@@ -39,7 +39,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
       onClick={onSelectLocation}
       onKeyDown={handleKeyDown}
       className={`
-        relative w-full aspect-[2.2/1] max-h-[280px] bg-slate-950 rounded-2xl border p-2 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-300
+        relative w-full h-full min-h-[300px] sm:min-h-[360px] flex flex-col justify-between bg-slate-950 rounded-2xl border p-2 sm:p-3 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-300
         ${
           isSpeakingLocation
             ? 'border-purple-400 ring-4 ring-purple-400/50 shadow-2xl shadow-purple-950/60 scale-[1.01]'
@@ -52,7 +52,8 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
     >
       <svg
         viewBox="0 0 1000 500"
-        className="w-full h-full filter drop-shadow"
+        preserveAspectRatio="xMidYMid meet"
+        className="w-full flex-1 filter drop-shadow"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -189,23 +190,23 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
       </svg>
 
       {/* Clean Floating Badge Over Map */}
-      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl px-3 py-2 flex items-center justify-between shadow-lg text-white">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-xl sm:text-2xl shrink-0 drop-shadow">
+      <div className="absolute bottom-2.5 left-2.5 right-2.5 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl px-4 py-2.5 flex items-center justify-between shadow-lg text-white">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-2xl sm:text-3xl shrink-0 drop-shadow">
             {flag}
           </span>
           <div className="flex flex-col min-w-0">
-            <span className="text-xs sm:text-sm font-black text-white truncate">
+            <span className="text-sm sm:text-base font-black text-white truncate">
               {location.city}{location.state ? `, ${location.state}` : ''}, {location.country}
             </span>
-            <span className="text-[11px] font-bold text-purple-300 truncate">
+            <span className="text-xs sm:text-sm font-bold text-purple-300 truncate">
               {location.countryZh}{location.stateZh ? location.stateZh : ''}{location.cityZh ? location.cityZh : ''}
             </span>
           </div>
         </div>
 
         <div className="shrink-0 ml-2 text-purple-300 group-hover:text-white transition-colors">
-          <Volume2 className="w-4 h-4" />
+          <Volume2 className="w-5 h-5" />
         </div>
       </div>
     </div>
