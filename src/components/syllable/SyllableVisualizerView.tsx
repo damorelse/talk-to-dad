@@ -610,11 +610,11 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
               disabled={isPlaying}
               minTouchSize="lg"
               className={`
-                px-7 sm:px-9 py-3.5 sm:py-4.5 rounded-2xl font-black flex items-center gap-2.5 text-base sm:text-lg shadow-xl transition-all
+                px-7 sm:px-9 py-3.5 sm:py-4.5 rounded-2xl font-black flex items-center gap-2.5 text-base sm:text-lg shadow-xl transition-all cursor-pointer
                 ${
                   isPlaying
-                    ? 'bg-amber-500/50 text-slate-900 cursor-wait'
-                    : 'bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 shadow-amber-900/40'
+                    ? 'bg-amber-600/60 text-white/70 cursor-wait'
+                    : 'bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white shadow-amber-900/40 border border-amber-400/30'
                 }
               `}
             >
