@@ -9,7 +9,7 @@ import {
   Keyboard as KeyboardIcon,
   Settings as SettingsIcon,
 } from 'lucide-react';
-import { ActiveTab } from '../../types';
+import { ActiveTab, TAB_METADATA } from '../../types';
 import { DebouncedTouchable } from '../common/DebouncedTouchable';
 
 interface NavigationBarProps {
@@ -34,8 +34,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
   }[] = [
     {
       id: 'grid',
-      label: 'Cards',
-      labelZh: '圖卡溝通',
+      label: TAB_METADATA.grid.label,
+      labelZh: TAB_METADATA.grid.labelZh,
       icon: <LayoutGrid className="w-5 h-5 sm:w-6 sm:h-6" />,
       activeBg: 'bg-blue-600',
       activeText: 'text-white',
@@ -43,8 +43,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
     },
     {
       id: 'today',
-      label: 'Today',
-      labelZh: '今天時空',
+      label: TAB_METADATA.today.label,
+      labelZh: TAB_METADATA.today.labelZh,
       icon: <Compass className="w-5 h-5 sm:w-6 sm:h-6" />,
       activeBg: 'bg-indigo-600',
       activeText: 'text-white',
@@ -52,8 +52,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
     },
     {
       id: 'scenes',
-      label: 'Scenes',
-      labelZh: '實景照片',
+      label: TAB_METADATA.scenes.label,
+      labelZh: TAB_METADATA.scenes.labelZh,
       icon: <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6" />,
       activeBg: 'bg-emerald-600',
       activeText: 'text-white',
@@ -61,8 +61,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
     },
     {
       id: 'pain',
-      label: 'Pain Map',
-      labelZh: '疼痛標示',
+      label: TAB_METADATA.pain.label,
+      labelZh: TAB_METADATA.pain.labelZh,
       icon: <PersonStanding className="w-5 h-5 sm:w-6 sm:h-6" />,
       activeBg: 'bg-rose-600',
       activeText: 'text-white',
@@ -70,8 +70,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
     },
     {
       id: 'syllables',
-      label: 'Sound It Out',
-      labelZh: '分段發音',
+      label: TAB_METADATA.syllables.label,
+      labelZh: TAB_METADATA.syllables.labelZh,
       icon: <MessageSquareQuote className="w-5 h-5 sm:w-6 sm:h-6" />,
       activeBg: 'bg-amber-600',
       activeText: 'text-white',
@@ -79,8 +79,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
     },
     {
       id: 'therapy',
-      label: 'Word Finding',
-      labelZh: '找字練習',
+      label: TAB_METADATA.therapy.label,
+      labelZh: TAB_METADATA.therapy.labelZh,
       icon: <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />,
       activeBg: 'bg-purple-600',
       activeText: 'text-white',
@@ -88,8 +88,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
     },
     {
       id: 'keyboard',
-      label: 'Speech Keys',
-      labelZh: '語音鍵盤',
+      label: TAB_METADATA.keyboard.label,
+      labelZh: TAB_METADATA.keyboard.labelZh,
       icon: <KeyboardIcon className="w-5 h-5 sm:w-6 sm:h-6" />,
       activeBg: 'bg-cyan-600',
       activeText: 'text-white',
@@ -97,8 +97,8 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
     },
     {
       id: 'caregiver',
-      label: 'Settings',
-      labelZh: '系統設定',
+      label: TAB_METADATA.caregiver.label,
+      labelZh: TAB_METADATA.caregiver.labelZh,
       icon: <SettingsIcon className="w-5 h-5 sm:w-6 sm:h-6" />,
       activeBg: 'bg-pink-600',
       activeText: 'text-white',

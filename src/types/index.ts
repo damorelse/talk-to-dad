@@ -145,37 +145,12 @@ export interface VisualSceneHotspot {
   color?: string; // Optional highlight border color
 }
 
-export interface TherapyDeck {
-  id: string;
-  title: string;
-  titleZh?: string;
-  description: string;
-  descriptionZh?: string;
-  category: 'daily-living' | 'articulation' | 'emotions' | 'medical-needs';
-  icon: string;
-  cardsCount: number;
-}
-
-export interface TherapyCard {
-  id: string;
-  deckId: string;
-  prompt: string;
-  targetWord: string;
-  targetWordZh?: string;
-  phoneticSyllables: string;
-  hint?: string;
-  emoji: string;
-  imageBlobId?: string;
-  audioBlobId?: string;
-}
-
 export type SpeechLanguageMode = 'en' | 'zh' | 'en-then-zh' | 'zh-then-en' | 'both';
 export type CardSpeechLanguage = SpeechLanguageMode;
 
 export interface AppSettings {
   id: string; // fixed 'current'
   theme: 'dark' | 'light';
-  gridRows: number; // 2 to 5
   gridCols: number; // 2 to 6
   tapDebounceMs: number; // 200 to 500 ms anti-tremor
   speechRate: number; // 0.5 to 1.5
@@ -224,6 +199,17 @@ export type ActiveTab =
   | 'keyboard'
   | 'caregiver';
 
+export const TAB_METADATA: Record<ActiveTab, { label: string; labelZh: string }> = {
+  grid: { label: 'Cards', labelZh: '圖卡溝通' },
+  today: { label: 'Today', labelZh: '今天時空' },
+  scenes: { label: 'Scenes', labelZh: '實景照片' },
+  pain: { label: 'Pain Map', labelZh: '疼痛標示' },
+  syllables: { label: 'Sound It Out', labelZh: '分段發音' },
+  therapy: { label: 'Word Finding', labelZh: '找字練習' },
+  keyboard: { label: 'Speech Keys', labelZh: '語音鍵盤' },
+  caregiver: { label: 'Settings', labelZh: '系統設定' },
+};
+
 export interface ExportDataPackage {
   version: string;
   exportDate: string;
@@ -231,10 +217,10 @@ export interface ExportDataPackage {
   cards: AACCard[];
   visualScenes: VisualScene[];
   hotspots: VisualSceneHotspot[];
-  therapyDecks: TherapyDeck[];
-  therapyCards?: TherapyCard[];
   settings: AppSettings;
   mediaBlobs: MediaBlobRecord[];
+  therapyDecks?: any[];
+  therapyCards?: any[];
 }
 
 export type SyllableStress = 'primary' | 'secondary' | 'unstressed';

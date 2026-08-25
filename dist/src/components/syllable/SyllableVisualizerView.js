@@ -4,13 +4,12 @@ import { SyllableCard } from './SyllableCard.js';
 import { CategorySelector } from '../grid/CategorySelector.js';
 import { DebouncedTouchable } from '../common/DebouncedTouchable.js';
 import { usePiperSyllables } from '../../hooks/usePiperSyllables.js';
-import { useDatabase } from '../../hooks/useDatabase.js';
 import { useSettings } from '../../hooks/useSettings.js';
 import { speechEngine, isChineseText } from '../../services/audio/WebSpeechEngine.js';
 import { getZhuyinForChar } from '../../services/syllables/zhuyinDictionary.js';
 import { getWeeklyCardsForCategory } from '../../services/therapy/weeklyCardSelector.js';
 import { Volume2, MessageSquareQuote, Square, Languages, Search, X, } from 'lucide-react';
-export const SyllableVisualizerView = ({ categories: propCategories, cards: propCards, }) => {
+export const SyllableVisualizerView = ({ categories: propCategories = [], cards: propCards = [], }) => {
     const [language, setLanguage] = useState('en');
     const [customInput, setCustomInput] = useState('');
     const [selectedCategoryId, setSelectedCategoryId] = useState('weekly');
@@ -18,10 +17,8 @@ export const SyllableVisualizerView = ({ categories: propCategories, cards: prop
     const [vocabMode, setVocabMode] = useState('words');
     const [selectedItemId, setSelectedItemId] = useState(null);
     const [isCustomActive, setIsCustomActive] = useState(false);
-    // Fallback to useDatabase if props not provided
-    const dbData = useDatabase();
-    const allCategories = (propCategories && propCategories.length > 0) ? propCategories : dbData.categories;
-    const allCards = (propCards && propCards.length > 0) ? propCards : dbData.cards;
+    const allCategories = propCategories;
+    const allCards = propCards;
     // Chinese articulation states
     const [zhActiveIdx, setZhActiveIdx] = useState(null);
     const [isZhPlaying, setIsZhPlaying] = useState(false);

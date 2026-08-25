@@ -10,8 +10,6 @@ import '../setup.js';
 import { 
   DEFAULT_CATEGORIES, 
   DEFAULT_CARDS, 
-  DEFAULT_THERAPY_DECKS, 
-  DEFAULT_THERAPY_CARDS, 
   DEFAULT_VISUAL_SCENES, 
   DEFAULT_HOTSPOTS, 
   DEFAULT_SETTINGS 
@@ -231,14 +229,15 @@ describe('Tier 1: Feature Verification (F01 - F16)', () => {
   });
 
   describe('F08: Speech Therapy Flashcards & Fanfare', () => {
-    it('should load 4 rehabilitation decks with prompts and target words', () => {
-      assert.equal(DEFAULT_THERAPY_DECKS.length, 4);
-      assert.ok(DEFAULT_THERAPY_CARDS.length >= 16);
+    it('should maintain rich AAC rehabilitation cards with clinical clues and phonetic syllables', () => {
+      const cardsWithClues = DEFAULT_CARDS.filter(c => c.clue && c.clueZh);
+      assert.ok(cardsWithClues.length >= 20, 'Should have rich bilingual clinical clues across core cards');
 
-      for (const tc of DEFAULT_THERAPY_CARDS) {
-        assert.ok(tc.prompt, 'Therapy card must have prompt');
-        assert.ok(tc.targetWord, 'Therapy card must have targetWord');
-        assert.ok(tc.phoneticSyllables, 'Therapy card must have phoneticSyllables');
+      for (const card of cardsWithClues) {
+        assert.ok(card.label, 'Card must have label');
+        assert.ok(card.labelZh, 'Card must have labelZh');
+        assert.ok(card.spokenText, 'Card must have spokenText');
+        assert.ok(card.spokenTextZh, 'Card must have spokenTextZh');
       }
     });
 
@@ -368,7 +367,6 @@ describe('Tier 1: Feature Verification (F01 - F16)', () => {
   describe('F12: IndexedDB Schema & Dual-Language Data Definition', () => {
     it('should verify default settings values including per-locale voice settings', () => {
       assert.equal(DEFAULT_SETTINGS.theme, 'dark');
-      assert.equal(DEFAULT_SETTINGS.gridRows, 3);
       assert.equal(DEFAULT_SETTINGS.gridCols, 4);
       assert.equal(DEFAULT_SETTINGS.tapDebounceMs, 300);
       assert.equal(DEFAULT_SETTINGS.speechRate, 0.9);

@@ -12,13 +12,13 @@ import { SyllableVisualizerView } from './components/syllable/SyllableVisualizer
 import { TherapySessionView } from './components/therapy/TherapySessionView';
 import { BigSpeechKeyboard } from './components/keyboard/BigSpeechKeyboard';
 import { CaregiverDashboard } from './components/caregiver/CaregiverDashboard';
-import { PinLockModal } from './components/caregiver/PinLockModal';
+import { CaregiverHoldLockModal } from './components/caregiver/CaregiverHoldLockModal';
 import { Check } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('grid');
   const [isCaregiverAuthenticated, setIsCaregiverAuthenticated] = useState<boolean>(false);
-  const [showPinModal, setShowPinModal] = useState<boolean>(false);
+  const [showCaregiverLockModal, setShowCaregiverLockModal] = useState<boolean>(false);
   const [syncToast, setSyncToast] = useState<string | null>(null);
 
   const {
@@ -54,21 +54,21 @@ export const App: React.FC = () => {
       if (isCaregiverAuthenticated) {
         setActiveTab('caregiver');
       } else {
-        setShowPinModal(true);
+        setShowCaregiverLockModal(true);
       }
     } else {
       setActiveTab(tab);
     }
   };
 
-  const handlePinSuccess = () => {
+  const handleCaregiverUnlockSuccess = () => {
     setIsCaregiverAuthenticated(true);
-    setShowPinModal(false);
+    setShowCaregiverLockModal(false);
     setActiveTab('caregiver');
   };
 
-  const handlePinCancel = () => {
-    setShowPinModal(false);
+  const handleCaregiverUnlockCancel = () => {
+    setShowCaregiverLockModal(false);
   };
 
   const handleExitCaregiver = () => {
@@ -89,7 +89,6 @@ export const App: React.FC = () => {
     <MainContainer
       activeTab={activeTab}
       onTabChange={handleTabChange}
-      settings={settings}
     >
       {/* 1. AAC Grid View */}
       {activeTab === 'grid' && (
@@ -146,10 +145,10 @@ export const App: React.FC = () => {
       )}
 
       {/* Caregiver 3-Second Hold Authentication Modal */}
-      {showPinModal && (
-        <PinLockModal
-          onSuccess={handlePinSuccess}
-          onCancel={handlePinCancel}
+      {showCaregiverLockModal && (
+        <CaregiverHoldLockModal
+          onSuccess={handleCaregiverUnlockSuccess}
+          onCancel={handleCaregiverUnlockCancel}
         />
       )}
 

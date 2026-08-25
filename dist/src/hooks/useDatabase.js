@@ -7,18 +7,14 @@ export function useDatabase() {
     const [cards, setCards] = useState([]);
     const [visualScenes, setVisualScenes] = useState([]);
     const [hotspots, setHotspots] = useState([]);
-    const [therapyDecks, setTherapyDecks] = useState([]);
-    const [therapyCards, setTherapyCards] = useState([]);
     const loadAll = useCallback(async () => {
         try {
             await db.initializeDefaults();
-            const [cats, crds, scenes, hs, decks, tcards] = await Promise.all([
+            const [cats, crds, scenes, hs] = await Promise.all([
                 db.categories.orderBy('order').toArray(),
                 db.cards.orderBy('order').toArray(),
                 db.visualScenes.toArray(),
                 db.hotspots.toArray(),
-                db.therapyDecks.toArray(),
-                db.therapyCards.toArray(),
             ]);
             const inMemoryCards = sheetDataStore.getSheetCards();
             // Deduplicate Cards: Keep DB card if exists, otherwise add in-memory card
@@ -34,8 +30,6 @@ export function useDatabase() {
             setCards(mergedCards);
             setVisualScenes(scenes);
             setHotspots(hs);
-            setTherapyDecks(decks);
-            setTherapyCards(tcards);
             setIsReady(true);
         }
         catch (err) {
@@ -104,8 +98,6 @@ export function useDatabase() {
         cards,
         visualScenes,
         hotspots,
-        therapyDecks,
-        therapyCards,
         refreshDatabase: loadAll,
         saveCard,
         deleteCard,

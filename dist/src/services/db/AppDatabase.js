@@ -1,12 +1,10 @@
 import { Dexie } from 'dexie';
-import { DEFAULT_CATEGORIES, DEFAULT_CARDS, DEFAULT_THERAPY_DECKS, DEFAULT_THERAPY_CARDS, DEFAULT_VISUAL_SCENES, DEFAULT_HOTSPOTS, DEFAULT_SETTINGS, } from './defaultData.js';
+import { DEFAULT_CATEGORIES, DEFAULT_CARDS, DEFAULT_VISUAL_SCENES, DEFAULT_HOTSPOTS, DEFAULT_SETTINGS, } from './defaultData.js';
 export class AppDatabase extends Dexie {
     categories;
     cards;
     visualScenes;
     hotspots;
-    therapyDecks;
-    therapyCards;
     settings;
     mediaBlobs;
     constructor(dbName = 'TalkWithDadDB') {
@@ -16,8 +14,6 @@ export class AppDatabase extends Dexie {
             cards: 'id, categoryId, fitzgeraldCategory, order, label, isFavorite',
             visualScenes: 'id, title, createdAt',
             hotspots: 'id, sceneId, label',
-            therapyDecks: 'id, category',
-            therapyCards: 'id, deckId',
             settings: 'id',
             mediaBlobs: 'id, type, createdAt',
         });
@@ -140,51 +136,6 @@ export class AppDatabase extends Dexie {
                 await this.cards.bulkDelete(legacySheetCardIds);
             }
         }
-        const deckCount = await this.therapyDecks.count();
-        if (deckCount === 0) {
-            await this.therapyDecks.bulkAdd(DEFAULT_THERAPY_DECKS);
-        }
-        else {
-            for (const deck of DEFAULT_THERAPY_DECKS) {
-                const existing = await this.therapyDecks.get(deck.id);
-                if (!existing) {
-                    await this.therapyDecks.put(deck);
-                }
-                else {
-                    let deckUpdated = false;
-                    if (!existing.titleZh && deck.titleZh) {
-                        existing.titleZh = deck.titleZh;
-                        existing.descriptionZh = deck.descriptionZh;
-                        deckUpdated = true;
-                    }
-                    if (deck.id === 'deck-articulation' && existing.description !== deck.description) {
-                        existing.description = deck.description;
-                        existing.descriptionZh = deck.descriptionZh;
-                        deckUpdated = true;
-                    }
-                    if (deckUpdated) {
-                        await this.therapyDecks.put(existing);
-                    }
-                }
-            }
-        }
-        const therapyCardCount = await this.therapyCards.count();
-        if (therapyCardCount === 0) {
-            await this.therapyCards.bulkAdd(DEFAULT_THERAPY_CARDS);
-        }
-        else {
-            for (const tcard of DEFAULT_THERAPY_CARDS) {
-                const existing = await this.therapyCards.get(tcard.id);
-                if (!existing) {
-                    await this.therapyCards.put(tcard);
-                }
-                else if (!existing.targetWordZh && tcard.targetWordZh) {
-                    existing.targetWordZh = tcard.targetWordZh;
-                    existing.hint = tcard.hint;
-                    await this.therapyCards.put(existing);
-                }
-            }
-        }
         const sceneCount = await this.visualScenes.count();
         if (sceneCount === 0) {
             await this.visualScenes.bulkAdd(DEFAULT_VISUAL_SCENES);
@@ -292,8 +243,6 @@ export class AppDatabase extends Dexie {
             this.cards,
             this.visualScenes,
             this.hotspots,
-            this.therapyDecks,
-            this.therapyCards,
             this.settings,
             this.mediaBlobs,
         ], async () => {
@@ -301,14 +250,10 @@ export class AppDatabase extends Dexie {
             await this.cards.clear();
             await this.visualScenes.clear();
             await this.hotspots.clear();
-            await this.therapyDecks.clear();
-            await this.therapyCards.clear();
             await this.settings.clear();
             await this.mediaBlobs.clear();
             await this.categories.bulkAdd(DEFAULT_CATEGORIES);
             await this.cards.bulkAdd(DEFAULT_CARDS);
-            await this.therapyDecks.bulkAdd(DEFAULT_THERAPY_DECKS);
-            await this.therapyCards.bulkAdd(DEFAULT_THERAPY_CARDS);
             await this.visualScenes.bulkAdd(DEFAULT_VISUAL_SCENES);
             await this.hotspots.bulkAdd(DEFAULT_HOTSPOTS);
             await this.settings.put(DEFAULT_SETTINGS);

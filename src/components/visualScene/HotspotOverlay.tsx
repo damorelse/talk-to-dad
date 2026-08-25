@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { VisualSceneHotspot } from '../../types';
 import { useAudio } from '../../hooks/useAudio';
+import { useMotorDebounce } from '../../hooks/useMotorDebounce';
 
 interface HotspotOverlayProps {
   hotspots: VisualSceneHotspot[];
@@ -11,11 +12,12 @@ interface HotspotOverlayProps {
 export const HotspotOverlay: React.FC<HotspotOverlayProps> = ({
   hotspots,
   onHotspotTrigger,
+  debounceMs = 300,
 }) => {
   const { speakHotspot } = useAudio();
   const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
 
-  const handleHotspotClick = (hotspot: VisualSceneHotspot) => {
+  const handleHotspotClick = useMotorDebounce((hotspot: VisualSceneHotspot) => {
     setActiveHotspotId(hotspot.id);
 
     // Speak hotspot text using global speech language setting
@@ -26,7 +28,7 @@ export const HotspotOverlay: React.FC<HotspotOverlayProps> = ({
     setTimeout(() => {
       setActiveHotspotId((cur) => (cur === hotspot.id ? null : cur));
     }, 1000);
-  };
+  }, debounceMs);
 
   return (
     <div className="absolute inset-0 pointer-events-auto select-none">

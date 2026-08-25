@@ -4,8 +4,6 @@ import {
   AACCard,
   VisualScene,
   VisualSceneHotspot,
-  TherapyDeck,
-  TherapyCard,
   MediaBlobRecord,
 } from '../types';
 import { db } from '../services/db/AppDatabase';
@@ -17,19 +15,15 @@ export function useDatabase() {
   const [cards, setCards] = useState<AACCard[]>([]);
   const [visualScenes, setVisualScenes] = useState<VisualScene[]>([]);
   const [hotspots, setHotspots] = useState<VisualSceneHotspot[]>([]);
-  const [therapyDecks, setTherapyDecks] = useState<TherapyDeck[]>([]);
-  const [therapyCards, setTherapyCards] = useState<TherapyCard[]>([]);
 
   const loadAll = useCallback(async () => {
     try {
       await db.initializeDefaults();
-      const [cats, crds, scenes, hs, decks, tcards] = await Promise.all([
+      const [cats, crds, scenes, hs] = await Promise.all([
         db.categories.orderBy('order').toArray(),
         db.cards.orderBy('order').toArray(),
         db.visualScenes.toArray(),
         db.hotspots.toArray(),
-        db.therapyDecks.toArray(),
-        db.therapyCards.toArray(),
       ]);
 
       const inMemoryCards = sheetDataStore.getSheetCards();
@@ -48,8 +42,6 @@ export function useDatabase() {
       setCards(mergedCards);
       setVisualScenes(scenes);
       setHotspots(hs);
-      setTherapyDecks(decks);
-      setTherapyCards(tcards);
       setIsReady(true);
     } catch (err) {
       console.error('Failed to initialize database:', err);
@@ -129,8 +121,6 @@ export function useDatabase() {
     cards,
     visualScenes,
     hotspots,
-    therapyDecks,
-    therapyCards,
     refreshDatabase: loadAll,
     saveCard,
     deleteCard,

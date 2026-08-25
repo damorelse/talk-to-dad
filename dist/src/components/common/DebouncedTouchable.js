@@ -2,21 +2,21 @@ import { jsx as _jsx } from "react/jsx-runtime";
 import React from 'react';
 import { useMotorDebounce } from '../../hooks/useMotorDebounce.js';
 export const DebouncedTouchable = ({ onPress, debounceMs = 300, activeScale = true, minTouchSize = 'md', className = '', children, onClick, disabled, ...props }) => {
-    const handleDebouncedPress = useMotorDebounce(() => {
+    const handleDebouncedPress = useMotorDebounce((e) => {
         if (disabled)
             return;
         if (onPress) {
             onPress();
+        }
+        if (onClick && e) {
+            onClick(e);
         }
     }, debounceMs);
     const handleClick = (e) => {
         e.preventDefault();
         if (disabled)
             return;
-        handleDebouncedPress();
-        if (onClick) {
-            onClick(e);
-        }
+        handleDebouncedPress(e);
     };
     const minSizeClass = {
         sm: 'min-h-[44px] min-w-[44px]',

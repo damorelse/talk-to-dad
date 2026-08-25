@@ -39,8 +39,6 @@ export class BackupService {
       cards,
       visualScenes,
       hotspots,
-      therapyDecks,
-      therapyCards,
       settingsRecord,
       mediaBlobs,
     ] = await Promise.all([
@@ -48,8 +46,6 @@ export class BackupService {
       this.database.cards.toArray(),
       this.database.visualScenes.toArray(),
       this.database.hotspots.toArray(),
-      this.database.therapyDecks.toArray(),
-      this.database.therapyCards.toArray(),
       this.database.settings.get('current'),
       this.database.mediaBlobs.toArray(),
     ]);
@@ -61,8 +57,6 @@ export class BackupService {
       cards,
       visualScenes,
       hotspots,
-      therapyDecks,
-      therapyCards,
       settings: settingsRecord || (await this.database.settings.get('current'))!,
       mediaBlobs,
     };
@@ -103,8 +97,6 @@ export class BackupService {
         this.database.cards,
         this.database.visualScenes,
         this.database.hotspots,
-        this.database.therapyDecks,
-        this.database.therapyCards,
         this.database.settings,
         this.database.mediaBlobs,
       ];
@@ -115,8 +107,6 @@ export class BackupService {
         await this.database.cards.clear();
         await this.database.visualScenes.clear();
         await this.database.hotspots.clear();
-        await this.database.therapyDecks.clear();
-        await this.database.therapyCards.clear();
         await this.database.settings.clear();
         await this.database.mediaBlobs.clear();
 
@@ -132,12 +122,6 @@ export class BackupService {
         }
         if (Array.isArray(data.hotspots) && data.hotspots.length > 0) {
           await this.database.hotspots.bulkAdd(data.hotspots);
-        }
-        if (Array.isArray(data.therapyDecks) && data.therapyDecks.length > 0) {
-          await this.database.therapyDecks.bulkAdd(data.therapyDecks);
-        }
-        if (Array.isArray(data.therapyCards) && data.therapyCards.length > 0) {
-          await this.database.therapyCards.bulkAdd(data.therapyCards);
         }
         if (data.settings && typeof data.settings === 'object') {
           await this.database.settings.put({ ...data.settings, id: 'current' });

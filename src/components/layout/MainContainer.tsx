@@ -1,12 +1,11 @@
 import React from 'react';
 import { EmergencyBar } from './EmergencyBar';
 import { NavigationBar } from './NavigationBar';
-import { ActiveTab, AppSettings } from '../../types';
+import { ActiveTab } from '../../types';
 
 interface MainContainerProps {
   activeTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
-  settings?: AppSettings;
   children: React.ReactNode;
 }
 

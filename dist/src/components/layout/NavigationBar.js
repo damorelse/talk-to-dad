@@ -1,14 +1,15 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useRef, useEffect } from 'react';
 import { LayoutGrid, Compass, Image as ImageIcon, PersonStanding, MessageSquareQuote, Sparkles, Keyboard as KeyboardIcon, Settings as SettingsIcon, } from 'lucide-react';
+import { TAB_METADATA } from '../../types/index.js';
 import { DebouncedTouchable } from '../common/DebouncedTouchable.js';
 export const NavigationBar = ({ activeTab, onTabChange, }) => {
     const activeTabRef = useRef(null);
     const tabs = [
         {
             id: 'grid',
-            label: 'Cards',
-            labelZh: '圖卡溝通',
+            label: TAB_METADATA.grid.label,
+            labelZh: TAB_METADATA.grid.labelZh,
             icon: _jsx(LayoutGrid, { className: "w-5 h-5 sm:w-6 sm:h-6" }),
             activeBg: 'bg-blue-600',
             activeText: 'text-white',
@@ -16,8 +17,8 @@ export const NavigationBar = ({ activeTab, onTabChange, }) => {
         },
         {
             id: 'today',
-            label: 'Today',
-            labelZh: '今天時空',
+            label: TAB_METADATA.today.label,
+            labelZh: TAB_METADATA.today.labelZh,
             icon: _jsx(Compass, { className: "w-5 h-5 sm:w-6 sm:h-6" }),
             activeBg: 'bg-indigo-600',
             activeText: 'text-white',
@@ -25,8 +26,8 @@ export const NavigationBar = ({ activeTab, onTabChange, }) => {
         },
         {
             id: 'scenes',
-            label: 'Scenes',
-            labelZh: '實景照片',
+            label: TAB_METADATA.scenes.label,
+            labelZh: TAB_METADATA.scenes.labelZh,
             icon: _jsx(ImageIcon, { className: "w-5 h-5 sm:w-6 sm:h-6" }),
             activeBg: 'bg-emerald-600',
             activeText: 'text-white',
@@ -34,8 +35,8 @@ export const NavigationBar = ({ activeTab, onTabChange, }) => {
         },
         {
             id: 'pain',
-            label: 'Pain Map',
-            labelZh: '疼痛標示',
+            label: TAB_METADATA.pain.label,
+            labelZh: TAB_METADATA.pain.labelZh,
             icon: _jsx(PersonStanding, { className: "w-5 h-5 sm:w-6 sm:h-6" }),
             activeBg: 'bg-rose-600',
             activeText: 'text-white',
@@ -43,8 +44,8 @@ export const NavigationBar = ({ activeTab, onTabChange, }) => {
         },
         {
             id: 'syllables',
-            label: 'Sound It Out',
-            labelZh: '分段發音',
+            label: TAB_METADATA.syllables.label,
+            labelZh: TAB_METADATA.syllables.labelZh,
             icon: _jsx(MessageSquareQuote, { className: "w-5 h-5 sm:w-6 sm:h-6" }),
             activeBg: 'bg-amber-600',
             activeText: 'text-white',
@@ -52,8 +53,8 @@ export const NavigationBar = ({ activeTab, onTabChange, }) => {
         },
         {
             id: 'therapy',
-            label: 'Word Finding',
-            labelZh: '找字練習',
+            label: TAB_METADATA.therapy.label,
+            labelZh: TAB_METADATA.therapy.labelZh,
             icon: _jsx(Sparkles, { className: "w-5 h-5 sm:w-6 sm:h-6" }),
             activeBg: 'bg-purple-600',
             activeText: 'text-white',
@@ -61,8 +62,8 @@ export const NavigationBar = ({ activeTab, onTabChange, }) => {
         },
         {
             id: 'keyboard',
-            label: 'Speech Keys',
-            labelZh: '語音鍵盤',
+            label: TAB_METADATA.keyboard.label,
+            labelZh: TAB_METADATA.keyboard.labelZh,
             icon: _jsx(KeyboardIcon, { className: "w-5 h-5 sm:w-6 sm:h-6" }),
             activeBg: 'bg-cyan-600',
             activeText: 'text-white',
@@ -70,8 +71,8 @@ export const NavigationBar = ({ activeTab, onTabChange, }) => {
         },
         {
             id: 'caregiver',
-            label: 'Settings',
-            labelZh: '系統設定',
+            label: TAB_METADATA.caregiver.label,
+            labelZh: TAB_METADATA.caregiver.labelZh,
             icon: _jsx(SettingsIcon, { className: "w-5 h-5 sm:w-6 sm:h-6" }),
             activeBg: 'bg-pink-600',
             activeText: 'text-white',

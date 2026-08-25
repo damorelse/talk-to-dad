@@ -7,7 +7,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import '../setup.js';
 
-import { DEFAULT_CARDS, DEFAULT_THERAPY_DECKS, DEFAULT_THERAPY_CARDS } from '../../src/services/db/defaultData.ts';
+import { DEFAULT_CARDS } from '../../src/services/db/defaultData.ts';
 import { audioService } from '../../src/services/audio/AudioService.ts';
 import { mockSpeech } from '../setup.js';
 import { splitWordIntoSyllables, formatWithMiddleDot } from '../../src/services/syllables/syllableSplitter.ts';
@@ -56,17 +56,14 @@ describe('Tier 4: Clinical E2E Rehabilitation Workflows', () => {
   });
 
   describe('Workflow 3: Speech Therapy Multi-Syllable Practice & Fanfare', () => {
-    it('should practice speech articulation deck words with 0.5x slowed pronunciation and positive reinforcement', async () => {
-      const articulationDeck = DEFAULT_THERAPY_DECKS.find(d => d.id === 'deck-articulation');
-      assert.ok(articulationDeck);
-
-      const butterflyCard = DEFAULT_THERAPY_CARDS.find(c => c.targetWord === 'Butterfly');
-      assert.ok(butterflyCard);
-      assert.equal(butterflyCard.phoneticSyllables, 'But · ter · fly');
+    it('should practice multi-syllable AAC cards with 0.5x slowed pronunciation and positive reinforcement', async () => {
+      const waterCard = DEFAULT_CARDS.find(c => c.label === 'Water');
+      assert.ok(waterCard);
+      assert.equal(waterCard.phoneticSyllables, 'Wa · ter');
 
       // Test syllable segmentation
-      const syllables = splitWordIntoSyllables(butterflyCard.targetWord);
-      assert.deepEqual(syllables, ['But', 'ter', 'fly']);
+      const syllables = splitWordIntoSyllables(waterCard.label);
+      assert.deepEqual(syllables, ['Wa', 'ter']);
 
       // Practice each syllable sequentially
       for (const syl of syllables) {

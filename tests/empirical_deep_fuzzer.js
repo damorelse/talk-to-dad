@@ -270,7 +270,7 @@ async function runDeepFuzzing() {
         phoneticSyllables: `Word · ${i}`,
         order: i,
       })),
-      settings: { id: 'current', theme: 'dark', gridRows: 4, gridCols: 5, tapDebounceMs: 400 },
+      settings: { id: 'current', theme: 'dark', gridCols: 5, tapDebounceMs: 400 },
       mediaBlobs: Array.from({ length: 20 }, (_, i) => ({
         id: `blob-${i}`,
         mimeType: 'audio/webm',

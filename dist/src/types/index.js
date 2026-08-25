@@ -68,3 +68,13 @@ export const FITZGERALD_COLOR_MAP = {
         contrastText: '#450a0a',
     },
 };
+export const TAB_METADATA = {
+    grid: { label: 'Cards', labelZh: '圖卡溝通' },
+    today: { label: 'Today', labelZh: '今天時空' },
+    scenes: { label: 'Scenes', labelZh: '實景照片' },
+    pain: { label: 'Pain Map', labelZh: '疼痛標示' },
+    syllables: { label: 'Sound It Out', labelZh: '分段發音' },
+    therapy: { label: 'Word Finding', labelZh: '找字練習' },
+    keyboard: { label: 'Speech Keys', labelZh: '語音鍵盤' },
+    caregiver: { label: 'Settings', labelZh: '系統設定' },
+};

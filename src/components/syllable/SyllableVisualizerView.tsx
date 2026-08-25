@@ -3,7 +3,6 @@ import { SyllableCard } from './SyllableCard.tsx';
 import { CategorySelector } from '../grid/CategorySelector.tsx';
 import { DebouncedTouchable } from '../common/DebouncedTouchable.tsx';
 import { usePiperSyllables } from '../../hooks/usePiperSyllables.ts';
-import { useDatabase } from '../../hooks/useDatabase.ts';
 import { useSettings } from '../../hooks/useSettings.ts';
 import { speechEngine, isChineseText } from '../../services/audio/WebSpeechEngine.ts';
 import { getZhuyinForChar } from '../../services/syllables/zhuyinDictionary.ts';
@@ -42,8 +41,8 @@ export interface SoundItOutVocabItem {
 }
 
 export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
-  categories: propCategories,
-  cards: propCards,
+  categories: propCategories = [],
+  cards: propCards = [],
 }) => {
   const [language, setLanguage] = useState<'en' | 'zh'>('en');
   const [customInput, setCustomInput] = useState<string>('');
@@ -53,10 +52,8 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isCustomActive, setIsCustomActive] = useState<boolean>(false);
 
-  // Fallback to useDatabase if props not provided
-  const dbData = useDatabase();
-  const allCategories = (propCategories && propCategories.length > 0) ? propCategories : dbData.categories;
-  const allCards = (propCards && propCards.length > 0) ? propCards : dbData.cards;
+  const allCategories = propCategories;
+  const allCards = propCards;
 
   // Chinese articulation states
   const [zhActiveIdx, setZhActiveIdx] = useState<number | null>(null);

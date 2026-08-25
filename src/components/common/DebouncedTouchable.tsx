@@ -20,20 +20,20 @@ export const DebouncedTouchable: React.FC<DebouncedTouchableProps> = ({
   disabled,
   ...props
 }) => {
-  const handleDebouncedPress = useMotorDebounce(() => {
+  const handleDebouncedPress = useMotorDebounce((e?: React.MouseEvent<HTMLButtonElement>) => {
     if (disabled) return;
     if (onPress) {
       onPress();
+    }
+    if (onClick && e) {
+      onClick(e);
     }
   }, debounceMs);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     if (disabled) return;
-    handleDebouncedPress();
-    if (onClick) {
-      onClick(e);
-    }
+    handleDebouncedPress(e);
   };
 
   const minSizeClass = {

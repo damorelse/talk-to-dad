@@ -1,10 +1,11 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useState } from 'react';
 import { useAudio } from '../../hooks/useAudio.js';
-export const HotspotOverlay = ({ hotspots, onHotspotTrigger, }) => {
+import { useMotorDebounce } from '../../hooks/useMotorDebounce.js';
+export const HotspotOverlay = ({ hotspots, onHotspotTrigger, debounceMs = 300, }) => {
     const { speakHotspot } = useAudio();
     const [activeHotspotId, setActiveHotspotId] = useState(null);
-    const handleHotspotClick = (hotspot) => {
+    const handleHotspotClick = useMotorDebounce((hotspot) => {
         setActiveHotspotId(hotspot.id);
         // Speak hotspot text using global speech language setting
         speakHotspot(hotspot);
@@ -12,7 +13,7 @@ export const HotspotOverlay = ({ hotspots, onHotspotTrigger, }) => {
         setTimeout(() => {
             setActiveHotspotId((cur) => (cur === hotspot.id ? null : cur));
         }, 1000);
-    };
+    }, debounceMs);
     return (_jsx("div", { className: "absolute inset-0 pointer-events-auto select-none", children: hotspots.map((hs) => {
             const isActive = activeHotspotId === hs.id;
             const borderColor = hs.color || '#3B82F6';
