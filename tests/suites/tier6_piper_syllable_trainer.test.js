@@ -107,6 +107,18 @@ describe('Tier 6: Piper TTS & eSpeak NG Syllable Articulation Trainer', () => {
       assert.equal(data.syllables[1].ipa, 'təɹ');
     });
 
+    it('should phonemize "daughter" -> daugh [ˈdɔː] | ter [təɹ]', () => {
+      const data = phonemizeWord('daughter');
+      assert.equal(data.canonicalIpa, 'ˈdɔːtəɹ');
+      assert.equal(data.syllables.length, 2);
+      assert.equal(data.syllables[0].text, 'daugh');
+      assert.equal(data.syllables[0].ipa, 'ˈdɔː');
+      assert.equal(data.syllables[0].stress, 'primary');
+      assert.equal(data.syllables[1].text, 'ter');
+      assert.equal(data.syllables[1].ipa, 'təɹ');
+      assert.equal(data.syllables[1].stress, 'unstressed');
+    });
+
     it('should phonemize "medicine" -> med [ˈmɛd] | i [ɪ] | cine [sɪn]', () => {
       const data = phonemizeWord('medicine');
       assert.equal(data.canonicalIpa, 'ˈmɛdɪsɪn');

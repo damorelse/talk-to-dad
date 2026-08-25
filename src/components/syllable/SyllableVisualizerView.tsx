@@ -223,6 +223,80 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
     setIsZhPlaying(false);
   };
 
+  // Category Selection with Auto-Sync to First Card in New Category
+  const handleSelectCategory = (catId: string) => {
+    if (catId === selectedCategoryId && !isCustomActive) return;
+    stopAll();
+    setSelectedCategoryId(catId);
+    setIsCustomActive(false);
+
+    // Compute items in the new category
+    let nextList = allVocabItems;
+    if (catId === 'weekly') {
+      nextList = nextList.filter((item) => item.isWeeklyTherapy);
+    } else if (catId === 'favorites') {
+      nextList = nextList.filter((item) => item.isFavorite);
+    } else if (catId !== 'all') {
+      nextList = nextList.filter((item) => item.categoryId === catId);
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      nextList = nextList.filter(
+        (item) =>
+          item.wordEn.toLowerCase().includes(q) ||
+          item.wordZh.toLowerCase().includes(q) ||
+          (item.categoryName && item.categoryName.toLowerCase().includes(q)) ||
+          (item.categoryNameZh && item.categoryNameZh.toLowerCase().includes(q))
+      );
+    }
+
+    const firstItem = nextList[0];
+    if (firstItem) {
+      setSelectedItemId(firstItem.id);
+      const targetWord = language === 'zh' ? firstItem.wordZh : firstItem.wordEn;
+      setWord(targetWord);
+    }
+  };
+
+  // Search Query Change with Auto-Sync to Filtered Results
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    stopAll();
+    setIsCustomActive(false);
+
+    const q = query.trim().toLowerCase();
+    let nextList = allVocabItems;
+    if (selectedCategoryId === 'weekly') {
+      nextList = nextList.filter((item) => item.isWeeklyTherapy);
+    } else if (selectedCategoryId === 'favorites') {
+      nextList = nextList.filter((item) => item.isFavorite);
+    } else if (selectedCategoryId !== 'all') {
+      nextList = nextList.filter((item) => item.categoryId === selectedCategoryId);
+    }
+
+    if (q) {
+      nextList = nextList.filter(
+        (item) =>
+          item.wordEn.toLowerCase().includes(q) ||
+          item.wordZh.toLowerCase().includes(q) ||
+          (item.categoryName && item.categoryName.toLowerCase().includes(q)) ||
+          (item.categoryNameZh && item.categoryNameZh.toLowerCase().includes(q))
+      );
+    }
+
+    // If current selection is not present in the filtered matches, switch active card to first match
+    if (nextList.length > 0) {
+      const currentStillPresent = nextList.some((i) => i.id === selectedItemId);
+      if (!currentStillPresent) {
+        const firstItem = nextList[0];
+        setSelectedItemId(firstItem.id);
+        const targetWord = language === 'zh' ? firstItem.wordZh : firstItem.wordEn;
+        setWord(targetWord);
+      }
+    }
+  };
+
   // Toggle Language Handler
   const handleSelectLanguage = (lang: 'en' | 'zh') => {
     setLanguage(lang);
@@ -236,10 +310,10 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
       }
     }
 
-    if (lang === 'zh') {
-      setWord('水');
-    } else {
-      setWord('Water');
+    const firstItem = filteredVocabList[0] || allVocabItems[0];
+    if (firstItem) {
+      setSelectedItemId(firstItem.id);
+      setWord(lang === 'zh' ? firstItem.wordZh : firstItem.wordEn);
     }
   };
 
@@ -267,13 +341,12 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         if (targetCard) {
           if (mode === 'phrases') {
             const rawW = language === 'zh' ? (targetCard.spokenTextZh || targetCard.labelZh) : (targetCard.spokenText || targetCard.label);
-            const w = rawW || 'Water';
-            setWord(w);
+            setWord(rawW || targetCard.label || 'Word');
             setSelectedItemId(`${targetCard.id}-phrase`);
           } else {
             const w = language === 'zh' ? targetCard.labelZh : targetCard.label;
             const cleanW = (w || '').split(/\s*[\/／]\s*/)[0];
-            setWord(cleanW || 'Water');
+            setWord(cleanW || targetCard.label || 'Word');
             setSelectedItemId(`${targetCard.id}-w0`);
           }
         }
@@ -585,7 +658,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         <CategorySelector
           categories={allCategories}
           selectedCategoryId={selectedCategoryId}
-          onSelectCategory={(id) => setSelectedCategoryId(id)}
+          onSelectCategory={handleSelectCategory}
           showAll={false}
           showWeekly={true}
           showFavorites={true}
@@ -597,14 +670,14 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             placeholder="Search AAC cards..."
             className="w-full pl-9 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400"
           />
           {searchQuery && (
             <button
               type="button"
-              onClick={() => setSearchQuery('')}
+              onClick={() => handleSearchChange('')}
               aria-label="Clear search"
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer"
             >

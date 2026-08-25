@@ -157,6 +157,71 @@ export const SyllableVisualizerView = ({ categories: propCategories, cards: prop
         setZhActiveIdx(null);
         setIsZhPlaying(false);
     };
+    // Category Selection with Auto-Sync to First Card in New Category
+    const handleSelectCategory = (catId) => {
+        if (catId === selectedCategoryId && !isCustomActive)
+            return;
+        stopAll();
+        setSelectedCategoryId(catId);
+        setIsCustomActive(false);
+        // Compute items in the new category
+        let nextList = allVocabItems;
+        if (catId === 'weekly') {
+            nextList = nextList.filter((item) => item.isWeeklyTherapy);
+        }
+        else if (catId === 'favorites') {
+            nextList = nextList.filter((item) => item.isFavorite);
+        }
+        else if (catId !== 'all') {
+            nextList = nextList.filter((item) => item.categoryId === catId);
+        }
+        if (searchQuery.trim()) {
+            const q = searchQuery.trim().toLowerCase();
+            nextList = nextList.filter((item) => item.wordEn.toLowerCase().includes(q) ||
+                item.wordZh.toLowerCase().includes(q) ||
+                (item.categoryName && item.categoryName.toLowerCase().includes(q)) ||
+                (item.categoryNameZh && item.categoryNameZh.toLowerCase().includes(q)));
+        }
+        const firstItem = nextList[0];
+        if (firstItem) {
+            setSelectedItemId(firstItem.id);
+            const targetWord = language === 'zh' ? firstItem.wordZh : firstItem.wordEn;
+            setWord(targetWord);
+        }
+    };
+    // Search Query Change with Auto-Sync to Filtered Results
+    const handleSearchChange = (query) => {
+        setSearchQuery(query);
+        stopAll();
+        setIsCustomActive(false);
+        const q = query.trim().toLowerCase();
+        let nextList = allVocabItems;
+        if (selectedCategoryId === 'weekly') {
+            nextList = nextList.filter((item) => item.isWeeklyTherapy);
+        }
+        else if (selectedCategoryId === 'favorites') {
+            nextList = nextList.filter((item) => item.isFavorite);
+        }
+        else if (selectedCategoryId !== 'all') {
+            nextList = nextList.filter((item) => item.categoryId === selectedCategoryId);
+        }
+        if (q) {
+            nextList = nextList.filter((item) => item.wordEn.toLowerCase().includes(q) ||
+                item.wordZh.toLowerCase().includes(q) ||
+                (item.categoryName && item.categoryName.toLowerCase().includes(q)) ||
+                (item.categoryNameZh && item.categoryNameZh.toLowerCase().includes(q)));
+        }
+        // If current selection is not present in the filtered matches, switch active card to first match
+        if (nextList.length > 0) {
+            const currentStillPresent = nextList.some((i) => i.id === selectedItemId);
+            if (!currentStillPresent) {
+                const firstItem = nextList[0];
+                setSelectedItemId(firstItem.id);
+                const targetWord = language === 'zh' ? firstItem.wordZh : firstItem.wordEn;
+                setWord(targetWord);
+            }
+        }
+    };
     // Toggle Language Handler
     const handleSelectLanguage = (lang) => {
         setLanguage(lang);
@@ -168,11 +233,10 @@ export const SyllableVisualizerView = ({ categories: propCategories, cards: prop
                 return;
             }
         }
-        if (lang === 'zh') {
-            setWord('水');
-        }
-        else {
-            setWord('Water');
+        const firstItem = filteredVocabList[0] || allVocabItems[0];
+        if (firstItem) {
+            setSelectedItemId(firstItem.id);
+            setWord(lang === 'zh' ? firstItem.wordZh : firstItem.wordEn);
         }
     };
     // Select Vocabulary Item Handler
@@ -198,14 +262,13 @@ export const SyllableVisualizerView = ({ categories: propCategories, cards: prop
                 if (targetCard) {
                     if (mode === 'phrases') {
                         const rawW = language === 'zh' ? (targetCard.spokenTextZh || targetCard.labelZh) : (targetCard.spokenText || targetCard.label);
-                        const w = rawW || 'Water';
-                        setWord(w);
+                        setWord(rawW || targetCard.label || 'Word');
                         setSelectedItemId(`${targetCard.id}-phrase`);
                     }
                     else {
                         const w = language === 'zh' ? targetCard.labelZh : targetCard.label;
                         const cleanW = (w || '').split(/\s*[\/／]\s*/)[0];
-                        setWord(cleanW || 'Water');
+                        setWord(cleanW || targetCard.label || 'Word');
                         setSelectedItemId(`${targetCard.id}-w0`);
                     }
                 }
@@ -370,7 +433,7 @@ export const SyllableVisualizerView = ({ categories: propCategories, cards: prop
                                     else {
                                         speakWholeWordEn();
                                     }
-                                }, disabled: isPlaying, minTouchSize: "lg", className: "bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-6 sm:px-8 py-3.5 sm:py-4.5 rounded-2xl font-black flex items-center gap-2 text-base sm:text-lg shadow-xl shadow-blue-900/40", children: [_jsx(Volume2, { className: "w-6 h-6 stroke-[2.5]" }), _jsx("span", { children: "Speak" })] }), isPlaying && (_jsxs("button", { type: "button", onClick: stopAll, className: "bg-red-600 hover:bg-red-500 text-white px-4 py-3.5 rounded-2xl font-bold flex items-center gap-1.5 text-sm shadow-lg cursor-pointer", children: [_jsx(Square, { className: "w-4 h-4 fill-current" }), _jsx("span", { children: "Stop" })] }))] })] }), _jsxs("div", { className: "w-full bg-slate-900/90 border border-slate-800/80 p-2.5 sm:p-3 rounded-2xl flex flex-col gap-2 shrink-0 shadow-xs", children: [_jsx(CategorySelector, { categories: allCategories, selectedCategoryId: selectedCategoryId, onSelectCategory: (id) => setSelectedCategoryId(id), showAll: false, showWeekly: true, showFavorites: true }), _jsxs("div", { className: "relative w-full", children: [_jsx(Search, { className: "w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" }), _jsx("input", { type: "text", value: searchQuery, onChange: (e) => setSearchQuery(e.target.value), placeholder: "Search AAC cards...", className: "w-full pl-9 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400" }), searchQuery && (_jsx("button", { type: "button", onClick: () => setSearchQuery(''), "aria-label": "Clear search", className: "absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer", children: _jsx(X, { className: "w-4 h-4" }) }))] }), _jsx("div", { className: "flex items-center gap-2 flex-wrap max-h-32 sm:max-h-36 overflow-y-auto pr-1 scrollbar-thin", children: filteredVocabList.length === 0 ? (_jsx("div", { className: "w-full py-4 text-center text-xs text-slate-500", children: "No matching AAC card vocabulary found" })) : (filteredVocabList.map((item) => {
+                                }, disabled: isPlaying, minTouchSize: "lg", className: "bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-6 sm:px-8 py-3.5 sm:py-4.5 rounded-2xl font-black flex items-center gap-2 text-base sm:text-lg shadow-xl shadow-blue-900/40", children: [_jsx(Volume2, { className: "w-6 h-6 stroke-[2.5]" }), _jsx("span", { children: "Speak" })] }), isPlaying && (_jsxs("button", { type: "button", onClick: stopAll, className: "bg-red-600 hover:bg-red-500 text-white px-4 py-3.5 rounded-2xl font-bold flex items-center gap-1.5 text-sm shadow-lg cursor-pointer", children: [_jsx(Square, { className: "w-4 h-4 fill-current" }), _jsx("span", { children: "Stop" })] }))] })] }), _jsxs("div", { className: "w-full bg-slate-900/90 border border-slate-800/80 p-2.5 sm:p-3 rounded-2xl flex flex-col gap-2 shrink-0 shadow-xs", children: [_jsx(CategorySelector, { categories: allCategories, selectedCategoryId: selectedCategoryId, onSelectCategory: handleSelectCategory, showAll: false, showWeekly: true, showFavorites: true }), _jsxs("div", { className: "relative w-full", children: [_jsx(Search, { className: "w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" }), _jsx("input", { type: "text", value: searchQuery, onChange: (e) => handleSearchChange(e.target.value), placeholder: "Search AAC cards...", className: "w-full pl-9 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-400" }), searchQuery && (_jsx("button", { type: "button", onClick: () => handleSearchChange(''), "aria-label": "Clear search", className: "absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 cursor-pointer", children: _jsx(X, { className: "w-4 h-4" }) }))] }), _jsx("div", { className: "flex items-center gap-2 flex-wrap max-h-32 sm:max-h-36 overflow-y-auto pr-1 scrollbar-thin", children: filteredVocabList.length === 0 ? (_jsx("div", { className: "w-full py-4 text-center text-xs text-slate-500", children: "No matching AAC card vocabulary found" })) : (filteredVocabList.map((item) => {
                             const isSelected = !isCustomActive && selectedItemId === item.id;
                             return (_jsxs("button", { type: "button", onClick: () => handleSelectVocabItem(item), className: `
                     px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 border-2 shadow-xs
