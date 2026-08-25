@@ -6,7 +6,12 @@ import { DebouncedTouchable } from "../common/DebouncedTouchable";
 import { useAudio } from "../../hooks/useAudio";
 import { useSettings } from "../../hooks/useSettings";
 import { selectWeeklyCards } from "../../services/therapy/weeklyCardSelector";
-import { QuorraCompanion, QuorraAnimationType } from "./QuorraCompanion";
+import {
+  QuorraCompanion,
+  QuorraAnimationType,
+  ALL_CORNER_ANIMATIONS,
+  ALL_CROSSING_ANIMATIONS,
+} from "./QuorraCompanion";
 import {
   CheckCircle2,
   ChevronRight,
@@ -83,7 +88,8 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
       const cat = categories.find((c) => c.id === catId);
       if (cat) {
         setQuorraCategory({ name: cat.name, nameZh: cat.nameZh });
-        setQuorraAnim("category-transition");
+        const randomCrossing = ALL_CROSSING_ANIMATIONS[Math.floor(Math.random() * ALL_CROSSING_ANIMATIONS.length)];
+        setQuorraAnim(randomCrossing);
       }
     }
   };
@@ -99,10 +105,9 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
     }
   };
 
-  // Milestone animations on multiples of 3
+  // Milestone animations on multiples of 3 randomly picked from the 25 corner animations
   const triggerMilestoneAnimation = useCallback(() => {
-    const milestoneTypes: QuorraAnimationType[] = ["corner-peek", "ball-fetch", "spin-trophy"];
-    const randomAnim = milestoneTypes[Math.floor(Math.random() * milestoneTypes.length)];
+    const randomAnim = ALL_CORNER_ANIMATIONS[Math.floor(Math.random() * ALL_CORNER_ANIMATIONS.length)];
     setQuorraAnim(randomAnim);
   }, []);
 
@@ -132,11 +137,12 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
         setCardIndex(nextIndex);
         setIsFlipped(false);
 
-        // If crossed into a new category, sync top tab and trigger Quorra trot
+        // If crossed into a new category, sync top tab and trigger Quorra 5s crossing animation
         if (nextItem && currentItem && nextItem.category.id !== currentItem.category.id) {
           setSelectedCategoryId(nextItem.category.id);
           setQuorraCategory({ name: nextItem.category.name, nameZh: nextItem.category.nameZh });
-          setQuorraAnim("category-transition");
+          const randomCrossing = ALL_CROSSING_ANIMATIONS[Math.floor(Math.random() * ALL_CROSSING_ANIMATIONS.length)];
+          setQuorraAnim(randomCrossing);
         }
       } else {
         // Finished all cards in master deck!
@@ -152,11 +158,12 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
       setCardIndex(nextIndex);
       setIsFlipped(false);
 
-      // Category transition sync
+      // Category transition sync with 5s non-blocking crossing animation
       if (nextItem && currentItem && nextItem.category.id !== currentItem.category.id) {
         setSelectedCategoryId(nextItem.category.id);
         setQuorraCategory({ name: nextItem.category.name, nameZh: nextItem.category.nameZh });
-        setQuorraAnim("category-transition");
+        const randomCrossing = ALL_CROSSING_ANIMATIONS[Math.floor(Math.random() * ALL_CROSSING_ANIMATIONS.length)];
+        setQuorraAnim(randomCrossing);
       }
     } else {
       setIsSessionComplete(true);
