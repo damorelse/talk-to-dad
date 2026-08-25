@@ -117,7 +117,7 @@ export async function syncGoogleSheetOnStartup(options: {
     }
 
     // Set into in-memory non-persistent store (never written to IndexedDB)
-    sheetDataStore.setSheetData(accumulatedCards);
+    sheetDataStore.setSheetCards(accumulatedCards);
 
     const now = Date.now();
     settings.lastGoogleSheetSyncTime = now;

@@ -34,6 +34,29 @@ export class AppDatabase extends Dexie {
       settings: 'id',
       mediaBlobs: 'id, type, createdAt',
     });
+
+    this.version(2).stores({
+      categories: 'id, name, order, isDefault',
+      cards: 'id, categoryId, fitzgeraldCategory, order, label, isFavorite',
+      visualScenes: 'id, title, createdAt',
+      hotspots: 'id, sceneId, label',
+      settings: 'id',
+      mediaBlobs: 'id, type, createdAt',
+    }).upgrade(async tx => {
+      // 1. Purge deprecated legacy food cards
+      const removedFoodCardIds = ['card-juice', 'card-bread', 'card-porridge', 'card-noodles'];
+      await tx.table('cards').where('id').anyOf(removedFoodCardIds).delete();
+
+      // 2. Purge legacy persisted sheet cards
+      const allCards = await tx.table('cards').toArray();
+      const legacySheetCardIds = allCards.filter((c: any) => c.id && c.id.startsWith('card-sheet-')).map((c: any) => c.id);
+      if (legacySheetCardIds.length > 0) {
+        await tx.table('cards').bulkDelete(legacySheetCardIds);
+      }
+
+      // 3. Clean up removed dining chair hotspots
+      await tx.table('hotspots').where('id').anyOf(['hs-chair-left', 'hs-chair-right']).delete();
+    });
   }
 
   async initializeDefaults(): Promise<void> {
@@ -45,27 +68,9 @@ export class AppDatabase extends Dexie {
         const existing = await this.categories.get(cat.id);
         if (!existing) {
           await this.categories.put(cat);
-        } else {
-          let catUpdated = false;
-          if (!existing.nameZh && cat.nameZh) {
-            existing.nameZh = cat.nameZh;
-            catUpdated = true;
-          }
-          if (cat.id === 'cat-family' && existing.name !== 'Family') {
-            existing.name = 'Family';
-            catUpdated = true;
-          }
-          if (cat.id === 'cat-health' && existing.name !== 'Health') {
-            existing.name = 'Health';
-            catUpdated = true;
-          }
-          if (cat.id === 'cat-time' && existing.name !== 'Date & Time') {
-            existing.name = 'Date & Time';
-            catUpdated = true;
-          }
-          if (catUpdated) {
-            await this.categories.put(existing);
-          }
+        } else if (!existing.nameZh && cat.nameZh) {
+          existing.nameZh = cat.nameZh;
+          await this.categories.put(existing);
         }
       }
     }
@@ -85,72 +90,18 @@ export class AppDatabase extends Dexie {
             existing.spokenTextZh = existing.spokenTextZh || card.spokenTextZh;
             updated = true;
           }
-          if (card.clue && existing.clue !== card.clue) {
+          if (existing.clue === undefined && card.clue) {
             existing.clue = card.clue;
             updated = true;
           }
-          if (card.clueZh && existing.clueZh !== card.clueZh) {
+          if (existing.clueZh === undefined && card.clueZh) {
             existing.clueZh = card.clueZh;
-            updated = true;
-          }
-          if (card.id.startsWith('card-num-') && (existing.label.includes(' / ') || (existing.labelZh && existing.labelZh.includes(' / ')))) {
-            existing.label = card.label;
-            existing.labelZh = card.labelZh;
-            updated = true;
-          }
-          if (card.id.startsWith('card-num-') && existing.icon === '🔢') {
-            existing.icon = card.icon;
-            updated = true;
-          }
-          if (card.id === 'card-num-100' && existing.icon === '💯') {
-            existing.icon = card.icon;
-            updated = true;
-          }
-          if (card.id === 'card-family-spouse' && existing.label.includes(' / ')) {
-            existing.label = card.label;
-            existing.labelZh = card.labelZh;
-            existing.spokenText = card.spokenText;
-            existing.spokenTextZh = card.spokenTextZh;
-            existing.phoneticSyllables = card.phoneticSyllables;
-            existing.icon = card.icon;
-            updated = true;
-          }
-          if (existing.icon !== card.icon) {
-            existing.icon = card.icon;
-            updated = true;
-          }
-          if (card.categoryId === 'cat-food' && existing.order !== card.order) {
-            existing.order = card.order;
-            updated = true;
-          }
-          if (card.id === 'card-milk' || card.id === 'card-fruit') {
-            existing.label = card.label;
-            existing.labelZh = card.labelZh;
-            existing.spokenText = card.spokenText;
-            existing.spokenTextZh = card.spokenTextZh;
-            existing.phoneticSyllables = card.phoneticSyllables;
             updated = true;
           }
           if (updated) {
             await this.cards.put(existing);
           }
         }
-      }
-
-      // Remove obsolete default food cards if present
-      const removedFoodCardIds = ['card-juice', 'card-bread', 'card-porridge', 'card-noodles'];
-      for (const removedId of removedFoodCardIds) {
-        const toRemove = await this.cards.get(removedId);
-        if (toRemove && toRemove.categoryId === 'cat-food') {
-          await this.cards.delete(removedId);
-        }
-      }
-
-      // Purge legacy persisted sheet cards so database remains strictly persistent custom/default items
-      const allDbCards = await this.cards.toArray();
-      const legacySheetCardIds = allDbCards.filter(c => c.id.startsWith('card-sheet-')).map(c => c.id);
-      if (legacySheetCardIds.length > 0) {
-        await this.cards.bulkDelete(legacySheetCardIds);
       }
     }
 
@@ -162,28 +113,10 @@ export class AppDatabase extends Dexie {
         const existing = await this.visualScenes.get(scene.id);
         if (!existing) {
           await this.visualScenes.put(scene);
-        } else {
-          let updated = false;
-          if (existing.id === 'scene-kitchen' && (existing.title === 'Kitchen & Dining' || existing.description !== scene.description)) {
-            existing.title = scene.title;
-            existing.titleZh = scene.titleZh;
-            existing.description = scene.description;
-            existing.descriptionZh = scene.descriptionZh;
-            updated = true;
-          }
-          if (existing.id === 'scene-livingroom' && existing.description !== scene.description) {
-            existing.description = scene.description;
-            existing.descriptionZh = scene.descriptionZh;
-            updated = true;
-          }
-          if (!existing.titleZh && scene.titleZh) {
-            existing.titleZh = scene.titleZh;
-            existing.descriptionZh = scene.descriptionZh;
-            updated = true;
-          }
-          if (updated) {
-            await this.visualScenes.put(existing);
-          }
+        } else if (!existing.titleZh && scene.titleZh) {
+          existing.titleZh = scene.titleZh;
+          existing.descriptionZh = scene.descriptionZh;
+          await this.visualScenes.put(existing);
         }
       }
     }
@@ -196,35 +129,12 @@ export class AppDatabase extends Dexie {
         const existing = await this.hotspots.get(hs.id);
         if (!existing) {
           await this.hotspots.put(hs);
-        } else {
-          if (hs.id === 'hs-chair' && existing.label !== hs.label) {
-            existing.label = hs.label;
-            existing.labelZh = hs.labelZh;
-            existing.spokenText = hs.spokenText;
-            existing.spokenTextZh = hs.spokenTextZh;
-            await this.hotspots.put(existing);
-          } else if ((hs.sceneId === 'scene-kitchen' || hs.sceneId === 'scene-bedroom' || hs.sceneId === 'scene-garden') && (existing.x !== hs.x || existing.y !== hs.y || existing.width !== hs.width || existing.height !== hs.height)) {
-            existing.x = hs.x;
-            existing.y = hs.y;
-            existing.width = hs.width;
-            existing.height = hs.height;
-            existing.label = hs.label;
-            existing.labelZh = hs.labelZh;
-            existing.spokenText = hs.spokenText;
-            existing.spokenTextZh = hs.spokenTextZh;
-            existing.color = hs.color;
-            await this.hotspots.put(existing);
-          } else if (!existing.labelZh || !existing.spokenTextZh) {
-            existing.labelZh = existing.labelZh || hs.labelZh;
-            existing.spokenTextZh = existing.spokenTextZh || hs.spokenTextZh;
-            await this.hotspots.put(existing);
-          }
+        } else if (!existing.labelZh || !existing.spokenTextZh) {
+          existing.labelZh = existing.labelZh || hs.labelZh;
+          existing.spokenTextZh = existing.spokenTextZh || hs.spokenTextZh;
+          await this.hotspots.put(existing);
         }
       }
-
-      // Clean up removed dining chair hotspots if present
-      await this.hotspots.delete('hs-chair-left');
-      await this.hotspots.delete('hs-chair-right');
     }
 
     const currentSettings = await this.settings.get('current');

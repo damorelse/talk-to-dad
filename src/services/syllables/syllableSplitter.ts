@@ -9,112 +9,13 @@ import { phonemizeWord, getCanonicalIpa, formatIpaWithSyllables } from './espeak
 import { piperTTSService, generateDeterministicPhonemeAudio } from './piperTTSService.ts';
 import { CANONICAL_PHONEME_DICTIONARY } from './phonemeDictionary.ts';
 
-// Clinical dictionary of common AAC & rehabilitation vocabulary syllables (lowercase keys)
-export const CLINICAL_SYLLABLE_DICTIONARY: Record<string, string[]> = {
-  // Showcase flagship example
-  'photography': ['pho', 'tog', 'ra', 'phy'],
-
-  // Needs & Essentials
-  'water': ['wa', 'ter'],
-  'bathroom': ['bath', 'room'],
-  'glasses': ['glass', 'es'],
-  'blanket': ['blan', 'ket'],
-  'reposition': ['re', 'po', 'si', 'tion'],
-  'hungry': ['hun', 'gry'],
-  'thirsty': ['thirs', 'ty'],
-  'coffee': ['cof', 'fee'],
-  'pillow': ['pil', 'low'],
-  'napkin': ['nap', 'kin'],
-  'slippers': ['slip', 'pers'],
-  'wheelchair': ['wheel', 'chair'],
-  'telephone': ['te', 'le', 'phone'],
-  'bookshelf': ['book', 'shelf'],
-  'toothbrush': ['tooth', 'brush'],
-  'backpack': ['back', 'pack'],
-  'notebook': ['note', 'book'],
-
-  // Health & Body
-  'medicine': ['med', 'i', 'cine'],
-  'dizzy': ['diz', 'zy'],
-  'doctor': ['doc', 'tor'],
-  'nurse': ['nurse'],
-  'hospital': ['hos', 'pi', 'tal'],
-  'bandage': ['ban', 'dage'],
-  'numbness': ['numb', 'ness'],
-  'headache': ['head', 'ache'],
-  'stomach': ['stom', 'ach'],
-  'shoulder': ['shoul', 'der'],
-  'temperature': ['tem', 'per', 'a', 'ture'],
-  'prescription': ['pre', 'scrip', 'tion'],
-  'rehabilitation': ['re', 'ha', 'bil', 'i', 'ta', 'tion'],
-  'therapy': ['ther', 'a', 'py'],
-  'breathing': ['breath', 'ing'],
-  'swallow': ['swal', 'low'],
-
-  // Feelings
-  'happy': ['hap', 'py'],
-  'frustrated': ['frus', 'trat', 'ed'],
-  'anxious': ['anx', 'ious'],
-  'tired': ['tired'],
-  'grateful': ['grate', 'ful'],
-  'peaceful': ['peace', 'ful'],
-  'excited': ['ex', 'cit', 'ed'],
-  'confused': ['con', 'fused'],
-  'comfortable': ['com', 'fort', 'a', 'ble'],
-
-  // Family & Social
-  'daughter': ['daugh', 'ter'],
-  'family': ['fam', 'i', 'ly'],
-  'children': ['chil', 'dren'],
-  'grandchildren': ['grand', 'chil', 'dren'],
-  'grandpa': ['grand', 'pa'],
-  'grandma': ['grand', 'ma'],
-  'caregiver': ['care', 'giv', 'er'],
-  'welcome': ['wel', 'come'],
-  'morning': ['morn', 'ing'],
-  'evening': ['eve', 'ning'],
-  'afternoon': ['af', 'ter', 'noon'],
-  'yesterday': ['yes', 'ter', 'day'],
-  'tomorrow': ['to', 'mor', 'row'],
-
-  // Activities & Objects
-  'butterfly': ['but', 'ter', 'fly'],
-  'refrigerator': ['re', 'frig', 'er', 'a', 'tor'],
-  'sunshine': ['sun', 'shine'],
-  'exercise': ['ex', 'er', 'cise'],
-  'music': ['mu', 'sic'],
-  'television': ['te', 'le', 'vi', 'sion'],
-  'outside': ['out', 'side'],
-  'bedroom': ['bed', 'room'],
-  'kitchen': ['kitch', 'en'],
-  'garden': ['gar', 'den'],
-  'practice': ['prac', 'tice'],
-  'reading': ['read', 'ing'],
-  'walking': ['walk', 'ing'],
-  'computer': ['com', 'pu', 'ter'],
-  'calendar': ['cal', 'en', 'dar'],
-  'umbrella': ['um', 'brel', 'la'],
-  'together': ['to', 'geth', 'er'],
-  'important': ['im', 'por', 'tant'],
-  'remember': ['re', 'mem', 'ber'],
-  'wonderful': ['won', 'der', 'ful'],
-
-  // Numbers
-  'zero': ['ze', 'ro'],
-  'seven': ['sev', 'en'],
-  'eleven': ['e', 'lev', 'en'],
-  'twelve': ['twelve'],
-  'thirteen': ['thir', 'teen'],
-  'fourteen': ['four', 'teen'],
-  'fifteen': ['fif', 'teen'],
-  'sixteen': ['six', 'teen'],
-  'seventeen': ['sev', 'en', 'teen'],
-  'eighteen': ['eigh', 'teen'],
-  'nineteen': ['nine', 'teen'],
-  'twenty': ['twen', 'ty'],
-  'thirty': ['thir', 'ty'],
-  'hundred': ['hun', 'dred'],
-};
+// Dynamically derived clinical syllable dictionary from the canonical phoneme dictionary (single source of truth)
+export const CLINICAL_SYLLABLE_DICTIONARY: Record<string, string[]> = Object.fromEntries(
+  Object.entries(CANONICAL_PHONEME_DICTIONARY).map(([word, entry]) => [
+    word.toLowerCase(),
+    entry.syllables.map((s) => s.text),
+  ])
+);
 
 /**
  * Algorithmic rule-based phonetic syllable splitter fallback.

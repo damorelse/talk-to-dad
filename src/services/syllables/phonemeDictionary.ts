@@ -598,4 +598,104 @@ export const CANONICAL_PHONEME_DICTIONARY: Record<string, CanonicalDictionaryEnt
       { text: 'ful', ipa: 'fəl', stress: 'unstressed', phonemes: ['f', 'ə', 'l'] },
     ],
   },
+  // Numbers
+  'zero': {
+    canonicalIpa: 'ˈzɪəɹoʊ',
+    syllables: [
+      { text: 'ze', ipa: 'ˈzɪə', stress: 'primary', phonemes: ['z', 'ɪ', 'ə'] },
+      { text: 'ro', ipa: 'ɹoʊ', stress: 'unstressed', phonemes: ['ɹ', 'oʊ'] },
+    ],
+  },
+  'seven': {
+    canonicalIpa: 'ˈsɛvən',
+    syllables: [
+      { text: 'sev', ipa: 'ˈsɛv', stress: 'primary', phonemes: ['s', 'ɛ', 'v'] },
+      { text: 'en', ipa: 'ən', stress: 'unstressed', phonemes: ['ə', 'n'] },
+    ],
+  },
+  'eleven': {
+    canonicalIpa: 'ɪˈlɛvən',
+    syllables: [
+      { text: 'e', ipa: 'ɪ', stress: 'unstressed', phonemes: ['ɪ'] },
+      { text: 'lev', ipa: 'ˈlɛv', stress: 'primary', phonemes: ['l', 'ɛ', 'v'] },
+      { text: 'en', ipa: 'ən', stress: 'unstressed', phonemes: ['ə', 'n'] },
+    ],
+  },
+  'twelve': {
+    canonicalIpa: 'twɛlv',
+    syllables: [
+      { text: 'twelve', ipa: 'twɛlv', stress: 'primary', phonemes: ['t', 'w', 'ɛ', 'l', 'v'] },
+    ],
+  },
+  'thirteen': {
+    canonicalIpa: 'ˌθɜːɹˈtiːn',
+    syllables: [
+      { text: 'thir', ipa: 'ˌθɜːɹ', stress: 'secondary', phonemes: ['θ', 'ɜː', 'ɹ'] },
+      { text: 'teen', ipa: 'ˈtiːn', stress: 'primary', phonemes: ['t', 'iː', 'n'] },
+    ],
+  },
+  'fourteen': {
+    canonicalIpa: 'ˌfɔːɹˈtiːn',
+    syllables: [
+      { text: 'four', ipa: 'ˌfɔːɹ', stress: 'secondary', phonemes: ['f', 'ɔː', 'ɹ'] },
+      { text: 'teen', ipa: 'ˈtiːn', stress: 'primary', phonemes: ['t', 'iː', 'n'] },
+    ],
+  },
+  'fifteen': {
+    canonicalIpa: 'ˌfɪfˈtiːn',
+    syllables: [
+      { text: 'fif', ipa: 'ˌfɪf', stress: 'secondary', phonemes: ['f', 'ɪ', 'f'] },
+      { text: 'teen', ipa: 'ˈtiːn', stress: 'primary', phonemes: ['t', 'iː', 'n'] },
+    ],
+  },
+  'sixteen': {
+    canonicalIpa: 'ˌsɪksˈtiːn',
+    syllables: [
+      { text: 'six', ipa: 'ˌsɪks', stress: 'secondary', phonemes: ['s', 'ɪ', 'k', 's'] },
+      { text: 'teen', ipa: 'ˈtiːn', stress: 'primary', phonemes: ['t', 'iː', 'n'] },
+    ],
+  },
+  'seventeen': {
+    canonicalIpa: 'ˌsɛvənˈtiːn',
+    syllables: [
+      { text: 'sev', ipa: 'ˌsɛv', stress: 'secondary', phonemes: ['s', 'ɛ', 'v'] },
+      { text: 'en', ipa: 'ən', stress: 'unstressed', phonemes: ['ə', 'n'] },
+      { text: 'teen', ipa: 'ˈtiːn', stress: 'primary', phonemes: ['t', 'iː', 'n'] },
+    ],
+  },
+  'eighteen': {
+    canonicalIpa: 'ˌeɪˈtiːn',
+    syllables: [
+      { text: 'eigh', ipa: 'ˌeɪ', stress: 'secondary', phonemes: ['eɪ'] },
+      { text: 'teen', ipa: 'ˈtiːn', stress: 'primary', phonemes: ['t', 'iː', 'n'] },
+    ],
+  },
+  'nineteen': {
+    canonicalIpa: 'ˌnaɪnˈtiːn',
+    syllables: [
+      { text: 'nine', ipa: 'ˌnaɪn', stress: 'secondary', phonemes: ['n', 'aɪ', 'n'] },
+      { text: 'teen', ipa: 'ˈtiːn', stress: 'primary', phonemes: ['t', 'iː', 'n'] },
+    ],
+  },
+  'twenty': {
+    canonicalIpa: 'ˈtwɛnti',
+    syllables: [
+      { text: 'twen', ipa: 'ˈtwɛn', stress: 'primary', phonemes: ['t', 'w', 'ɛ', 'n'] },
+      { text: 'ty', ipa: 'ti', stress: 'unstressed', phonemes: ['t', 'i'] },
+    ],
+  },
+  'thirty': {
+    canonicalIpa: 'ˈθɜːɹti',
+    syllables: [
+      { text: 'thir', ipa: 'ˈθɜːɹ', stress: 'primary', phonemes: ['θ', 'ɜː', 'ɹ'] },
+      { text: 'ty', ipa: 'ti', stress: 'unstressed', phonemes: ['t', 'i'] },
+    ],
+  },
+  'hundred': {
+    canonicalIpa: 'ˈhʌndɹəd',
+    syllables: [
+      { text: 'hun', ipa: 'ˈhʌn', stress: 'primary', phonemes: ['h', 'ʌ', 'n'] },
+      { text: 'dred', ipa: 'dɹəd', stress: 'unstressed', phonemes: ['d', 'ɹ', 'ə', 'd'] },
+    ],
+  },
 };

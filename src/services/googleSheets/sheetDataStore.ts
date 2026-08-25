@@ -12,14 +12,13 @@ class SheetDataStore {
     return this.sheetCards;
   }
 
-  setSheetData(cards: AACCard[]): void {
+  setSheetCards(cards: AACCard[]): void {
     this.sheetCards = cards;
     this.notify();
   }
 
-  setSheetCards(cards: AACCard[]): void {
-    this.sheetCards = cards;
-    this.notify();
+  setSheetData(cards: AACCard[]): void {
+    this.setSheetCards(cards);
   }
 
   clear(): void {

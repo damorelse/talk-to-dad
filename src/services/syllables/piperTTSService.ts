@@ -1,10 +1,8 @@
 /**
- * Local Deterministic Piper TTS Syllable Audio Synthesis & Caching Engine
+ * Local Deterministic Syllable Audio Synthesis & Caching Engine
  * 
- * Implements a high-precision digital IIR Biquad Resonator Source-Filter synthesizer (Klatt/Fant model)
- * with distinct Piper voice profiles (Lessac, Ryan, Amy, Danny, LibriTTS).
- * Generates natural, clean, click-free 22,050Hz PCM audio for individual IPA syllables and caches
- * in memory and IndexedDB.
+ * Provides fast, deterministic, lightweight syllable waveform audio generation,
+ * caching in memory and IndexedDB, and articulation playback orchestration.
  */
 
 import type { SyllablePhonemeData, WordPronunciationData, SyllableStress } from '../../types/index.ts';
@@ -12,161 +10,7 @@ import { db } from '../db/AppDatabase.ts';
 import { recordedAudioEngine } from '../audio/RecordedAudioEngine.ts';
 import { iosAudioUnlock } from '../audio/iOSAudioUnlock.ts';
 
-const SAMPLE_RATE = 22050; // Standard Piper TTS sample rate (Hz)
-
-// Digital 2nd-order IIR Biquad Resonator Filter (Klatt Acoustic Resonator)
-export class BiquadResonator {
-  private a: number;
-  private b: number;
-  private c: number;
-  private y1 = 0;
-  private y2 = 0;
-
-  constructor(freq: number, bandwidth: number, sampleRate = SAMPLE_RATE) {
-    const clampedFreq = Math.max(50, Math.min(sampleRate * 0.48, freq));
-    const clampedBw = Math.max(30, Math.min(sampleRate * 0.25, bandwidth));
-    const r = Math.exp((-Math.PI * clampedBw) / sampleRate);
-    this.c = -(r * r);
-    this.b = 2.0 * r * Math.cos((2.0 * Math.PI * clampedFreq) / sampleRate);
-    this.a = 1.0 - this.b - this.c;
-  }
-
-  process(x: number): number {
-    const y = this.a * x + this.b * this.y1 + this.c * this.y2;
-    this.y2 = this.y1;
-    this.y1 = y;
-    return y;
-  }
-
-  reset() {
-    this.y1 = 0;
-    this.y2 = 0;
-  }
-}
-
-// 1st-order Low-Pass Filter for Glottal Spectral Tilt (-12dB/octave)
-export class LowPassFilter {
-  private alpha: number;
-  private prev = 0;
-
-  constructor(cutoffHz: number, sampleRate = SAMPLE_RATE) {
-    const rc = 1.0 / (2.0 * Math.PI * cutoffHz);
-    const dt = 1.0 / sampleRate;
-    this.alpha = dt / (rc + dt);
-  }
-
-  process(x: number): number {
-    this.prev = this.prev + this.alpha * (x - this.prev);
-    return this.prev;
-  }
-}
-
-// Formant frequency definitions for standard neutral IPA vowels (F1, F2, F3 in Hz)
-interface VowelAcousticModel {
-  f1: number;
-  f2: number;
-  f3: number;
-  bw1: number;
-  bw2: number;
-  bw3: number;
-  baseDurationMs: number;
-}
-
-const VOWEL_ACOUSTICS: Record<string, VowelAcousticModel> = {
-  // Schwa (unstressed central vowel)
-  'ə': { f1: 500, f2: 1500, f3: 2500, bw1: 80, bw2: 100, bw3: 130, baseDurationMs: 170 },
-  // Open back unrounded /ɑː/ (father, tog in photography)
-  'ɑː': { f1: 760, f2: 1180, f3: 2450, bw1: 90, bw2: 110, bw3: 140, baseDurationMs: 250 },
-  // Near-open front /æ/ (cat, trap)
-  'æ': { f1: 800, f2: 1750, f3: 2500, bw1: 90, bw2: 120, bw3: 140, baseDurationMs: 240 },
-  // Open-mid front /ɛ/ (bed, dress)
-  'ɛ': { f1: 550, f2: 1850, f3: 2550, bw1: 80, bw2: 100, bw3: 130, baseDurationMs: 210 },
-  // Near-close near-front /ɪ/ (sit, kit, i in medicine)
-  'ɪ': { f1: 400, f2: 1950, f3: 2600, bw1: 70, bw2: 100, bw3: 130, baseDurationMs: 180 },
-  // Close front /i/ and /iː/ (fleece, phy in photography)
-  'i': { f1: 280, f2: 2250, f3: 2900, bw1: 60, bw2: 90, bw3: 120, baseDurationMs: 200 },
-  'iː': { f1: 270, f2: 2300, f3: 2950, bw1: 60, bw2: 90, bw3: 120, baseDurationMs: 260 },
-  // Close back rounded /uː/ (goose, too, room)
-  'uː': { f1: 320, f2: 850, f3: 2250, bw1: 70, bw2: 90, bw3: 130, baseDurationMs: 250 },
-  // Near-close near-back /ʊ/ (foot, put)
-  'ʊ': { f1: 450, f2: 1050, f3: 2300, bw1: 75, bw2: 95, bw3: 130, baseDurationMs: 190 },
-  // Open-mid back /ʌ/ (cup, strut, but in butterfly)
-  'ʌ': { f1: 650, f2: 1200, f3: 2400, bw1: 85, bw2: 105, bw3: 135, baseDurationMs: 210 },
-  // Open-mid back rounded /ɔː/ (water, thought, call)
-  'ɔː': { f1: 560, f2: 880, f3: 2400, bw1: 80, bw2: 100, bw3: 130, baseDurationMs: 260 },
-  // Nurse / bird rhotic vowel /ɜː/
-  'ɜː': { f1: 480, f2: 1350, f3: 1650, bw1: 80, bw2: 110, bw3: 130, baseDurationMs: 240 },
-  // Diphthongs
-  'aɪ': { f1: 750, f2: 1200, f3: 2100, bw1: 90, bw2: 110, bw3: 130, baseDurationMs: 280 },
-  'eɪ': { f1: 500, f2: 1800, f3: 2150, bw1: 80, bw2: 100, bw3: 130, baseDurationMs: 270 },
-  'ɔɪ': { f1: 550, f2: 900, f3: 2100, bw1: 85, bw2: 105, bw3: 130, baseDurationMs: 280 },
-  'aʊ': { f1: 750, f2: 1200, f3: 900, bw1: 90, bw2: 110, bw3: 130, baseDurationMs: 280 },
-  'oʊ': { f1: 500, f2: 1000, f3: 850, bw1: 80, bw2: 100, bw3: 130, baseDurationMs: 270 },
-};
-
-export interface PiperVoiceProfile {
-  id: string;
-  name: string;
-  gender: 'female' | 'male' | 'neutral';
-  description: string;
-  basePitch: number;       // Fundamental F0 in Hz
-  formantScale: number;    // Vocal tract length scaling
-  openQuotient: number;    // Glottal pulse duty cycle (0.35 to 0.55)
-  spectralTiltHz: number;  // Glottal smoothing cutoff
-}
-
-export const PIPER_VOICE_PROFILES: Record<string, PiperVoiceProfile> = {
-  'en_US-lessac-medium': {
-    id: 'en_US-lessac-medium',
-    name: 'Lessac (Female - Clear)',
-    gender: 'female',
-    description: 'High-clarity female voice with bright formant clarity for speech rehabilitation',
-    basePitch: 210,
-    formantScale: 1.08,
-    openQuotient: 0.44,
-    spectralTiltHz: 2800,
-  },
-  'en_US-ryan-medium': {
-    id: 'en_US-ryan-medium',
-    name: 'Ryan (Male - Deep)',
-    gender: 'male',
-    description: 'Deep resonant male voice with rich fundamental chest harmonics',
-    basePitch: 112,
-    formantScale: 0.92,
-    openQuotient: 0.38,
-    spectralTiltHz: 1800,
-  },
-  'en_US-amy-low': {
-    id: 'en_US-amy-low',
-    name: 'Amy (Female - Warm)',
-    gender: 'female',
-    description: 'Warm, soft female register with gentle articulation',
-    basePitch: 185,
-    formantScale: 1.03,
-    openQuotient: 0.48,
-    spectralTiltHz: 2400,
-  },
-  'en_US-danny-low': {
-    id: 'en_US-danny-low',
-    name: 'Danny (Male - Calm)',
-    gender: 'male',
-    description: 'Calm, low-register steady male voice',
-    basePitch: 98,
-    formantScale: 0.88,
-    openQuotient: 0.36,
-    spectralTiltHz: 1600,
-  },
-  'en_US-libritts_r-medium': {
-    id: 'en_US-libritts_r-medium',
-    name: 'LibriTTS (Studio Neutral)',
-    gender: 'neutral',
-    description: 'Balanced studio narration voice',
-    basePitch: 145,
-    formantScale: 1.0,
-    openQuotient: 0.42,
-    spectralTiltHz: 2200,
-  },
-};
+const SAMPLE_RATE = 22050; // Standard audio sample rate (Hz)
 
 /**
  * Creates standard 44-byte RIFF/WAVE header for mono 16-bit PCM audio.
@@ -231,10 +75,8 @@ export function bytesToBase64DataUrl(bytes: Uint8Array, mimeType = 'audio/wav'):
 }
 
 /**
- * High-Precision Klatt/Fant Source-Filter Formant Synthesizer
- * 
- * Accurately models the human glottis and vocal tract using IIR Biquad Resonators,
- * Rosenberg glottal excitation pulses, and spectral tilt smoothing.
+ * Lightweight, Deterministic Syllable Audio Generator
+ * Generates clean, click-free audio with harmonic richness and natural envelope.
  */
 export function generateDeterministicPhonemeAudio(
   phonemes: string[],
@@ -243,153 +85,29 @@ export function generateDeterministicPhonemeAudio(
   pitchMultiplier = 1.0,
   voiceProfileId = 'en_US-lessac-medium'
 ): { base64: string; durationMs: number; rawBytes: Uint8Array } {
-  const profile = PIPER_VOICE_PROFILES[voiceProfileId] || PIPER_VOICE_PROFILES['en_US-lessac-medium'];
+  const durationFactor = (1.0 / Math.max(0.2, speed)) * (stress === 'primary' ? 1.3 : stress === 'secondary' ? 1.15 : 0.95);
+  const basePitch = (voiceProfileId.includes('ryan') || voiceProfileId.includes('danny') ? 110 : 210) * pitchMultiplier;
+  const stressPitchMod = stress === 'primary' ? 1.2 : stress === 'secondary' ? 1.08 : 0.96;
+  const targetPitch = basePitch * stressPitchMod;
 
-  // Speed multiplier: 0.5x slows down by ~1.8x
-  const durationFactor = (1.0 / Math.max(0.2, speed)) * (stress === 'primary' ? 1.25 : stress === 'secondary' ? 1.1 : 0.95);
-
-  // Pitch settings
-  const stressPitchMod = stress === 'primary' ? 1.22 : stress === 'secondary' ? 1.08 : 0.96;
-  const basePitch = profile.basePitch * pitchMultiplier * stressPitchMod;
-
-  // Identify dominant vowel and consonants
-  let vowelModel = VOWEL_ACOUSTICS['ə'];
-  for (const ph of phonemes) {
-    if (VOWEL_ACOUSTICS[ph]) {
-      vowelModel = VOWEL_ACOUSTICS[ph];
-      break;
-    }
-  }
-
-  const durationMs = Math.round(vowelModel.baseDurationMs * durationFactor + (phonemes.length * 35));
+  const baseDurationMs = 200 + phonemes.length * 35;
+  const durationMs = Math.round(baseDurationMs * durationFactor);
   const numSamples = Math.round((durationMs / 1000) * SAMPLE_RATE);
   const rawOutput = new Float32Array(numSamples);
 
-  // Initialize Vocal Tract Resonators (scaled by profile.formantScale)
-  const scale = profile.formantScale;
-  const hasRhotic = phonemes.some(p => p.includes('ɹ') || p.includes('r'));
-  const hasFricativeS = phonemes.some(p => p.includes('s') || p.includes('z'));
-  const hasFricativeSh = phonemes.some(p => p.includes('ʃ') || p.includes('ʒ'));
-  const hasFricativeF = phonemes.some(p => p.includes('f') || p.includes('v') || p.includes('θ'));
-  const hasPlosiveT = phonemes.some(p => p.includes('t') || p.includes('d'));
-  const hasPlosiveK = phonemes.some(p => p.includes('k') || p.includes('ɡ'));
-  const hasPlosiveP = phonemes.some(p => p.includes('p') || p.includes('b'));
-  const hasNasal = phonemes.some(p => p.includes('m') || p.includes('n') || p.includes('ŋ'));
-
-  const f1 = vowelModel.f1 * scale;
-  const f2 = (hasRhotic ? Math.min(vowelModel.f2, 1350) : vowelModel.f2) * scale;
-  const f3 = (hasRhotic ? 1600 : vowelModel.f3) * scale;
-  const f4 = 3400 * scale;
-
-  const res1 = new BiquadResonator(f1, vowelModel.bw1);
-  const res2 = new BiquadResonator(f2, vowelModel.bw2);
-  const res3 = new BiquadResonator(f3, vowelModel.bw3);
-  const res4 = new BiquadResonator(f4, 180);
-
-  // Specialized Fricative Noise Resonators
-  const fricativeRes = hasFricativeS
-    ? new BiquadResonator(5200, 1200)
-    : hasFricativeSh
-    ? new BiquadResonator(3200, 1000)
-    : new BiquadResonator(2200, 1500);
-
-  // Glottal tilt smoothing filter
-  const glottalTilt = new LowPassFilter(profile.spectralTiltHz);
-
-  // Deterministic seed for reproducible noise
-  let seed = 1234567;
-  for (const char of phonemes.join('') + voiceProfileId) {
-    seed = (seed * 31 + char.charCodeAt(0)) % 1000000007;
-  }
-  const pseudoRand = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed / 2147483647) * 2 - 1;
-  };
-
-  // Glottal pulse period tracker
-  let phaseInPeriod = 0;
-  const openQ = profile.openQuotient;
+  const attackSamples = Math.min(Math.round(SAMPLE_RATE * 0.02), Math.round(numSamples * 0.15));
+  const decaySamples = Math.min(Math.round(SAMPLE_RATE * 0.04), Math.round(numSamples * 0.25));
 
   for (let i = 0; i < numSamples; i++) {
     const progress = i / numSamples;
+    const pitch = targetPitch * (1.0 - progress * 0.05);
+    const t = (2 * Math.PI * pitch * i) / SAMPLE_RATE;
 
-    // Pitch intonation contour (natural human arc)
-    let curPitch = basePitch;
-    if (stress === 'primary') {
-      curPitch = basePitch + Math.sin(progress * Math.PI) * (basePitch * 0.18);
-    } else {
-      curPitch = basePitch - progress * (basePitch * 0.08);
-    }
+    // Harmonic synthesis: Fundamental + 2nd + 3rd harmonics
+    const sample = Math.sin(t) * 0.6 + Math.sin(2 * t) * 0.25 + Math.sin(3 * t) * 0.15;
 
-    const periodSamples = SAMPLE_RATE / Math.max(50, curPitch);
-
-    // Rosenberg Glottal Source Pulse
-    const tRel = phaseInPeriod / periodSamples;
-    let glottalRaw = 0;
-    if (tRel < openQ) {
-      // Opening phase: smooth sinusoidal rise
-      glottalRaw = 0.5 * (1.0 - Math.cos((Math.PI * tRel) / openQ));
-    } else if (tRel < openQ + 0.16) {
-      // Rapid closing phase
-      glottalRaw = Math.cos((Math.PI * (tRel - openQ)) / 0.32);
-    } else {
-      // Closed phase (0 excitation)
-      glottalRaw = 0;
-    }
-
-    phaseInPeriod += 1;
-    if (phaseInPeriod >= periodSamples) {
-      phaseInPeriod -= periodSamples;
-    }
-
-    // Apply glottal spectral tilt
-    const glottalSource = glottalTilt.process(glottalRaw);
-
-    // Pass glottal pulse through vocal tract formant resonators
-    const y1 = res1.process(glottalSource);
-    const y2 = res2.process(glottalSource);
-    const y3 = res3.process(glottalSource);
-    const y4 = res4.process(glottalSource);
-
-    let vocalSound = y1 * 0.5 + y2 * 0.3 + y3 * 0.15 + y4 * 0.05;
-
-    // Nasal murmur addition
-    if (hasNasal && progress > 0.55) {
-      vocalSound = vocalSound * 0.6 + Math.sin((2 * Math.PI * 220 * i) / SAMPLE_RATE) * 0.25;
-    }
-
-    // Fricative consonant noise modeling (e.g. /f/, /s/, /sh/)
-    if (hasFricativeS || hasFricativeSh || hasFricativeF) {
-      const isInitialFric = progress < 0.28;
-      const isFinalFric = progress > 0.72;
-      if (isInitialFric || isFinalFric) {
-        const noise = pseudoRand();
-        const shapedNoise = fricativeRes.process(noise);
-        const fricWeight = isInitialFric ? 0.45 : 0.35;
-        vocalSound = vocalSound * 0.4 + shapedNoise * fricWeight;
-      }
-    }
-
-    // Plosive release burst (e.g. /t/, /k/, /p/)
-    if (hasPlosiveT || hasPlosiveK || hasPlosiveP) {
-      if (progress < 0.08) {
-        // Initial closure silence then explosive burst
-        if (progress < 0.02) {
-          vocalSound = 0; // Silent closure
-        } else {
-          const burstEnv = Math.exp(-(progress - 0.02) * 50);
-          const burstFreq = hasPlosiveT ? 3800 : hasPlosiveK ? 2200 : 900;
-          const burstNoise = pseudoRand() * 0.6 + Math.sin((2 * Math.PI * burstFreq * i) / SAMPLE_RATE) * 0.4;
-          vocalSound += burstNoise * burstEnv * 0.5;
-        }
-      }
-    }
-
-    // Syllable Tukey Window Envelope (smooth fade-in and fade-out to prevent clicks)
+    // Tukey envelope to eliminate clicks
     let env = 1.0;
-    const attackSamples = Math.min(SAMPLE_RATE * 0.015, numSamples * 0.12);
-    const decaySamples = Math.min(SAMPLE_RATE * 0.035, numSamples * 0.22);
-
     if (i < attackSamples) {
       env = 0.5 * (1 - Math.cos((Math.PI * i) / attackSamples));
     } else if (i > numSamples - decaySamples) {
@@ -397,22 +115,19 @@ export function generateDeterministicPhonemeAudio(
       env = 0.5 * (1 + Math.cos((Math.PI * decayIdx) / decaySamples));
     }
 
-    rawOutput[i] = vocalSound * env;
+    rawOutput[i] = sample * env;
   }
 
-  // Find peak for clean auto-gain normalization (target -1.5 dB peak = 0.84)
+  // Peak normalization
   let maxPeak = 0;
   for (let i = 0; i < numSamples; i++) {
     const absVal = Math.abs(rawOutput[i]);
     if (absVal > maxPeak) maxPeak = absVal;
   }
+  const normGain = maxPeak > 0 ? 0.85 / maxPeak : 1.0;
 
-  const normGain = maxPeak > 0 ? 0.84 / maxPeak : 1.0;
-
-  // Convert Float32 to 16-bit PCM bytes
   const pcmBytes = new Uint8Array(numSamples * 2);
   const dataView = new DataView(pcmBytes.buffer);
-
   for (let i = 0; i < numSamples; i++) {
     const sample = Math.max(-1.0, Math.min(1.0, rawOutput[i] * normGain));
     const int16 = sample < 0 ? Math.round(sample * 0x8000) : Math.round(sample * 0x7fff);
