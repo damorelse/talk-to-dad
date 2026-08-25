@@ -22,7 +22,6 @@ import {
   Calendar,
   Clock,
   RefreshCw,
-  Sparkles,
   Compass,
   VolumeX,
 } from 'lucide-react';
@@ -121,7 +120,13 @@ export const TodayOrientationView: React.FC = () => {
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December',
   ];
+  const monthsEnShort = [
+    'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+    'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+  ];
   const monthName = monthsEn[currentDate.getMonth()];
+  const monthShort = monthsEnShort[currentDate.getMonth()];
+  const monthNum = currentDate.getMonth() + 1;
   const dayNum = currentDate.getDate();
   const year = currentDate.getFullYear();
 
@@ -142,9 +147,9 @@ export const TodayOrientationView: React.FC = () => {
   const isLocationActive = isSpeaking && (activeSpeechType === 'location' || activeSpeechType === 'all');
 
   return (
-    <div className="w-full h-full flex flex-col gap-3 overflow-y-auto p-1 select-none scrollbar-thin">
+    <div className="w-full h-full flex flex-col gap-3.5 overflow-y-auto p-1 select-none scrollbar-thin">
       {/* 1. HERO ORIENTATION GREETING & MASTER SPEAK ALL */}
-      <div className="w-full bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 border-2 border-indigo-500/40 rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 min-w-0">
+      <div className="w-full bg-gradient-to-r from-slate-900 via-indigo-950/70 to-slate-900 border-2 border-indigo-500/40 rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 min-w-0">
         <div className="flex items-center gap-3.5 sm:gap-4 text-center sm:text-left min-w-0">
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-600/30 border-2 border-indigo-400/60 flex items-center justify-center text-indigo-300 shrink-0 text-3xl sm:text-4xl shadow-lg shadow-indigo-950/80">
             {greeting.icon}
@@ -159,7 +164,7 @@ export const TodayOrientationView: React.FC = () => {
               </span>
             </div>
             <p className="text-xs sm:text-sm font-bold text-slate-300 mt-1 truncate">
-              Today is {currentWeekday.name}, {monthName} {dayNum} · 今天是 {year} 年 {currentDate.getMonth() + 1} 月 {dayNum} 日 ({currentWeekday.nameZh})
+              Today is {currentWeekday.name}, {monthName} {dayNum} · 今天是 {year} 年 {monthNum} 月 {dayNum} 日 ({currentWeekday.nameZh})
             </p>
           </div>
         </div>
@@ -190,7 +195,7 @@ export const TodayOrientationView: React.FC = () => {
             <button
               type="button"
               onClick={stopAll}
-              className="px-4 py-3.5 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white rounded-2xl text-xs font-black shadow-lg border border-rose-400 flex items-center gap-1.5 transition-all"
+              className="px-4 py-3.5 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white rounded-2xl text-xs font-black shadow-lg border border-rose-400 flex items-center gap-1.5 transition-all cursor-pointer"
               aria-label="Stop speaking"
             >
               <VolumeX className="w-4 h-4" />
@@ -201,17 +206,17 @@ export const TodayOrientationView: React.FC = () => {
       </div>
 
       {/* 2. MAIN 2-COLUMN BALANCED ORIENTATION GRID */}
-      <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
-        {/* LEFT COLUMN: Weekday & Visual Day Tracker + Calendar Date */}
-        <div className="flex flex-col gap-3">
+      <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3.5 min-h-0">
+        {/* LEFT COLUMN: Weekday & Visual Day Tracker + Skeuomorphic Tear-Off Calendar Date */}
+        <div className="flex flex-col gap-3.5">
           {/* Card 1: Weekday & Visual Weekday Strip */}
           <div
             className={`
-              bg-slate-900 border-2 rounded-3xl p-4 flex flex-col justify-between shadow-xl gap-3.5 transition-all duration-200
+              bg-slate-900 border-2 rounded-3xl p-4 flex flex-col justify-between shadow-xl gap-3.5 transition-all duration-300
               ${
                 isWeekdayActive
                   ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60 brightness-110'
-                  : 'border-slate-700 hover:border-slate-600'
+                  : 'border-slate-700/80 hover:border-slate-600'
               }
             `}
           >
@@ -234,7 +239,7 @@ export const TodayOrientationView: React.FC = () => {
                 onPress={() => handleSpeakWeekday()}
                 minTouchSize="md"
                 className={`
-                  border px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition-colors
+                  border px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition-colors cursor-pointer
                   ${
                     isWeekdayActive
                       ? 'bg-amber-500 text-slate-950 border-amber-300 ring-2 ring-white'
@@ -248,7 +253,7 @@ export const TodayOrientationView: React.FC = () => {
               </DebouncedTouchable>
             </div>
 
-            {/* Visual 7-Day Weekday Tracker with Tremor-Safe Touch Padding */}
+            {/* Visual 7-Day Weekday Tracker with Tremor-Safe Touch Targets */}
             <WeekdayBar
               currentDate={currentDate}
               onSelectDay={(day, isToday) => handleSpeakWeekday(day, isToday)}
@@ -256,21 +261,21 @@ export const TodayOrientationView: React.FC = () => {
             />
           </div>
 
-          {/* Card 2: Calendar Date */}
+          {/* Card 2: Skeuomorphic Tear-Off Calendar Date */}
           <div
             className={`
-              bg-slate-900 border-2 rounded-3xl p-4 flex flex-col justify-between shadow-xl gap-3 transition-all duration-200
+              bg-slate-900 border-2 rounded-3xl p-4 flex flex-col justify-between shadow-xl gap-3.5 transition-all duration-300
               ${
                 isDateActive
                   ? 'border-blue-400 ring-4 ring-blue-400/40 shadow-blue-950/60 brightness-110'
-                  : 'border-slate-700 hover:border-slate-600'
+                  : 'border-slate-700/80 hover:border-slate-600'
               }
             `}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-400 flex items-center justify-center text-blue-300 shadow-inner">
-                  <Sparkles className="w-5 h-5" />
+                  <Calendar className="w-5 h-5" />
                 </div>
                 <div>
                   <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider block">
@@ -286,7 +291,7 @@ export const TodayOrientationView: React.FC = () => {
                 onPress={handleSpeakDate}
                 minTouchSize="md"
                 className={`
-                  border px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition-colors
+                  border px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition-colors cursor-pointer
                   ${
                     isDateActive
                       ? 'bg-blue-500 text-white border-blue-300 ring-2 ring-white'
@@ -300,52 +305,67 @@ export const TodayOrientationView: React.FC = () => {
               </DebouncedTouchable>
             </div>
 
-            {/* Big High-Contrast Date Badge */}
+            {/* Classic Skeuomorphic Tear-Off Calendar Tile */}
             <DebouncedTouchable
               onPress={handleSpeakDate}
               minTouchSize="lg"
-              className="w-full bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-inner hover:border-blue-500/50 transition-colors cursor-pointer group"
+              className="w-full bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-inner hover:border-blue-500/60 hover:shadow-blue-950/30 transition-all cursor-pointer group"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex flex-col items-center justify-center shadow-lg border border-blue-400/40 shrink-0">
-                  <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-blue-200">
-                    {monthName.slice(0, 3)}
-                  </span>
-                  <span className="text-2xl sm:text-3xl font-black leading-none my-0.5">
-                    {dayNum}
-                  </span>
-                  <span className="text-[11px] font-bold text-blue-200 leading-none">
+              <div className="flex items-center gap-4 min-w-0">
+                {/* Tear-Off Calendar Block */}
+                <div className="w-20 h-22 sm:w-22 sm:h-24 rounded-2xl bg-slate-100 text-slate-900 flex flex-col items-center overflow-hidden shadow-2xl border-2 border-slate-300 shrink-0 select-none">
+                  {/* Red Header with Holes */}
+                  <div className="w-full bg-rose-600 text-white py-1 flex items-center justify-between px-2.5 border-b border-rose-700 shadow-sm">
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-900/60" />
+                    <span className="text-[11px] font-black uppercase tracking-wider">
+                      {monthShort} · {monthNum}月
+                    </span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-900/60" />
+                  </div>
+                  {/* Center Bold Day Number */}
+                  <div className="flex-1 flex items-center justify-center">
+                    <span className="text-3xl sm:text-4xl font-black text-slate-900 leading-none">
+                      {dayNum}
+                    </span>
+                  </div>
+                  {/* Year Footer */}
+                  <div className="w-full bg-slate-200/80 py-0.5 text-center text-[10px] font-black text-slate-600 border-t border-slate-300">
                     {year}
-                  </span>
+                  </div>
                 </div>
 
-                <div className="flex flex-col text-left">
-                  <span className="text-lg sm:text-2xl font-black text-white group-hover:text-blue-300 transition-colors">
+                {/* Date Details Text */}
+                <div className="flex flex-col text-left min-w-0">
+                  <span className="text-lg sm:text-2xl font-black text-white group-hover:text-blue-300 transition-colors truncate">
                     {monthName} {dayNum}, {year}
                   </span>
-                  <span className="text-sm sm:text-base font-extrabold text-slate-300 mt-0.5">
-                    {year} 年 {currentDate.getMonth() + 1} 月 {dayNum} 日
+                  <span className="text-sm sm:text-base font-extrabold text-blue-200 mt-0.5">
+                    {year} 年 {monthNum} 月 {dayNum} 日
+                  </span>
+                  <span className="text-xs font-bold text-slate-400 mt-0.5">
+                    {currentWeekday.name} · {currentWeekday.nameZh}
                   </span>
                 </div>
               </div>
 
-              <div className="shrink-0 hidden sm:flex items-center text-xs font-black text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/30">
-                Tap to Hear
+              <div className="shrink-0 hidden sm:flex items-center gap-1 text-xs font-black text-blue-400 bg-blue-500/10 px-3 py-1.5 rounded-xl border border-blue-500/30 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                <Volume2 className="w-3.5 h-3.5" />
+                <span>Tap to Hear</span>
               </div>
             </DebouncedTouchable>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Live Clock & Day Period + World Map & Location */}
-        <div className="flex flex-col gap-3">
-          {/* Card 3: Live Digital Clock & Calm Day Phase */}
+        {/* RIGHT COLUMN: Bedside Digital Clock + World Map & Location */}
+        <div className="flex flex-col gap-3.5">
+          {/* Card 3: Bedside Digital Clock & Day Phase */}
           <div
             className={`
-              bg-slate-900 border-2 rounded-3xl p-4 flex flex-col justify-between shadow-xl gap-3 transition-all duration-200
+              bg-slate-900 border-2 rounded-3xl p-4 flex flex-col justify-between shadow-xl gap-3.5 transition-all duration-300
               ${
                 isTimeActive
                   ? 'border-emerald-400 ring-4 ring-emerald-400/40 shadow-emerald-950/60 brightness-110'
-                  : 'border-slate-700 hover:border-slate-600'
+                  : 'border-slate-700/80 hover:border-slate-600'
               }
             `}
           >
@@ -368,7 +388,7 @@ export const TodayOrientationView: React.FC = () => {
                 onPress={handleSpeakTime}
                 minTouchSize="md"
                 className={`
-                  border px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition-colors
+                  border px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition-colors cursor-pointer
                   ${
                     isTimeActive
                       ? 'bg-emerald-500 text-slate-950 border-emerald-300 ring-2 ring-white'
@@ -382,22 +402,25 @@ export const TodayOrientationView: React.FC = () => {
               </DebouncedTouchable>
             </div>
 
-            {/* Calm Big Clock Display without distracting seconds jitter */}
+            {/* Calm Bedside Digital Clock Display */}
             <DebouncedTouchable
               onPress={handleSpeakTime}
               minTouchSize="lg"
-              className="w-full bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-inner hover:border-emerald-500/50 transition-colors cursor-pointer group"
+              className="w-full bg-slate-950/90 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-inner hover:border-emerald-500/60 hover:shadow-emerald-950/30 transition-all cursor-pointer group"
             >
-              <div className="flex items-center gap-4">
-                {/* Period of day icon & badge */}
-                <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex flex-col items-center justify-center shadow-lg border border-emerald-400/40 shrink-0 text-3xl">
-                  <span>{dayPeriod.icon}</span>
-                  <span className="text-[10px] font-black uppercase text-emerald-100 mt-0.5 tracking-wider">
+              <div className="flex items-center gap-4 min-w-0">
+                {/* Day Phase Icon Badge */}
+                <div className="w-20 h-22 sm:w-22 sm:h-24 rounded-2xl bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900 text-white flex flex-col items-center justify-center shadow-2xl border-2 border-emerald-400/50 shrink-0">
+                  <span className="text-3xl sm:text-4xl drop-shadow">{dayPeriod.icon}</span>
+                  <span className="text-[10px] sm:text-[11px] font-black uppercase text-emerald-100 mt-1 tracking-wider">
                     {dayPeriod.en}
+                  </span>
+                  <span className="text-[10px] font-bold text-emerald-200">
+                    {dayPeriod.zh}
                   </span>
                 </div>
 
-                <div className="flex flex-col text-left">
+                <div className="flex flex-col text-left min-w-0">
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
                       {displayHours12}:{minStr}
@@ -407,14 +430,18 @@ export const TodayOrientationView: React.FC = () => {
                     </span>
                   </div>
 
-                  <span className="text-sm sm:text-base font-extrabold text-slate-300 mt-0.5">
-                    {dayPeriod.zh} {displayHours12} 點 {minutes} 分
+                  <span className="text-sm sm:text-base font-extrabold text-emerald-200 mt-1 truncate">
+                    {dayPeriod.zh} {displayHours12} 點 {minutes === 0 ? '整' : `${minutes} 分`}
+                  </span>
+                  <span className="text-xs font-bold text-slate-400 mt-0.5">
+                    {dayPeriod.en.toUpperCase()} ({ampm})
                   </span>
                 </div>
               </div>
 
-              <div className="shrink-0 hidden sm:flex items-center text-xs font-black text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/30">
-                Tap to Hear
+              <div className="shrink-0 hidden sm:flex items-center gap-1 text-xs font-black text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/30 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                <Volume2 className="w-3.5 h-3.5" />
+                <span>Tap to Hear</span>
               </div>
             </DebouncedTouchable>
           </div>
@@ -422,11 +449,11 @@ export const TodayOrientationView: React.FC = () => {
           {/* Card 4: Location & World Map Visual */}
           <div
             className={`
-              bg-slate-900 border-2 rounded-3xl p-4 flex flex-col justify-between shadow-xl gap-3 transition-all duration-200
+              bg-slate-900 border-2 rounded-3xl p-4 flex flex-col justify-between shadow-xl gap-3.5 transition-all duration-300
               ${
                 isLocationActive
                   ? 'border-purple-400 ring-4 ring-purple-400/40 shadow-purple-950/60 brightness-110'
-                  : 'border-slate-700 hover:border-slate-600'
+                  : 'border-slate-700/80 hover:border-slate-600'
               }
             `}
           >
@@ -450,7 +477,7 @@ export const TodayOrientationView: React.FC = () => {
                   type="button"
                   onClick={refreshLocation}
                   disabled={isLocating}
-                  className="p-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-300 border border-slate-700 rounded-xl transition-colors disabled:opacity-50"
+                  className="p-2 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 text-slate-300 border border-slate-700 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
                   aria-label="Refresh location via GPS"
                   title="Refresh location"
                 >
@@ -461,7 +488,7 @@ export const TodayOrientationView: React.FC = () => {
                   onPress={handleSpeakLocation}
                   minTouchSize="md"
                   className={`
-                    border px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition-colors
+                    border px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition-colors cursor-pointer
                     ${
                       isLocationActive
                         ? 'bg-purple-500 text-white border-purple-300 ring-2 ring-white'
@@ -486,26 +513,32 @@ export const TodayOrientationView: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. BOTTOM COMPOSITE STATEMENT PREVIEW */}
-      <div className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3.5 sm:p-4 flex flex-col gap-1.5 shadow-inner mt-1">
+      {/* 3. BOTTOM COMPOSITE STATEMENT TRANSCRIPTION TERMINAL */}
+      <div className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col gap-2 shadow-inner mt-1">
         <div className="flex items-center justify-between text-xs font-extrabold text-slate-400">
-          <span className="flex items-center gap-1.5 text-slate-300">
-            <span>💬 Spoken Composite Statement · 朗讀語句預覽</span>
-          </span>
+          <div className="flex items-center gap-2 text-slate-300">
+            <span>💬 Spoken Transcription Preview · 朗讀語句預覽</span>
+            {isSpeaking && (
+              <span className="flex items-center gap-1 text-[11px] font-black text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-500/40 animate-pulse">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                Speaking 正在朗讀...
+              </span>
+            )}
+          </div>
           <button
             type="button"
             onClick={handleSpeakAll}
-            className="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-black text-xs"
+            className="text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-black text-xs cursor-pointer transition-colors"
           >
             <Volume2 className="w-3.5 h-3.5" />
-            <span>Play Aloud 播放</span>
+            <span>Play Aloud 播放全部</span>
           </button>
         </div>
 
-        <p className="text-sm sm:text-base font-bold text-amber-300 tracking-wide leading-snug">
+        <p className="text-sm sm:text-base font-bold text-amber-300 tracking-wide leading-relaxed">
           "{fullSpeech.en}"
         </p>
-        <p className="text-sm sm:text-base font-bold text-white tracking-wide leading-snug pt-1 border-t border-slate-800/80">
+        <p className="text-sm sm:text-base font-bold text-white tracking-wide leading-relaxed pt-1.5 border-t border-slate-800/80">
           「{fullSpeech.zh}」
         </p>
       </div>

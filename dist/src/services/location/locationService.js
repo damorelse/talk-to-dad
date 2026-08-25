@@ -196,6 +196,55 @@ export function getGreeting(hours) {
     }
 }
 /**
+ * Get country flag emoji from country string
+ */
+export function getCountryFlag(country) {
+    const c = country.toLowerCase();
+    if (c.includes('united states') || c.includes('usa') || c.includes('us'))
+        return '🇺🇸';
+    if (c.includes('taiwan'))
+        return '🇹🇼';
+    if (c.includes('canada'))
+        return '🇨🇦';
+    if (c.includes('japan'))
+        return '🇯🇵';
+    if (c.includes('united kingdom') || c.includes('uk') || c.includes('britain'))
+        return '🇬🇧';
+    if (c.includes('france'))
+        return '🇫🇷';
+    if (c.includes('australia'))
+        return '🇦🇺';
+    if (c.includes('singapore'))
+        return '🇸🇬';
+    if (c.includes('hong kong'))
+        return '🇭🇰';
+    if (c.includes('china'))
+        return '🇨🇳';
+    return '📍';
+}
+/**
+ * Generate full week calendar dates (Sunday to Saturday) around currentDate
+ */
+export function getWeekDates(currentDate) {
+    const currentDayOfWeek = currentDate.getDay(); // 0 = Sun, ..., 6 = Sat
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth();
+    const currentDayOfMonth = currentDate.getDate();
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+        const diff = i - currentDayOfWeek;
+        const dayDate = new Date(currentYear, currentMonth, currentDayOfMonth + diff);
+        days.push({
+            weekday: WEEKDAYS[i],
+            dayOfMonth: dayDate.getDate(),
+            month: dayDate.getMonth(),
+            isToday: i === currentDayOfWeek,
+            fullDate: dayDate,
+        });
+    }
+    return days;
+}
+/**
  * Format English & Traditional Chinese speech for the Weekday
  */
 export function formatWeekdaySpeech(date) {

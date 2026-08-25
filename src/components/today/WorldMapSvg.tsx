@@ -1,6 +1,7 @@
 import React from 'react';
 import { UserLocationInfo } from '../../types';
-import { MapPin } from 'lucide-react';
+import { getCountryFlag } from '../../services/location/locationService';
+import { Volume2 } from 'lucide-react';
 
 interface WorldMapSvgProps {
   location: UserLocationInfo;
@@ -24,19 +25,29 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
   const pinX = ((clampedLon + 180) / 360) * 1000;
   const pinY = ((90 - clampedLat) / 180) * 500;
 
+  const flag = getCountryFlag(location.country);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.key === 'Enter' || e.key === ' ') && onSelectLocation) {
+      e.preventDefault();
+      onSelectLocation();
+    }
+  };
+
   return (
     <div
       onClick={onSelectLocation}
+      onKeyDown={handleKeyDown}
       className={`
-        relative w-full aspect-[2/1] max-h-[320px] bg-slate-950 rounded-2xl border p-2 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-200
+        relative w-full aspect-[2/1] max-h-[320px] bg-slate-950 rounded-2xl border p-2 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-300
         ${
           isSpeakingLocation
             ? 'border-purple-400 ring-4 ring-purple-400/50 shadow-2xl shadow-purple-950/60 scale-[1.01]'
-            : 'border-slate-800 hover:border-purple-500/60'
+            : 'border-slate-800 hover:border-purple-500/60 hover:shadow-purple-950/30'
         }
       `}
       role="button"
-      aria-label={`Current location on world map: ${location.city}, ${location.country}`}
+      aria-label={`Current location on world map: ${location.city}, ${location.country}. Tap to hear.`}
       tabIndex={0}
     >
       <svg
@@ -167,10 +178,10 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <circle
             cx={pinX}
             cy={pinY}
-            r="16"
+            r="18"
             fill="none"
-            stroke="#38bdf8"
-            strokeWidth="2"
+            stroke="#a855f7"
+            strokeWidth="2.5"
             className="animate-ping origin-center opacity-75"
             style={{ animationDuration: '2.5s' }}
           />
@@ -179,8 +190,8 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <circle
             cx={pinX}
             cy={pinY}
-            r="8"
-            fill="#0284c7"
+            r="10"
+            fill="#9333ea"
             className="opacity-60"
           />
 
@@ -188,7 +199,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <circle
             cx={pinX}
             cy={pinY}
-            r="5"
+            r="5.5"
             fill="#facc15"
             stroke="#ffffff"
             strokeWidth="1.5"
@@ -197,25 +208,26 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
       </svg>
 
       {/* Floating Interactive Badge Over Map */}
-      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-xl px-3 py-1.5 flex items-center justify-between shadow-lg text-white group-hover:border-blue-500 transition-colors">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-6 h-6 rounded-lg bg-blue-600/30 border border-blue-400 flex items-center justify-center text-blue-400 shrink-0">
-            <MapPin className="w-3.5 h-3.5" />
+      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-xl px-3 py-2 flex items-center justify-between shadow-lg text-white group-hover:border-purple-500/80 transition-colors">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="text-xl sm:text-2xl shrink-0 drop-shadow">
+            {flag}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-xs font-black text-white truncate">
-              {location.city}{location.state ? `, ${location.state}` : ''}, {location.country}
-            </span>
-            <span className="text-[10px] font-bold text-slate-400 truncate">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-xs sm:text-sm font-black text-white truncate">
+                {location.city}{location.state ? `, ${location.state}` : ''}, {location.country}
+              </span>
+            </div>
+            <span className="text-[10px] sm:text-xs font-bold text-purple-300 truncate">
               {location.countryZh}{location.stateZh ? location.stateZh : ''}{location.cityZh ? location.cityZh : ''} · {lat.toFixed(1)}°, {lon.toFixed(1)}°
             </span>
           </div>
         </div>
 
-        <div className="shrink-0 ml-2">
-          <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/40 px-2 py-0.5 rounded-md">
-            Tap to Hear
-          </span>
+        <div className="shrink-0 ml-2 flex items-center gap-1 bg-purple-500/20 text-purple-300 border border-purple-500/40 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wider group-hover:bg-purple-500 group-hover:text-white transition-colors">
+          <Volume2 className="w-3.5 h-3.5" />
+          <span>Tap to Hear</span>
         </div>
       </div>
     </div>
