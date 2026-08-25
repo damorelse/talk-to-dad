@@ -213,7 +213,7 @@ export const TodayOrientationView: React.FC = () => {
       {/* 2. 2-COLUMN LAYOUT: Left (Time, Weekday, Date) | Right (Location with World Map) */}
       <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3 min-h-0">
         {/* LEFT COLUMN: Time (top) -> Weekday (middle) -> Date (bottom) */}
-        <div className="flex flex-col gap-2.5 sm:gap-3">
+        <div className="flex flex-col gap-2.5 sm:gap-3 h-full">
           {/* CARD 1: TIME (Top Left) */}
           <DebouncedTouchable
             onPress={handleSpeakTime}
@@ -305,12 +305,12 @@ export const TodayOrientationView: React.FC = () => {
             </div>
           </div>
 
-          {/* CARD 3: DATE (Bottom Left - Underneath Weekday) */}
+          {/* CARD 3: DATE (Bottom Left - Underneath Weekday, Expands to Match Height) */}
           <DebouncedTouchable
             onPress={handleSpeakDate}
             minTouchSize="lg"
             className={`
-              bg-slate-900 border-2 rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group
+              flex-1 bg-slate-900 border-2 rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3.5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group min-h-[92px] sm:min-h-[102px]
               ${
                 isDateActive
                   ? 'border-blue-400 ring-4 ring-blue-400/40 shadow-blue-950/60'
@@ -333,8 +333,8 @@ export const TodayOrientationView: React.FC = () => {
             </div>
 
             {/* Date Display */}
-            <div className="flex items-center gap-3 sm:gap-3.5 my-auto py-0.5 min-w-0">
-              <div className="w-12 h-14 sm:w-14 sm:h-15 rounded-xl bg-slate-100 text-slate-900 flex flex-col items-center overflow-hidden shadow-md border border-slate-300 shrink-0 select-none">
+            <div className="flex items-center gap-3.5 sm:gap-4 my-auto py-1 min-w-0">
+              <div className="w-13 h-15 sm:w-14 sm:h-16 rounded-xl bg-slate-100 text-slate-900 flex flex-col items-center overflow-hidden shadow-md border border-slate-300 shrink-0 select-none">
                 <div className="w-full bg-rose-600 text-white py-0.5 text-center text-[9px] sm:text-[10px] font-black uppercase tracking-wider">
                   {monthShort} · {monthNum}月
                 </div>
