@@ -91,6 +91,7 @@ export const ALL_CROSSING_ANIMATIONS: CrossingAnimationType[] = [
 
 interface QuorraCompanionProps {
   animationType: QuorraAnimationType | null;
+  animationKey?: number | string;
   onComplete?: () => void;
   categoryName?: string;
   categoryNameZh?: string;
@@ -98,6 +99,7 @@ interface QuorraCompanionProps {
 
 export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
   animationType,
+  animationKey,
   onComplete,
   categoryName,
   categoryNameZh,
@@ -105,6 +107,8 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
   const [isPetted, setIsPetted] = useState(false);
   const [petHearts, setPetHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const { playPuppyBark } = useAudio();
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   // Normalize legacy aliases
   const resolvedType = React.useMemo<CornerAnimationType | CrossingAnimationType | null>(() => {
@@ -128,12 +132,12 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       // Crossing animations take 5.0s, corner animations take 3.0s
       const durationMs = isCrossing ? 5200 : 3200;
       const timer = setTimeout(() => {
-        onComplete?.();
+        onCompleteRef.current?.();
       }, durationMs);
 
       return () => clearTimeout(timer);
     }
-  }, [resolvedType, isCrossing, onComplete, playPuppyBark]);
+  }, [resolvedType, animationKey, isCrossing, playPuppyBark]);
 
   // Handle tap-to-pet interaction
   const handlePet = useCallback(
@@ -410,6 +414,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       {isCrossing && (
         <div className="absolute top-0 left-0 right-0 h-16 z-30 pointer-events-none flex items-center overflow-hidden">
           <div
+            key={animationKey ?? resolvedType}
             onClick={handlePet}
             className="relative flex items-center gap-2 cursor-pointer select-none pointer-events-auto hover:scale-105 transition-transform"
             style={{
@@ -721,6 +726,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       {/* ============================================================ */}
       {!isCrossing && (
         <div
+          key={animationKey ?? resolvedType}
           onClick={handlePet}
           className="absolute -bottom-1 left-2 sm:left-6 z-30 cursor-pointer select-none pointer-events-auto group"
           style={{

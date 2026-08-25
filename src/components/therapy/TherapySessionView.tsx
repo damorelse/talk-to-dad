@@ -40,6 +40,7 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
 
   // Quorra Mascot Companion State
   const [quorraAnim, setQuorraAnim] = useState<QuorraAnimationType | null>(null);
+  const [quorraAnimKey, setQuorraAnimKey] = useState<number>(0);
   const [quorraCategory, setQuorraCategory] = useState<{ name: string; nameZh?: string }>({
     name: "Daily Needs",
     nameZh: "日常需求",
@@ -67,6 +68,42 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
 
   const currentItem = allWeeklyCards[cardIndex] || allWeeklyCards[0];
   const currentCard = currentItem?.card;
+  const currentCategoryId = currentItem?.category?.id;
+  const prevCategoryIdRef = React.useRef<string | null>(null);
+
+  // Trigger 5s top crossing animation on category changes
+  const triggerCrossingAnimation = useCallback((name: string, nameZh?: string) => {
+    setQuorraCategory({ name, nameZh });
+    const randomCrossing = ALL_CROSSING_ANIMATIONS[Math.floor(Math.random() * ALL_CROSSING_ANIMATIONS.length)];
+    setQuorraAnim(randomCrossing);
+    setQuorraAnimKey((k) => k + 1);
+  }, []);
+
+  // Milestone animations on multiples of 3 randomly picked from the 25 corner animations
+  const triggerMilestoneAnimation = useCallback(() => {
+    const randomAnim = ALL_CORNER_ANIMATIONS[Math.floor(Math.random() * ALL_CORNER_ANIMATIONS.length)];
+    setQuorraAnim(randomAnim);
+    setQuorraAnimKey((k) => k + 1);
+  }, []);
+
+  const handleCompleteAnimation = useCallback(() => {
+    setQuorraAnim(null);
+  }, []);
+
+  // Synchronize category transitions whenever the active card enters a new category
+  React.useEffect(() => {
+    if (!currentCategoryId) return;
+
+    if (prevCategoryIdRef.current !== null && prevCategoryIdRef.current !== currentCategoryId) {
+      setSelectedCategoryId(currentCategoryId);
+      const cat = categories.find((c) => c.id === currentCategoryId);
+      if (cat) {
+        triggerCrossingAnimation(cat.name, cat.nameZh);
+      }
+    }
+
+    prevCategoryIdRef.current = currentCategoryId;
+  }, [currentCategoryId, categories, triggerCrossingAnimation]);
 
   // Handle jump when user manually taps a category tab at top
   const handleSelectCategory = (catId: string | "favorites") => {
@@ -84,12 +121,11 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
 
     const firstCardIdx = allWeeklyCards.findIndex((item) => item.category.id === catId);
     if (firstCardIdx !== -1) {
+      const isSameCard = cardIndex === firstCardIdx;
       setCardIndex(firstCardIdx);
       const cat = categories.find((c) => c.id === catId);
-      if (cat) {
-        setQuorraCategory({ name: cat.name, nameZh: cat.nameZh });
-        const randomCrossing = ALL_CROSSING_ANIMATIONS[Math.floor(Math.random() * ALL_CROSSING_ANIMATIONS.length)];
-        setQuorraAnim(randomCrossing);
+      if (cat && isSameCard) {
+        triggerCrossingAnimation(cat.name, cat.nameZh);
       }
     }
   };
@@ -104,12 +140,6 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
       speakBilingual(clueText, clueTextZh);
     }
   };
-
-  // Milestone animations on multiples of 3 randomly picked from the 25 corner animations
-  const triggerMilestoneAnimation = useCallback(() => {
-    const randomAnim = ALL_CORNER_ANIMATIONS[Math.floor(Math.random() * ALL_CORNER_ANIMATIONS.length)];
-    setQuorraAnim(randomAnim);
-  }, []);
 
   const handleCorrect = () => {
     // Play 1046Hz success fanfare
@@ -132,18 +162,8 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
 
       // Auto-advance to next card in unified continuous stream
       if (cardIndex < allWeeklyCards.length - 1) {
-        const nextIndex = cardIndex + 1;
-        const nextItem = allWeeklyCards[nextIndex];
-        setCardIndex(nextIndex);
+        setCardIndex((idx) => idx + 1);
         setIsFlipped(false);
-
-        // If crossed into a new category, sync top tab and trigger Quorra 5s crossing animation
-        if (nextItem && currentItem && nextItem.category.id !== currentItem.category.id) {
-          setSelectedCategoryId(nextItem.category.id);
-          setQuorraCategory({ name: nextItem.category.name, nameZh: nextItem.category.nameZh });
-          const randomCrossing = ALL_CROSSING_ANIMATIONS[Math.floor(Math.random() * ALL_CROSSING_ANIMATIONS.length)];
-          setQuorraAnim(randomCrossing);
-        }
       } else {
         // Finished all cards in master deck!
         setIsSessionComplete(true);
@@ -153,18 +173,8 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
 
   const handleNext = () => {
     if (cardIndex < allWeeklyCards.length - 1) {
-      const nextIndex = cardIndex + 1;
-      const nextItem = allWeeklyCards[nextIndex];
-      setCardIndex(nextIndex);
+      setCardIndex((idx) => idx + 1);
       setIsFlipped(false);
-
-      // Category transition sync with 5s non-blocking crossing animation
-      if (nextItem && currentItem && nextItem.category.id !== currentItem.category.id) {
-        setSelectedCategoryId(nextItem.category.id);
-        setQuorraCategory({ name: nextItem.category.name, nameZh: nextItem.category.nameZh });
-        const randomCrossing = ALL_CROSSING_ANIMATIONS[Math.floor(Math.random() * ALL_CROSSING_ANIMATIONS.length)];
-        setQuorraAnim(randomCrossing);
-      }
     } else {
       setIsSessionComplete(true);
     }
@@ -172,14 +182,8 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
 
   const handlePrev = () => {
     if (cardIndex > 0) {
-      const prevIndex = cardIndex - 1;
-      const prevItem = allWeeklyCards[prevIndex];
-      setCardIndex(prevIndex);
+      setCardIndex((idx) => idx - 1);
       setIsFlipped(false);
-
-      if (prevItem && currentItem && prevItem.category.id !== currentItem.category.id) {
-        setSelectedCategoryId(prevItem.category.id);
-      }
     }
   };
 
@@ -191,6 +195,7 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
     setQuorraAnim(null);
     if (allWeeklyCards.length > 0) {
       setSelectedCategoryId(allWeeklyCards[0].category.id);
+      prevCategoryIdRef.current = allWeeklyCards[0].category.id;
     }
   };
 
@@ -225,7 +230,8 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
         {/* Quorra the Golden Retriever Therapy Companion Mascot */}
         <QuorraCompanion
           animationType={quorraAnim}
-          onComplete={() => setQuorraAnim(null)}
+          animationKey={quorraAnimKey}
+          onComplete={handleCompleteAnimation}
           categoryName={quorraCategory.name}
           categoryNameZh={quorraCategory.nameZh}
         />
