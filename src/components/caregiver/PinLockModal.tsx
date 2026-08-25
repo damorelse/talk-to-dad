@@ -93,7 +93,7 @@ export const PinLockModal: React.FC<PinLockModalProps> = ({
       }}
     >
       <div
-        className="w-full max-w-sm bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex flex-col items-center gap-5 shadow-2xl transition-all cursor-default"
+        className="w-full max-w-sm bg-white dark:bg-slate-900 border-2 border-pink-500/40 dark:border-pink-500/40 rounded-3xl p-6 flex flex-col items-center gap-5 shadow-2xl shadow-pink-950/40 transition-all cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Icon */}
@@ -105,8 +105,8 @@ export const PinLockModal: React.FC<PinLockModalProps> = ({
                 isUnlocked
                   ? 'bg-green-500/20 border-green-500 text-green-500 scale-110'
                   : isHolding
-                  ? 'bg-blue-600/20 border-blue-500 text-blue-500 scale-105'
-                  : 'bg-purple-600/20 border-purple-500 text-purple-500'
+                  ? 'bg-pink-600/30 border-pink-500 text-pink-400 scale-105 shadow-lg shadow-pink-900/50'
+                  : 'bg-pink-600/20 border-pink-500 text-pink-500'
               }
             `}
           >
@@ -140,8 +140,8 @@ export const PinLockModal: React.FC<PinLockModalProps> = ({
                 isUnlocked
                   ? 'bg-green-600 border-green-400 text-white font-black'
                   : isHolding
-                  ? 'bg-blue-900/60 border-blue-400 text-white'
-                  : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 border-purple-500/50'
+                  ? 'bg-pink-950/80 border-pink-400 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 border-pink-500/50'
               }
             `}
             aria-label="Press and hold 3 seconds to unlock settings mode"
@@ -150,7 +150,7 @@ export const PinLockModal: React.FC<PinLockModalProps> = ({
             <div
               className={`
                 absolute left-0 top-0 bottom-0 transition-all ease-linear
-                ${isUnlocked ? 'bg-green-500' : 'bg-blue-600/80'}
+                ${isUnlocked ? 'bg-green-500' : 'bg-pink-600/80'}
               `}
               style={{ width: `${holdProgress}%` }}
             />
@@ -164,17 +164,17 @@ export const PinLockModal: React.FC<PinLockModalProps> = ({
                 </div>
               ) : isHolding ? (
                 <>
-                  <span className="text-sm font-black uppercase tracking-wider text-blue-100 drop-shadow">
+                  <span className="text-sm font-black uppercase tracking-wider text-pink-100 drop-shadow">
                     Hold for {remainingSeconds} SECONDS...
                   </span>
-                  <span className="text-xs font-bold text-blue-200">
+                  <span className="text-xs font-bold text-pink-200">
                     {Math.round(holdProgress)}% complete
                   </span>
                 </>
               ) : (
                 <>
                   <div className="flex items-center gap-1.5">
-                    <Lock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <Lock className="w-4 h-4 text-pink-600 dark:text-pink-400" />
                     <span className="text-sm font-black uppercase tracking-wider">
                       Hold 3 SECONDS to Unlock
                     </span>

@@ -145,9 +145,9 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
   return (
     <div className="w-full h-full flex flex-col gap-2.5 overflow-hidden select-none bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-2 sm:p-3 transition-colors">
       {/* Top Header & Lock Button */}
-      <div className="w-full bg-white dark:bg-slate-900 border-2 border-purple-500/50 rounded-2xl p-3 flex items-center justify-between shadow-xl shrink-0">
+      <div className="w-full bg-white dark:bg-slate-900 border-2 border-pink-500/40 rounded-2xl p-3 flex items-center justify-between shadow-xl shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-600/30 border border-purple-400 flex items-center justify-center text-purple-600 dark:text-purple-300 font-bold">
+          <div className="w-10 h-10 rounded-xl bg-pink-600/20 border border-pink-400 flex items-center justify-center text-pink-600 dark:text-pink-400 font-bold text-lg">
             🔒
           </div>
           <div>
@@ -158,7 +158,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
         <DebouncedTouchable
           onPress={onCloseCaregiverMode}
           minTouchSize="md"
-          className="bg-purple-600 hover:bg-purple-500 active:bg-purple-700 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-md shadow-purple-900/40 text-xs sm:text-sm"
+          className="bg-pink-600 hover:bg-pink-500 active:bg-pink-700 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-md shadow-pink-900/40 text-xs sm:text-sm border border-pink-400/30 cursor-pointer"
         >
           <Lock className="w-4 h-4" />
           <span>Lock Settings</span>
@@ -175,10 +175,10 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
               onPress={() => setActiveTab(tab.id)}
               minTouchSize="sm"
               className={`
-                px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap border-2 transition-all
+                px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 whitespace-nowrap border-2 transition-all cursor-pointer
                 ${
                   isActive
-                    ? 'bg-blue-600 text-white border-blue-400 shadow-md'
+                    ? 'bg-pink-600 text-white border-pink-400 shadow-md shadow-pink-900/30 font-black'
                     : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }
               `}
@@ -194,9 +194,10 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
       <div className="flex-1 w-full overflow-y-auto p-1 scrollbar-thin">
         {/* --- SETTINGS TAB --- */}
         {activeTab === 'settings' && (
-          <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-3xl p-5 shadow-xl">
-            <h2 className="text-lg font-black text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2">
-              Settings
+          <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 bg-white dark:bg-slate-900 border-2 border-pink-500/30 dark:border-pink-500/30 rounded-3xl p-5 shadow-xl shadow-pink-950/20">
+            <h2 className="text-lg font-black text-slate-900 dark:text-white border-b border-pink-500/20 dark:border-pink-500/20 pb-2 flex items-center gap-2">
+              <span className="text-pink-500">⚙️</span>
+              <span>Settings</span>
             </h2>
 
             {/* 1. Theme Selector (Dark & Light) */}
@@ -591,7 +592,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
                   setIsCardModalOpen(true);
                 }}
                 minTouchSize="sm"
-                className="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5"
+                className="bg-pink-600 hover:bg-pink-500 active:bg-pink-700 text-white px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md shadow-pink-900/30 border border-pink-400/30 cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Add New Card</span>

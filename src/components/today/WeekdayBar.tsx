@@ -29,7 +29,7 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
             debounceMs={debounceMs}
             minTouchSize="md"
             className={`
-              relative flex flex-col items-center justify-between min-h-[72px] sm:min-h-[82px] py-2 px-1 sm:px-2 rounded-2xl border-2 transition-all duration-200 cursor-pointer
+              relative flex flex-col items-center justify-between min-h-[54px] sm:min-h-[62px] py-1.5 px-0.5 sm:px-1.5 rounded-2xl border-2 transition-all duration-200 cursor-pointer
               ${
                 isGlowSpeaking
                   ? 'bg-amber-500/40 border-amber-300 ring-4 ring-amber-300 scale-105 shadow-xl brightness-125 z-20 animate-pulse'
@@ -44,7 +44,7 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
             {/* Today Badge */}
             {isToday && (
               <div className="absolute -top-2.5 inset-x-0 flex items-center justify-center pointer-events-none">
-                <span className="bg-amber-400 text-slate-950 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow">
+                <span className="bg-amber-400 text-slate-950 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-full shadow">
                   Today
                 </span>
               </div>
@@ -53,7 +53,7 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
             {/* Day Short Name in English */}
             <span
               className={`
-                text-[11px] sm:text-xs font-black uppercase tracking-tight
+                text-[10px] sm:text-[11px] font-black uppercase tracking-tight
                 ${isToday ? 'text-amber-300 pt-0.5' : 'text-slate-400'}
               `}
             >
@@ -63,7 +63,7 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
             {/* Day Number (Day of Month) */}
             <span
               className={`
-                text-base sm:text-xl font-black leading-none font-mono
+                text-sm sm:text-base font-black leading-none font-mono
                 ${isToday ? 'text-white scale-110 drop-shadow' : 'text-slate-200'}
               `}
             >
@@ -73,7 +73,7 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
             {/* Day Name in Traditional Chinese */}
             <span
               className={`
-                text-[11px] sm:text-xs font-extrabold
+                text-[10px] sm:text-[11px] font-extrabold
                 ${isToday ? 'text-amber-200 font-black' : 'text-slate-400'}
               `}
             >
