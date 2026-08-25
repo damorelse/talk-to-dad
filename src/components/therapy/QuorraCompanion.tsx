@@ -411,11 +411,25 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
         <div className="absolute top-0 left-0 right-0 h-16 z-30 pointer-events-none flex items-center overflow-hidden">
           <div
             onClick={handlePet}
-            className="flex items-center gap-2 cursor-pointer select-none pointer-events-auto hover:scale-105 transition-transform"
+            className="relative flex items-center gap-2 cursor-pointer select-none pointer-events-auto hover:scale-105 transition-transform"
             style={{
               animation: "quorraCross5s 5s cubic-bezier(0.25, 1, 0.5, 1) forwards",
             }}
           >
+            {/* Tap-to-Pet Floating Hearts */}
+            {petHearts.map((h) => (
+              <span
+                key={h.id}
+                className="absolute text-xl pointer-events-none animate-ping z-20"
+                style={{
+                  left: "24px",
+                  top: "10px",
+                  transform: `translate(calc(-50% + ${h.x}px), ${h.y}px)`,
+                }}
+              >
+                💖
+              </span>
+            ))}
             {/* Custom Crossing SVG by Type */}
             {resolvedType === "cross-skateboard" ? (
               <div className="relative w-16 h-16 shrink-0 drop-shadow-md">
@@ -708,78 +722,87 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       {!isCrossing && (
         <div
           onClick={handlePet}
-          className="absolute -bottom-1 left-2 sm:left-6 z-30 cursor-pointer select-none flex flex-col items-center pointer-events-auto group"
+          className="absolute -bottom-1 left-2 sm:left-6 z-30 cursor-pointer select-none pointer-events-auto group"
           style={{
             animation: "quorraCornerPeekLeft 3.0s ease-in-out forwards",
           }}
         >
-          {/* Tap-to-Pet Floating Hearts */}
-          {petHearts.map((h) => (
-            <span
-              key={h.id}
-              className="absolute text-xl pointer-events-none animate-ping"
-              style={{ transform: `translate(${h.x}px, ${h.y}px)` }}
-            >
-              💖
-            </span>
-          ))}
+          {/* Main Dog Container with fixed width/height so base position never shifts */}
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+            {/* Speech Bubble Pill - Centered directly above the dog without affecting the dog's horizontal base position */}
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 pointer-events-none whitespace-nowrap z-10">
+              <div className="bg-amber-400 text-slate-950 px-3 py-1 rounded-xl text-xs font-black shadow-lg border-2 border-white flex items-center gap-1 animate-bounce">
+                <span>🐾</span>
+                <span>{getCornerBubbleText()}</span>
+              </div>
+            </div>
 
-          {/* Speech Bubble Pill */}
-          <div className="bg-amber-400 text-slate-950 px-3 py-1 rounded-xl text-xs font-black shadow-lg border-2 border-white mb-1 flex items-center gap-1 animate-bounce">
-            <span>🐾</span>
-            <span>{getCornerBubbleText()}</span>
-          </div>
+            {/* Tap-to-Pet Floating Hearts */}
+            {petHearts.map((h) => (
+              <span
+                key={h.id}
+                className="absolute text-xl pointer-events-none animate-ping z-20"
+                style={{
+                  left: "50%",
+                  top: "20%",
+                  transform: `translate(calc(-50% + ${h.x}px), ${h.y}px)`,
+                }}
+              >
+                💖
+              </span>
+            ))}
 
-          {/* Golden Retriever Base SVG in Bottom-Left */}
-          <div className="relative w-20 h-20 sm:w-24 sm:h-24 filter drop-shadow-2xl">
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <defs>
-                <linearGradient id="goldFurLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#fbbf24" /><stop offset="100%" stopColor="#d97706" />
-                </linearGradient>
-                <linearGradient id="earFurLeft" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#d97706" /><stop offset="100%" stopColor="#b45309" />
-                </linearGradient>
-              </defs>
+            {/* Golden Retriever Base SVG in Bottom-Left */}
+            <div className="w-full h-full filter drop-shadow-2xl">
+              <svg viewBox="0 0 100 100" className="w-full h-full">
+                <defs>
+                  <linearGradient id="goldFurLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fbbf24" /><stop offset="100%" stopColor="#d97706" />
+                  </linearGradient>
+                  <linearGradient id="earFurLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#d97706" /><stop offset="100%" stopColor="#b45309" />
+                  </linearGradient>
+                </defs>
 
-              {/* Wagging Tail at Right for left-corner balance */}
-              <path
-                d="M 82 60 Q 96 45 88 32 Q 78 42 81 60 Z"
-                fill="url(#goldFurLeft)"
-                className="animate-spin origin-bottom-left opacity-90"
-                style={{ animationDuration: "0.6s" }}
-              />
+                {/* Wagging Tail at Right for left-corner balance */}
+                <path
+                  d="M 82 60 Q 96 45 88 32 Q 78 42 81 60 Z"
+                  fill="url(#goldFurLeft)"
+                  className="animate-spin origin-bottom-left opacity-90"
+                  style={{ animationDuration: "0.6s" }}
+                />
 
-              {/* Head */}
-              <circle cx="50" cy="46" r="28" fill="url(#goldFurLeft)" />
+                {/* Head */}
+                <circle cx="50" cy="46" r="28" fill="url(#goldFurLeft)" />
 
-              {/* Floppy Golden Ears */}
-              <path d="M 28 32 Q 16 52 24 66 Q 36 62 34 38 Z" fill="url(#earFurLeft)" />
-              <path d="M 72 32 Q 84 52 76 66 Q 64 62 66 38 Z" fill="url(#earFurLeft)" />
+                {/* Floppy Golden Ears */}
+                <path d="M 28 32 Q 16 52 24 66 Q 36 62 34 38 Z" fill="url(#earFurLeft)" />
+                <path d="M 72 32 Q 84 52 76 66 Q 64 62 66 38 Z" fill="url(#earFurLeft)" />
 
-              {/* White Muzzle & Nose */}
-              <ellipse cx="50" cy="54" rx="13" ry="10" fill="#fef3c7" />
-              <polygon points="50,50 44,45 56,45" fill="#0f172a" />
-              <path d="M 50 50 Q 50 58 46 60 M 50 50 Q 50 58 54 60" stroke="#0f172a" strokeWidth="1.8" fill="none" />
-              <path d="M 47 58 Q 50 67 53 58 Z" fill="#f43f5e" />
+                {/* White Muzzle & Nose */}
+                <ellipse cx="50" cy="54" rx="13" ry="10" fill="#fef3c7" />
+                <polygon points="50,50 44,45 56,45" fill="#0f172a" />
+                <path d="M 50 50 Q 50 58 46 60 M 50 50 Q 50 58 54 60" stroke="#0f172a" strokeWidth="1.8" fill="none" />
+                <path d="M 47 58 Q 50 67 53 58 Z" fill="#f43f5e" />
 
-              {/* Cute Shiny Eyes */}
-              <circle cx="39" cy="42" r="4.2" fill="#0f172a" />
-              <circle cx="37.5" cy="40.5" r="1.6" fill="#ffffff" />
-              <circle cx="61" cy="42" r="4.2" fill="#0f172a" />
-              <circle cx="59.5" cy="40.5" r="1.6" fill="#ffffff" />
+                {/* Cute Shiny Eyes */}
+                <circle cx="39" cy="42" r="4.2" fill="#0f172a" />
+                <circle cx="37.5" cy="40.5" r="1.6" fill="#ffffff" />
+                <circle cx="61" cy="42" r="4.2" fill="#0f172a" />
+                <circle cx="59.5" cy="40.5" r="1.6" fill="#ffffff" />
 
-              {/* Red Collar with Golden Tag */}
-              <path d="M 32 72 Q 50 78 68 72" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" fill="none" />
-              <circle cx="50" cy="76" r="3" fill="#facc15" />
+                {/* Red Collar with Golden Tag */}
+                <path d="M 32 72 Q 50 78 68 72" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" fill="none" />
+                <circle cx="50" cy="76" r="3" fill="#facc15" />
 
-              {/* Front Paws */}
-              <ellipse cx="30" cy="84" rx="8" ry="6" fill="#d97706" />
-              <ellipse cx="70" cy="84" rx="8" ry="6" fill="#d97706" />
+                {/* Front Paws */}
+                <ellipse cx="30" cy="84" rx="8" ry="6" fill="#d97706" />
+                <ellipse cx="70" cy="84" rx="8" ry="6" fill="#d97706" />
 
-              {/* Unique Accessory Layer for active animation */}
-              {renderCornerAccessory()}
-            </svg>
+                {/* Unique Accessory Layer for active animation */}
+                {renderCornerAccessory()}
+              </svg>
+            </div>
           </div>
         </div>
       )}
