@@ -258,7 +258,6 @@ export function formatWeekdaySpeech(date) {
  * Format English & Traditional Chinese speech for the Date
  */
 export function formatDateSpeech(date) {
-    const day = WEEKDAYS[date.getDay()];
     const monthsEn = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December',
@@ -268,8 +267,8 @@ export function formatDateSpeech(date) {
     const dayNum = date.getDate();
     const year = date.getFullYear();
     return {
-        en: `Today is ${day.name}, ${monthEn} ${dayNum}, ${year}.`,
-        zh: `今天是 ${year} 年 ${monthNum} 月 ${dayNum} 日，${day.nameZh}。`,
+        en: `Today is ${monthEn} ${dayNum}, ${year}.`,
+        zh: `今天是 ${year} 年 ${monthNum} 月 ${dayNum} 日。`,
     };
 }
 /**
@@ -314,10 +313,18 @@ export function formatLocationSpeech(loc) {
  * Format the Full Orientation Composite Speech
  */
 export function formatFullOrientationSpeech(date, loc) {
-    const dateSpeech = formatDateSpeech(date);
+    const day = WEEKDAYS[date.getDay()];
+    const monthsEn = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    const monthEn = monthsEn[date.getMonth()];
+    const monthNum = date.getMonth() + 1;
+    const dayNum = date.getDate();
+    const year = date.getFullYear();
     const timeSpeech = formatTimeSpeech(date);
     const locSpeech = formatLocationSpeech(loc);
-    const en = `${dateSpeech.en} ${timeSpeech.en} ${locSpeech.en}`;
-    const zh = `${dateSpeech.zh} ${timeSpeech.zh} ${locSpeech.zh}`;
+    const en = `Today is ${day.name}, ${monthEn} ${dayNum}, ${year}. ${timeSpeech.en} ${locSpeech.en}`;
+    const zh = `今天是 ${year} 年 ${monthNum} 月 ${dayNum} 日，${day.nameZh}。${timeSpeech.zh} ${locSpeech.zh}`;
     return { en, zh };
 }

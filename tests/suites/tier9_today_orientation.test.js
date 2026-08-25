@@ -82,11 +82,13 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
   });
 
   describe('3. Calendar Date Speech', () => {
-    it('should format full date bilingually', () => {
+    it('should format calendar date bilingually without weekday', () => {
       const d = new Date(2026, 7, 25); // August 25, 2026
       const speech = formatDateSpeech(d);
-      assert.equal(speech.en, 'Today is Tuesday, August 25, 2026.');
-      assert.equal(speech.zh, '今天是 2026 年 8 月 25 日，星期二。');
+      assert.equal(speech.en, 'Today is August 25, 2026.');
+      assert.equal(speech.zh, '今天是 2026 年 8 月 25 日。');
+      assert.equal(speech.en.includes('Tuesday'), false);
+      assert.equal(speech.zh.includes('星期'), false);
     });
   });
 
