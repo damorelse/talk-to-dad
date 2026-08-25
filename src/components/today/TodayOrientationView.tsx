@@ -22,7 +22,7 @@ import {
   Calendar,
   Clock,
   RefreshCw,
-  Compass,
+  MapPin,
   VolumeX,
 } from 'lucide-react';
 
@@ -388,8 +388,8 @@ export const TodayOrientationView: React.FC = () => {
               bg-slate-900 border-2 rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 flex flex-col justify-between gap-2 shadow-lg h-full transition-all duration-200 cursor-pointer group
               ${
                 isLocationActive
-                  ? 'border-purple-400 ring-4 ring-purple-400/40 shadow-purple-950/60'
-                  : 'border-slate-800 hover:border-purple-500/60'
+                  ? 'border-rose-400 ring-4 ring-rose-400/40 shadow-rose-950/60'
+                  : 'border-slate-800 hover:border-rose-500/60'
               }
             `}
             role="button"
@@ -405,7 +405,7 @@ export const TodayOrientationView: React.FC = () => {
             {/* Card Header */}
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
-                <Compass className="w-4 h-4 text-purple-400" />
+                <MapPin className="w-4 h-4 text-rose-400" />
                 <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">
                   Location · 所在位置
                 </span>
@@ -418,14 +418,14 @@ export const TodayOrientationView: React.FC = () => {
                     refreshLocation();
                   }}
                   disabled={isLocating}
-                  className="p-1 text-slate-400 hover:text-purple-300 transition-colors disabled:opacity-50 cursor-pointer"
+                  className="p-1 text-slate-400 hover:text-rose-300 transition-colors disabled:opacity-50 cursor-pointer"
                   aria-label="Refresh location"
                   title="Refresh GPS"
                 >
-                  <RefreshCw className={`w-4 h-4 ${isLocating ? 'animate-spin text-purple-400' : ''}`} />
+                  <RefreshCw className={`w-4 h-4 ${isLocating ? 'animate-spin text-rose-400' : ''}`} />
                 </button>
                 <div
-                  className="text-purple-400 group-hover:text-white transition-colors p-0.5"
+                  className="text-rose-400 group-hover:text-white transition-colors p-0.5"
                   aria-hidden="true"
                 >
                   <Volume2 className="w-4 h-4" />

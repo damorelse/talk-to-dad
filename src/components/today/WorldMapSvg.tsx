@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserLocationInfo } from '../../types';
 import { getCountryFlag } from '../../services/location/locationService';
-import { Volume2 } from 'lucide-react';
+import { Volume2, MapPin } from 'lucide-react';
 
 interface WorldMapSvgProps {
   location: UserLocationInfo;
@@ -27,6 +27,14 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
 
   const flag = getCountryFlag(location.country);
 
+  // On-map floating label calculations
+  const cityLabel = location.city || location.country || 'You Are Here';
+  const pillWidth = Math.max(90, Math.min(180, cityLabel.length * 8.5 + 30));
+  const calloutX = Math.max(pillWidth / 2 + 12, Math.min(1000 - pillWidth / 2 - 12, pinX));
+  const isNearTop = pinY < 80;
+  const calloutY = isNearTop ? pinY + 54 : pinY - 48;
+  const pointerOffset = Math.max(-pillWidth / 2 + 12, Math.min(pillWidth / 2 - 12, pinX - calloutX));
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.key === 'Enter' || e.key === ' ') && onSelectLocation) {
       e.preventDefault();
@@ -42,8 +50,8 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
         relative w-full h-full min-h-[160px] sm:min-h-[200px] flex flex-col justify-between bg-slate-950 rounded-2xl border px-2 sm:px-3 py-1 sm:py-1.5 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-300
         ${
           isSpeakingLocation
-            ? 'border-purple-400 ring-4 ring-purple-400/50 shadow-2xl shadow-purple-950/60 scale-[1.01]'
-            : 'border-slate-800 hover:border-purple-500/60'
+            ? 'border-rose-400 ring-4 ring-rose-400/50 shadow-2xl shadow-rose-950/60 scale-[1.01]'
+            : 'border-slate-800 hover:border-rose-500/60'
         }
       `}
       role="button"
@@ -67,12 +75,23 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             <stop offset="100%" stopColor="#1e293b" />
           </linearGradient>
 
+          {/* High-Contrast Vibrant Red Pin Gradient */}
+          <linearGradient id="redPinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#f87171" />
+            <stop offset="40%" stopColor="#ef4444" />
+            <stop offset="100%" stopColor="#b91c1c" />
+          </linearGradient>
+
           <filter id="pinGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
+          </filter>
+
+          <filter id="pinShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#000000" floodOpacity="0.6" />
           </filter>
         </defs>
 
@@ -154,44 +173,116 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           " />
         </g>
 
-        {/* User Location Beacon & Ripple Effect */}
-        <g filter="url(#pinGlow)">
-          {/* Animated Expanding Ripple 1 */}
+        {/* User Location: Prominent Red Pin & Concentric Radar Ripples */}
+        <g transform={`translate(${pinX}, ${pinY})`} filter="url(#pinShadow)">
+          {/* Animated Expanding Sonar Ripple 1 */}
           <circle
-            cx={pinX}
-            cy={pinY}
-            r="16"
+            cx="0"
+            cy="0"
+            r="28"
             fill="none"
-            stroke="#c084fc"
-            strokeWidth="2"
+            stroke="#ef4444"
+            strokeWidth="2.5"
             className="animate-ping origin-center opacity-75"
-            style={{ animationDuration: '2.5s' }}
+            style={{ animationDuration: '2s' }}
           />
 
-          {/* Animated Expanding Ripple 2 */}
+          {/* Animated Pulsing Sonar Ripple 2 */}
           <circle
-            cx={pinX}
-            cy={pinY}
-            r="9"
-            fill="#9333ea"
-            className="opacity-60"
+            cx="0"
+            cy="0"
+            r="16"
+            fill="#ef4444"
+            className="animate-pulse opacity-30"
           />
 
-          {/* Center Target Core */}
-          <circle
-            cx={pinX}
-            cy={pinY}
-            r="5"
-            fill="#facc15"
+          {/* Base Ground Contact Shadow */}
+          <ellipse cx="0" cy="1" rx="10" ry="3.5" fill="#000000" opacity="0.5" />
+
+          {/* Classic 3D Red Location Pin Teardrop */}
+          <path
+            d="M 0 0 C -3 -6, -14 -16, -14 -28 A 14 14 0 1 1 14 -28 C 14 -16, 3 -6, 0 0 Z"
+            fill="url(#redPinGrad)"
             stroke="#ffffff"
-            strokeWidth="1.5"
+            strokeWidth="2"
+            strokeLinejoin="round"
+            className="transition-transform duration-200 hover:scale-110 origin-bottom"
           />
+
+          {/* Glossy Top 3D Reflection */}
+          <ellipse
+            cx="-3"
+            cy="-34"
+            rx="4"
+            ry="2"
+            fill="#ffffff"
+            opacity="0.6"
+            transform="rotate(-30, -3, -34)"
+            pointerEvents="none"
+          />
+
+          {/* Inner White Core Dot */}
+          <circle cx="0" cy="-28" r="5.5" fill="#ffffff" pointerEvents="none" />
+          <circle cx="0" cy="-28" r="2.5" fill="#dc2626" pointerEvents="none" />
+
+          {/* Ground Contact Dot */}
+          <circle cx="0" cy="0" r="3.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
+        </g>
+
+        {/* On-Map Floating Location Name Callout */}
+        <g transform={`translate(${calloutX}, ${calloutY})`}>
+          {/* Callout Pointer Triangle */}
+          {!isNearTop ? (
+            <polygon
+              points={`${pointerOffset},2 ${pointerOffset - 5},-3 ${pointerOffset + 5},-3`}
+              fill="#ef4444"
+              stroke="#ffffff"
+              strokeWidth="1.5"
+            />
+          ) : (
+            <polygon
+              points={`${pointerOffset},-26 ${pointerOffset - 5},-21 ${pointerOffset + 5},-21`}
+              fill="#ef4444"
+              stroke="#ffffff"
+              strokeWidth="1.5"
+            />
+          )}
+
+          {/* Callout Pill */}
+          <rect
+            x={-pillWidth / 2}
+            y="-24"
+            width={pillWidth}
+            height="22"
+            rx="11"
+            fill="#ef4444"
+            stroke="#ffffff"
+            strokeWidth="2"
+            filter="url(#pinGlow)"
+          />
+
+          {/* Callout Text */}
+          <text
+            x="0"
+            y="-9"
+            textAnchor="middle"
+            fill="#ffffff"
+            fontSize="11"
+            fontWeight="900"
+            letterSpacing="0.4"
+            pointerEvents="none"
+          >
+            {cityLabel}
+          </text>
         </g>
       </svg>
 
-      {/* Clean Floating Badge Over Map */}
-      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center justify-between shadow-lg text-white">
+      {/* Clean Floating Badge Over Map with Red Pin Accent */}
+      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-rose-500/30 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center justify-between shadow-xl text-white">
         <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center shrink-0 shadow-inner">
+            <MapPin className="w-5 h-5 text-rose-400 fill-rose-500/20" />
+          </div>
           <span className="text-xl sm:text-2xl shrink-0 drop-shadow">
             {flag}
           </span>
@@ -199,13 +290,13 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             <span className="text-xs sm:text-sm md:text-base font-black text-white truncate">
               {location.city}{location.state ? `, ${location.state}` : ''}, {location.country}
             </span>
-            <span className="text-[11px] sm:text-xs font-bold text-purple-300 truncate">
+            <span className="text-[11px] sm:text-xs font-bold text-rose-300 truncate">
               {location.countryZh}{location.stateZh ? location.stateZh : ''}{location.cityZh ? location.cityZh : ''}
             </span>
           </div>
         </div>
 
-        <div className="shrink-0 ml-1.5 text-purple-300 group-hover:text-white transition-colors">
+        <div className="shrink-0 ml-1.5 text-rose-300 group-hover:text-white transition-colors">
           <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
       </div>
