@@ -66,21 +66,22 @@ export const BodyMapSvg: React.FC<BodyMapSvgProps> = ({
               className="cursor-pointer transition-colors duration-150 hover:brightness-125"
               onClick={() => onSelectRegion('face')}
             />
+            {/* Top Face Label (Forehead) */}
+            <text x="150" y="29" textAnchor="middle" fill="#f8fafc" fontSize="11" fontWeight="bold" pointerEvents="none">
+              Face
+            </text>
             {/* Eyes */}
-            <circle cx="138" cy="38" r="2.5" fill="#f8fafc" pointerEvents="none" />
-            <circle cx="162" cy="38" r="2.5" fill="#f8fafc" pointerEvents="none" />
+            <circle cx="138" cy="44" r="2.5" fill="#f8fafc" pointerEvents="none" />
+            <circle cx="162" cy="44" r="2.5" fill="#f8fafc" pointerEvents="none" />
             {/* Smile / Mouth */}
             <path
-              d="M 139 48 Q 150 56 161 48"
+              d="M 139 54 Q 150 62 161 54"
               fill="none"
               stroke="#f8fafc"
               strokeWidth="2.5"
               strokeLinecap="round"
               pointerEvents="none"
             />
-            <text x="150" y="66" textAnchor="middle" fill="#f8fafc" fontSize="11" fontWeight="bold" pointerEvents="none">
-              Face
-            </text>
           </>
         ) : (
           <>
