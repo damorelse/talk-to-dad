@@ -30,6 +30,14 @@ export class AudioService {
   }
 
   /**
+   * Plays cheerful puppy bark for Quorra mascot animations.
+   */
+  playPuppyBark(): void {
+    iosAudioUnlock.ensureUnlockedAndResumed();
+    toneEngine.playPuppyBark();
+  }
+
+  /**
    * Stops all active audio outputs (speech synthesis, recorded audio, etc.).
    */
   stopAll(): void {

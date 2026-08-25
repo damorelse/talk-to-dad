@@ -251,6 +251,10 @@ export function useAudio() {
     audioService.playError();
   }, []);
 
+  const playPuppyBark = useCallback(() => {
+    audioService.playPuppyBark();
+  }, []);
+
   const stopAll = useCallback(() => {
     audioService.stopAll();
     setIsSpeaking(false);
@@ -267,6 +271,7 @@ export function useAudio() {
     playSuccess,
     playAlert,
     playError,
+    playPuppyBark,
     stopAll,
   };
 }
