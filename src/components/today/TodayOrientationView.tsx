@@ -197,7 +197,7 @@ export const TodayOrientationView: React.FC = () => {
 
       {/* 2. 2-COLUMN LAYOUT: Left (Time, Date, Weekday) | Right (Location with Big Map) */}
       <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3.5 min-h-0">
-        {/* LEFT COLUMN: Time (top) -> Date (middle) -> Weekday (bottom) */}
+        {/* LEFT COLUMN: Time (top) -> Weekday (middle) -> Date (bottom) */}
         <div className="flex flex-col gap-3.5">
           {/* CARD 1: TIME (Top Left) */}
           <DebouncedTouchable
@@ -242,7 +242,55 @@ export const TodayOrientationView: React.FC = () => {
             </div>
           </DebouncedTouchable>
 
-          {/* CARD 2: DATE (Middle Left - Underneath Time) */}
+          {/* CARD 2: WEEKDAY & 7-DAY STRIP (Middle Left - Underneath Time) */}
+          <div
+            onClick={() => handleSpeakWeekday()}
+            className={`
+              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg gap-3 transition-all duration-200 cursor-pointer group
+              ${
+                isWeekdayActive
+                  ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
+                  : 'border-slate-800 hover:border-amber-500/60'
+              }
+            `}
+            role="button"
+            tabIndex={0}
+            aria-label={`Current weekday: ${currentWeekday.name}, ${currentWeekday.nameZh}. Tap to hear.`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSpeakWeekday();
+              }
+            }}
+          >
+            {/* Card Header */}
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-amber-400" />
+                <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">
+                  Weekday · 星期
+                </span>
+              </div>
+              <div className="text-sm sm:text-base font-black text-amber-300 group-hover:text-amber-200 flex items-center gap-1.5 transition-colors">
+                <span>{currentWeekday.name} ({currentWeekday.nameZh})</span>
+                <Volume2 className="w-4 h-4 text-amber-400 group-hover:text-white transition-colors" />
+              </div>
+            </div>
+
+            {/* Visual 7-Day Weekday Tracker */}
+            <div
+              className="my-auto py-1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <WeekdayBar
+                currentDate={currentDate}
+                onSelectDay={(day, isToday) => handleSpeakWeekday(day, isToday)}
+                activeGlowDayIndex={isWeekdayActive ? currentWeekday.index : null}
+              />
+            </div>
+          </div>
+
+          {/* CARD 3: DATE (Bottom Left - Underneath Weekday) */}
           <DebouncedTouchable
             onPress={handleSpeakDate}
             minTouchSize="lg"
@@ -295,54 +343,6 @@ export const TodayOrientationView: React.FC = () => {
               </div>
             </div>
           </DebouncedTouchable>
-
-          {/* CARD 3: WEEKDAY & 7-DAY STRIP (Bottom Left) */}
-          <div
-            onClick={() => handleSpeakWeekday()}
-            className={`
-              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg gap-3 transition-all duration-200 cursor-pointer group
-              ${
-                isWeekdayActive
-                  ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
-                  : 'border-slate-800 hover:border-amber-500/60'
-              }
-            `}
-            role="button"
-            tabIndex={0}
-            aria-label={`Current weekday: ${currentWeekday.name}, ${currentWeekday.nameZh}. Tap to hear.`}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleSpeakWeekday();
-              }
-            }}
-          >
-            {/* Card Header */}
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-5 h-5 text-amber-400" />
-                <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">
-                  Weekday · 星期
-                </span>
-              </div>
-              <div className="text-sm sm:text-base font-black text-amber-300 group-hover:text-amber-200 flex items-center gap-1.5 transition-colors">
-                <span>{currentWeekday.name} ({currentWeekday.nameZh})</span>
-                <Volume2 className="w-4 h-4 text-amber-400 group-hover:text-white transition-colors" />
-              </div>
-            </div>
-
-            {/* Visual 7-Day Weekday Tracker */}
-            <div
-              className="my-auto py-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <WeekdayBar
-                currentDate={currentDate}
-                onSelectDay={(day, isToday) => handleSpeakWeekday(day, isToday)}
-                activeGlowDayIndex={isWeekdayActive ? currentWeekday.index : null}
-              />
-            </div>
-          </div>
         </div>
 
         {/* RIGHT COLUMN: LOCATION & BIG WORLD MAP */}

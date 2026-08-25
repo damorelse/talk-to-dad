@@ -311,14 +311,14 @@ export function formatLocationSpeech(loc) {
 }
 /**
  * Format the Full Orientation Composite Speech
- * Order: Time -> Date -> Weekday -> Location
+ * Order: Time -> Weekday -> Date -> Location
  */
 export function formatFullOrientationSpeech(date, loc) {
     const timeSpeech = formatTimeSpeech(date);
-    const dateSpeech = formatDateSpeech(date);
     const weekdaySpeech = formatWeekdaySpeech(date);
+    const dateSpeech = formatDateSpeech(date);
     const locSpeech = formatLocationSpeech(loc);
-    const en = `${timeSpeech.en} ${dateSpeech.en} ${weekdaySpeech.en} ${locSpeech.en}`;
-    const zh = `${timeSpeech.zh} ${dateSpeech.zh} ${weekdaySpeech.zh} ${locSpeech.zh}`;
+    const en = `${timeSpeech.en} ${weekdaySpeech.en} ${dateSpeech.en} ${locSpeech.en}`;
+    const zh = `${timeSpeech.zh} ${weekdaySpeech.zh} ${dateSpeech.zh} ${locSpeech.zh}`;
     return { en, zh };
 }
