@@ -346,28 +346,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
               </div>
             </div>
 
-            {/* 3. Anti-Tremor Tap Debounce */}
-            <div className="flex flex-col gap-2 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                  Tap Debounce: <strong className="text-amber-600 dark:text-amber-400">{settings.tapDebounceMs} ms</strong>
-                </label>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
-                  Default: 300 ms
-                </span>
-              </div>
-              <input
-                type="range"
-                min="200"
-                max="500"
-                step="50"
-                value={settings.tapDebounceMs}
-                onChange={(e) => updateSettings({ tapDebounceMs: Number(e.target.value) })}
-                className="accent-amber-500 w-full cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
-              />
-            </div>
-
-            {/* 4. Speech Rate & Voice Settings */}
+            {/* 3. Speech Rate & Voice Settings */}
             <div className="flex flex-col gap-3.5 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
               {/* Speech Rate Section */}
               <div className="flex flex-col gap-2">
@@ -542,7 +521,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
               </div>
             </div>
 
-            {/* 5. Google Sheet Auto-Sync on Startup */}
+            {/* 4. Google Sheet Auto-Sync on Startup */}
             <div className="flex flex-col gap-2.5 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
@@ -576,6 +555,27 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
                   </p>
                 )}
               </div>
+            </div>
+
+            {/* 5. Anti-Tremor Tap Debounce */}
+            <div className="flex flex-col gap-2 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                  Tap Debounce: <strong className="text-amber-600 dark:text-amber-400">{settings.tapDebounceMs} ms</strong>
+                </label>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
+                  Default: 300 ms
+                </span>
+              </div>
+              <input
+                type="range"
+                min="200"
+                max="500"
+                step="50"
+                value={settings.tapDebounceMs}
+                onChange={(e) => updateSettings({ tapDebounceMs: Number(e.target.value) })}
+                className="accent-amber-500 w-full cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
+              />
             </div>
           </div>
         )}
