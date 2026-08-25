@@ -131,7 +131,7 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
   });
 
   describe('5. Full Composite Orientation Statement', () => {
-    it('should generate complete bilingual orientation sentence', () => {
+    it('should generate complete bilingual orientation sentence in Time -> Date -> Weekday -> Location sequence', () => {
       const d = new Date(2026, 7, 25, 14, 15, 0);
       const loc = {
         city: 'San Francisco',
@@ -143,13 +143,14 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
         source: 'default',
       };
       const full = formatFullOrientationSpeech(d, loc);
-      assert.ok(full.en.includes('Today is Tuesday, August 25, 2026.'));
-      assert.ok(full.en.includes('The current time is 2:15 PM in the afternoon.'));
-      assert.ok(full.en.includes('We are currently in San Francisco, California, United States.'));
 
-      assert.ok(full.zh.includes('今天是 2026 年 8 月 25 日，星期二。'));
-      assert.ok(full.zh.includes('現在時間是下午 2 點 15 分。'));
-      assert.ok(full.zh.includes('我們現在在美國加州舊金山。'));
+      // English Order Check: Time -> Date -> Weekday -> Location
+      const expectedEn = 'The current time is 2:15 PM in the afternoon. Today is August 25, 2026. Today is Tuesday. We are currently in San Francisco, California, United States.';
+      assert.equal(full.en, expectedEn);
+
+      // Chinese Order Check: Time -> Date -> Weekday -> Location
+      const expectedZh = '現在時間是下午 2 點 15 分。 今天是 2026 年 8 月 25 日。 今天是星期二。 我們現在在美國加州舊金山。';
+      assert.equal(full.zh, expectedZh);
     });
   });
 

@@ -342,23 +342,16 @@ export function formatLocationSpeech(loc: UserLocationInfo): { en: string; zh: s
 
 /**
  * Format the Full Orientation Composite Speech
+ * Order: Time -> Date -> Weekday -> Location
  */
 export function formatFullOrientationSpeech(date: Date, loc: UserLocationInfo): { en: string; zh: string } {
-  const day = WEEKDAYS[date.getDay()];
-  const monthsEn = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
-  const monthEn = monthsEn[date.getMonth()];
-  const monthNum = date.getMonth() + 1;
-  const dayNum = date.getDate();
-  const year = date.getFullYear();
-
   const timeSpeech = formatTimeSpeech(date);
+  const dateSpeech = formatDateSpeech(date);
+  const weekdaySpeech = formatWeekdaySpeech(date);
   const locSpeech = formatLocationSpeech(loc);
 
-  const en = `Today is ${day.name}, ${monthEn} ${dayNum}, ${year}. ${timeSpeech.en} ${locSpeech.en}`;
-  const zh = `今天是 ${year} 年 ${monthNum} 月 ${dayNum} 日，${day.nameZh}。${timeSpeech.zh} ${locSpeech.zh}`;
+  const en = `${timeSpeech.en} ${dateSpeech.en} ${weekdaySpeech.en} ${locSpeech.en}`;
+  const zh = `${timeSpeech.zh} ${dateSpeech.zh} ${weekdaySpeech.zh} ${locSpeech.zh}`;
 
   return { en, zh };
 }
