@@ -204,7 +204,7 @@ export const TodayOrientationView: React.FC = () => {
             onPress={handleSpeakTime}
             minTouchSize="lg"
             className={`
-              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group
+              bg-slate-900 border-2 rounded-2xl px-4 sm:px-5 py-3 sm:py-3.5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group
               ${
                 isTimeActive
                   ? 'border-emerald-400 ring-4 ring-emerald-400/40 shadow-emerald-950/60'
@@ -227,7 +227,7 @@ export const TodayOrientationView: React.FC = () => {
             </div>
 
             {/* Time Display (Clean, large digits, no morning emoji / inner box) */}
-            <div className="flex flex-col my-auto py-2">
+            <div className="flex flex-col my-auto py-1">
               <div className="flex items-baseline gap-3">
                 <span className="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
                   {displayHours12}:{minStr}
@@ -236,7 +236,7 @@ export const TodayOrientationView: React.FC = () => {
                   {ampm}
                 </span>
               </div>
-              <span className="text-sm sm:text-base font-bold text-emerald-200 mt-1 truncate">
+              <span className="text-sm sm:text-base font-bold text-emerald-200 mt-0.5 truncate">
                 {dayPeriod.zh} {displayHours12} 點 {minutes === 0 ? '整' : `${minutes} 分`}
               </span>
             </div>
@@ -246,7 +246,7 @@ export const TodayOrientationView: React.FC = () => {
           <div
             onClick={() => handleSpeakWeekday()}
             className={`
-              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg gap-3 transition-all duration-200 cursor-pointer group
+              bg-slate-900 border-2 rounded-2xl px-4 sm:px-5 py-3 sm:py-3.5 flex flex-col justify-between shadow-lg gap-2 transition-all duration-200 cursor-pointer group
               ${
                 isWeekdayActive
                   ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
@@ -279,7 +279,7 @@ export const TodayOrientationView: React.FC = () => {
 
             {/* Visual 7-Day Weekday Tracker */}
             <div
-              className="my-auto py-1"
+              className="my-auto py-0.5"
               onClick={(e) => e.stopPropagation()}
             >
               <WeekdayBar
@@ -295,7 +295,7 @@ export const TodayOrientationView: React.FC = () => {
             onPress={handleSpeakDate}
             minTouchSize="lg"
             className={`
-              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group
+              bg-slate-900 border-2 rounded-2xl px-4 sm:px-5 py-3 sm:py-3.5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group
               ${
                 isDateActive
                   ? 'border-blue-400 ring-4 ring-blue-400/40 shadow-blue-950/60'
@@ -318,7 +318,7 @@ export const TodayOrientationView: React.FC = () => {
             </div>
 
             {/* Date Display */}
-            <div className="flex items-center gap-3.5 sm:gap-4 my-auto py-2 min-w-0">
+            <div className="flex items-center gap-3.5 sm:gap-4 my-auto py-1 min-w-0">
               <div className="w-14 h-16 sm:w-16 sm:h-18 rounded-xl bg-slate-100 text-slate-900 flex flex-col items-center overflow-hidden shadow-md border border-slate-300 shrink-0 select-none">
                 <div className="w-full bg-rose-600 text-white py-0.5 text-center text-[10px] sm:text-[11px] font-black uppercase tracking-wider">
                   {monthShort} · {monthNum}月
@@ -337,7 +337,7 @@ export const TodayOrientationView: React.FC = () => {
                 <span className="text-xl sm:text-2xl lg:text-3xl font-black text-white group-hover:text-blue-300 transition-colors truncate">
                   {monthName} {dayNum}, {year}
                 </span>
-                <span className="text-sm sm:text-base font-bold text-blue-200 mt-1">
+                <span className="text-sm sm:text-base font-bold text-blue-200 mt-0.5">
                   {year} 年 {monthNum} 月 {dayNum} 日
                 </span>
               </div>
@@ -350,7 +350,7 @@ export const TodayOrientationView: React.FC = () => {
           <div
             onClick={handleSpeakLocation}
             className={`
-              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-lg h-full transition-all duration-200 cursor-pointer group
+              bg-slate-900 border-2 rounded-2xl px-4 sm:px-5 py-3 sm:py-3.5 flex flex-col justify-between gap-2.5 shadow-lg h-full transition-all duration-200 cursor-pointer group
               ${
                 isLocationActive
                   ? 'border-purple-400 ring-4 ring-purple-400/40 shadow-purple-950/60'

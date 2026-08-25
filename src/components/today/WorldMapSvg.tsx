@@ -39,7 +39,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
       onClick={onSelectLocation}
       onKeyDown={handleKeyDown}
       className={`
-        relative w-full h-full min-h-[300px] sm:min-h-[360px] flex flex-col justify-between bg-slate-950 rounded-2xl border p-2 sm:p-3 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-300
+        relative w-full h-full min-h-[300px] sm:min-h-[360px] flex flex-col justify-between bg-slate-950 rounded-2xl border px-2.5 sm:px-3.5 py-1.5 sm:py-2 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-300
         ${
           isSpeakingLocation
             ? 'border-purple-400 ring-4 ring-purple-400/50 shadow-2xl shadow-purple-950/60 scale-[1.01]'
