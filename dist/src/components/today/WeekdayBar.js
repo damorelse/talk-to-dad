@@ -2,7 +2,6 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from 'react';
 import { getWeekDates } from '../../services/location/locationService.js';
 import { DebouncedTouchable } from '../common/DebouncedTouchable.js';
-import { Sparkles } from 'lucide-react';
 export const WeekdayBar = ({ currentDate, onSelectDay, debounceMs = 200, activeGlowDayIndex = null, }) => {
     const weekDays = getWeekDates(currentDate);
     return (_jsx("div", { className: "grid grid-cols-7 gap-1.5 sm:gap-2.5 w-full select-none pt-1", children: weekDays.map(({ weekday, dayOfMonth, isToday }) => {
@@ -14,7 +13,7 @@ export const WeekdayBar = ({ currentDate, onSelectDay, debounceMs = 200, activeG
                     : isToday
                         ? 'bg-gradient-to-b from-amber-500/30 via-amber-600/30 to-slate-900 border-amber-400 shadow-lg shadow-amber-950/60 ring-2 ring-amber-400/50 scale-105 z-10'
                         : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-800/60 hover:text-slate-200 hover:border-slate-700'}
-            `, "aria-label": `${weekday.name}, ${weekday.nameZh}, ${dayOfMonth}${isToday ? ' (Today)' : ''}`, "aria-current": isToday ? 'date' : undefined, children: [isToday && (_jsx("div", { className: "absolute -top-2.5 inset-x-0 flex items-center justify-center pointer-events-none", children: _jsxs("span", { className: "bg-amber-400 text-slate-950 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shadow flex items-center gap-0.5", children: [_jsx(Sparkles, { className: "w-2.5 h-2.5 fill-slate-950 stroke-[1.5]" }), _jsx("span", { children: "Today" })] }) })), _jsx("span", { className: `
+            `, "aria-label": `${weekday.name}, ${weekday.nameZh}, ${dayOfMonth}${isToday ? ' (Today)' : ''}`, "aria-current": isToday ? 'date' : undefined, children: [isToday && (_jsx("div", { className: "absolute -top-2.5 inset-x-0 flex items-center justify-center pointer-events-none", children: _jsx("span", { className: "bg-amber-400 text-slate-950 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow", children: "Today" }) })), _jsx("span", { className: `
                 text-[11px] sm:text-xs font-black uppercase tracking-tight
                 ${isToday ? 'text-amber-300 pt-0.5' : 'text-slate-400'}
               `, children: weekday.nameShort }), _jsx("span", { className: `

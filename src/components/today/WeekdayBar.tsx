@@ -1,7 +1,6 @@
 import React from 'react';
 import { WeekdayDef, getWeekDates } from '../../services/location/locationService';
 import { DebouncedTouchable } from '../common/DebouncedTouchable';
-import { Sparkles } from 'lucide-react';
 
 interface WeekdayBarProps {
   currentDate: Date;
@@ -45,9 +44,8 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
             {/* Today Badge */}
             {isToday && (
               <div className="absolute -top-2.5 inset-x-0 flex items-center justify-center pointer-events-none">
-                <span className="bg-amber-400 text-slate-950 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full shadow flex items-center gap-0.5">
-                  <Sparkles className="w-2.5 h-2.5 fill-slate-950 stroke-[1.5]" />
-                  <span>Today</span>
+                <span className="bg-amber-400 text-slate-950 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow">
+                  Today
                 </span>
               </div>
             )}
