@@ -225,7 +225,7 @@ export const TodayOrientationView: React.FC = () => {
               {/* Clock Digits & Chinese Time */}
               <div className="flex flex-col text-left min-w-0">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Live Time · 現在時間
+                  Time · 現在時間
                 </span>
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
