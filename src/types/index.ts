@@ -201,8 +201,22 @@ export interface MediaBlobRecord {
   createdAt: number;
 }
 
+export interface UserLocationInfo {
+  city: string;
+  state?: string;
+  country: string;
+  cityZh?: string;
+  stateZh?: string;
+  countryZh?: string;
+  latitude?: number;
+  longitude?: number;
+  source: 'geolocation' | 'timezone' | 'default';
+  isLoading?: boolean;
+}
+
 export type ActiveTab = 
   | 'grid'
+  | 'today'
   | 'scenes'
   | 'pain'
   | 'syllables'

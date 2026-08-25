@@ -1,6 +1,6 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useRef, useEffect } from 'react';
-import { LayoutGrid, Image as ImageIcon, PersonStanding, MessageSquareQuote, Sparkles, Keyboard as KeyboardIcon, Settings as SettingsIcon, } from 'lucide-react';
+import { LayoutGrid, Compass, Image as ImageIcon, PersonStanding, MessageSquareQuote, Sparkles, Keyboard as KeyboardIcon, Settings as SettingsIcon, } from 'lucide-react';
 import { DebouncedTouchable } from '../common/DebouncedTouchable.js';
 export const NavigationBar = ({ activeTab, onTabChange, }) => {
     const activeTabRef = useRef(null);
@@ -13,6 +13,15 @@ export const NavigationBar = ({ activeTab, onTabChange, }) => {
             activeBg: 'bg-blue-600',
             activeText: 'text-white',
             activeBorder: 'border-blue-400 shadow-blue-500/30',
+        },
+        {
+            id: 'today',
+            label: 'Today',
+            labelZh: '今天時空',
+            icon: _jsx(Compass, { className: "w-5 h-5 sm:w-6 sm:h-6" }),
+            activeBg: 'bg-indigo-600',
+            activeText: 'text-white',
+            activeBorder: 'border-indigo-400 shadow-indigo-500/30',
         },
         {
             id: 'scenes',

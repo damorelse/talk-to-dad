@@ -7,6 +7,7 @@ import { MainContainer } from './components/layout/MainContainer';
 import { CardGrid } from './components/grid/CardGrid';
 import { VisualSceneViewer } from './components/visualScene/VisualSceneViewer';
 import { PainMapContainer } from './components/painMap/PainMapContainer';
+import { TodayOrientationView } from './components/today/TodayOrientationView';
 import { SyllableVisualizerView } from './components/syllable/SyllableVisualizerView';
 import { TherapySessionView } from './components/therapy/TherapySessionView';
 import { BigSpeechKeyboard } from './components/keyboard/BigSpeechKeyboard';
@@ -99,7 +100,10 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* 2. Visual Scene Displays View */}
+      {/* 2. Today & Daily Orientation View */}
+      {activeTab === 'today' && <TodayOrientationView />}
+
+      {/* 3. Visual Scene Displays View */}
       {activeTab === 'scenes' && (
         <VisualSceneViewer
           scenes={visualScenes}

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import {
   LayoutGrid,
+  Compass,
   Image as ImageIcon,
   PersonStanding,
   MessageSquareQuote,
@@ -39,6 +40,15 @@ export const NavigationBar: React.FC<NavigationBarProps> = ({
       activeBg: 'bg-blue-600',
       activeText: 'text-white',
       activeBorder: 'border-blue-400 shadow-blue-500/30',
+    },
+    {
+      id: 'today',
+      label: 'Today',
+      labelZh: '今天時空',
+      icon: <Compass className="w-5 h-5 sm:w-6 sm:h-6" />,
+      activeBg: 'bg-indigo-600',
+      activeText: 'text-white',
+      activeBorder: 'border-indigo-400 shadow-indigo-500/30',
     },
     {
       id: 'scenes',
