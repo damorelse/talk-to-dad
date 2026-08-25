@@ -146,39 +146,39 @@ export const TodayOrientationView: React.FC = () => {
 
   return (
     <div className="w-full h-full flex flex-col gap-3 overflow-y-auto p-1 select-none scrollbar-thin">
-      {/* 1. CLEAN HERO GREETING & MASTER SPEAK ALL */}
-      <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl px-4 py-3 shadow-lg flex items-center justify-between gap-3 min-w-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="text-2xl sm:text-3xl shrink-0 drop-shadow">
+      {/* 1. HERO GREETING & MASTER SPEAK BUTTON */}
+      <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl px-5 py-3.5 shadow-lg flex items-center justify-between gap-3 min-w-0">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <span className="text-3xl sm:text-4xl shrink-0 drop-shadow">
             {greeting.icon}
           </span>
-          <div className="flex items-baseline gap-2 min-w-0 flex-wrap">
-            <h1 className="text-lg sm:text-xl font-black text-white tracking-tight truncate">
+          <div className="flex items-baseline gap-2.5 min-w-0 flex-wrap">
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight truncate">
               {greeting.en}
             </h1>
-            <span className="text-sm sm:text-base font-extrabold text-indigo-300">
+            <span className="text-base sm:text-lg font-extrabold text-indigo-300">
               {greeting.zh}
             </span>
           </div>
         </div>
 
-        {/* Master Speak All & Stop Controls */}
+        {/* Master Speak & Stop Controls */}
         <div className="flex items-center gap-2 shrink-0">
           <DebouncedTouchable
             onPress={handleSpeakAll}
             minTouchSize="lg"
             className={`
-              px-4 sm:px-5 py-2.5 rounded-xl font-black text-white flex items-center gap-2 shadow-lg transition-all duration-200 text-xs sm:text-sm cursor-pointer
+              px-4 sm:px-5 py-2.5 rounded-xl font-black text-white flex items-center gap-2 shadow-lg transition-all duration-200 text-sm sm:text-base cursor-pointer
               ${
                 isSpeaking && activeSpeechType === 'all'
                   ? 'bg-indigo-500 ring-4 ring-indigo-300/60 scale-105 shadow-indigo-500/50'
                   : 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 hover:scale-[1.02]'
               }
             `}
-            aria-label="Speak all orientation information aloud"
+            aria-label="Speak orientation information aloud"
           >
-            <Volume2 className="w-4 h-4 stroke-[2.5]" />
-            <span>Speak All · 朗讀全部</span>
+            <Volume2 className="w-5 h-5 stroke-[2.5]" />
+            <span>Speak</span>
           </DebouncedTouchable>
 
           {isSpeaking && (
@@ -188,142 +188,143 @@ export const TodayOrientationView: React.FC = () => {
               className="px-3 py-2.5 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white rounded-xl text-xs font-black shadow border border-rose-400 flex items-center gap-1.5 transition-all cursor-pointer"
               aria-label="Stop speaking"
             >
-              <VolumeX className="w-3.5 h-3.5" />
+              <VolumeX className="w-4 h-4" />
               <span>Stop</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* 2. BALANCED 4-CARD ORIENTATION GRID */}
-      <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
-        {/* LEFT COLUMN: 1. Time (top), 2. Date (middle), 3. Weekday (bottom) */}
-        <div className="flex flex-col gap-3">
-          {/* Card 1: Bedside Digital Clock (Top Left) */}
-          <DebouncedTouchable
-            onPress={handleSpeakTime}
-            minTouchSize="lg"
-            className={`
-              bg-slate-900 border-2 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between shadow-lg transition-all duration-200 cursor-pointer group
-              ${
-                isTimeActive
-                  ? 'border-emerald-400 ring-4 ring-emerald-400/40 shadow-emerald-950/60'
-                  : 'border-slate-800 hover:border-emerald-500/60'
-              }
-            `}
-            aria-label={`Current time: ${displayHours12}:${minStr} ${ampm}. Tap to hear.`}
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              {/* Day Phase Icon Badge */}
-              <div className="w-16 h-18 sm:w-18 sm:h-20 rounded-xl bg-gradient-to-br from-emerald-700 to-teal-800 text-white flex flex-col items-center justify-center shadow-md border border-emerald-400/40 shrink-0">
-                <span className="text-2xl sm:text-3xl drop-shadow">{dayPeriod.icon}</span>
-                <span className="text-[10px] font-black uppercase text-emerald-100 mt-0.5 tracking-wider">
-                  {dayPeriod.zh}
-                </span>
-              </div>
-
-              {/* Clock Digits & Chinese Time */}
-              <div className="flex flex-col text-left min-w-0">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Time · 現在時間
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
-                    {displayHours12}:{minStr}
-                  </span>
-                  <span className="text-xs font-black text-emerald-300 bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/30">
-                    {ampm}
-                  </span>
-                </div>
-                <span className="text-xs sm:text-sm font-bold text-emerald-200 mt-0.5 truncate">
-                  {dayPeriod.zh} {displayHours12} 點 {minutes === 0 ? '整' : `${minutes} 分`}
-                </span>
-              </div>
+      {/* 2. BALANCED 4-CARD ORIENTATION GRID (Row 1: Time | Date, Row 2: Weekday | Location) */}
+      <div className="w-full flex-1 grid grid-cols-1 md:grid-cols-2 gap-3.5 min-h-0">
+        {/* CARD 1: TIME (Top Left) */}
+        <DebouncedTouchable
+          onPress={handleSpeakTime}
+          minTouchSize="lg"
+          className={`
+            bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group
+            ${
+              isTimeActive
+                ? 'border-emerald-400 ring-4 ring-emerald-400/40 shadow-emerald-950/60'
+                : 'border-slate-800 hover:border-emerald-500/60'
+            }
+          `}
+          aria-label={`Current time: ${displayHours12}:${minStr} ${ampm}. Tap to hear.`}
+        >
+          {/* Card Header */}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-emerald-400" />
+              <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">
+                Time · 現在時間
+              </span>
             </div>
-
-            <div className="shrink-0 text-emerald-400 group-hover:text-white transition-colors p-2">
-              <Volume2 className="w-4 h-4" />
+            <div className="text-emerald-400 group-hover:text-white transition-colors p-1">
+              <Volume2 className="w-5 h-5" />
             </div>
-          </DebouncedTouchable>
+          </div>
 
-          {/* Card 2: Date Card (Middle Left) */}
-          <DebouncedTouchable
-            onPress={handleSpeakDate}
-            minTouchSize="lg"
-            className={`
-              bg-slate-900 border-2 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between shadow-lg transition-all duration-200 cursor-pointer group
-              ${
-                isDateActive
-                  ? 'border-blue-400 ring-4 ring-blue-400/40 shadow-blue-950/60'
-                  : 'border-slate-800 hover:border-blue-500/60'
-              }
-            `}
-            aria-label={`Current date: ${monthName} ${dayNum}, ${year}. Tap to hear.`}
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              {/* Calendar Block */}
-              <div className="w-16 h-18 sm:w-18 sm:h-20 rounded-xl bg-slate-100 text-slate-900 flex flex-col items-center overflow-hidden shadow-md border border-slate-300 shrink-0 select-none">
-                <div className="w-full bg-rose-600 text-white py-0.5 text-center text-[10px] font-black uppercase tracking-wider">
-                  {monthShort} · {monthNum}月
-                </div>
-                <div className="flex-1 flex items-center justify-center">
-                  <span className="text-2xl sm:text-3xl font-black text-slate-900 leading-none">
-                    {dayNum}
-                  </span>
-                </div>
-                <div className="w-full bg-slate-200 py-0.5 text-center text-[9px] font-black text-slate-600">
-                  {year}
-                </div>
+          {/* Time Display (Clean, large digits, no morning emoji / inner box) */}
+          <div className="flex flex-col my-auto py-2">
+            <div className="flex items-baseline gap-3">
+              <span className="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
+                {displayHours12}:{minStr}
+              </span>
+              <span className="text-xs sm:text-sm font-black text-emerald-300 bg-emerald-500/20 px-2.5 py-1 rounded-md border border-emerald-500/30">
+                {ampm}
+              </span>
+            </div>
+            <span className="text-sm sm:text-base font-bold text-emerald-200 mt-1 truncate">
+              {dayPeriod.zh} {displayHours12} 點 {minutes === 0 ? '整' : `${minutes} 分`}
+            </span>
+          </div>
+        </DebouncedTouchable>
+
+        {/* CARD 2: DATE (Top Right - In-line with Time) */}
+        <DebouncedTouchable
+          onPress={handleSpeakDate}
+          minTouchSize="lg"
+          className={`
+            bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group
+            ${
+              isDateActive
+                ? 'border-blue-400 ring-4 ring-blue-400/40 shadow-blue-950/60'
+                : 'border-slate-800 hover:border-blue-500/60'
+            }
+          `}
+          aria-label={`Current date: ${monthName} ${dayNum}, ${year}. Tap to hear.`}
+        >
+          {/* Card Header */}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-400" />
+              <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">
+                Date · 日曆日期
+              </span>
+            </div>
+            <div className="text-blue-400 group-hover:text-white transition-colors p-1">
+              <Volume2 className="w-5 h-5" />
+            </div>
+          </div>
+
+          {/* Date Display */}
+          <div className="flex items-center gap-3.5 sm:gap-4 my-auto py-2 min-w-0">
+            <div className="w-14 h-16 sm:w-16 sm:h-18 rounded-xl bg-slate-100 text-slate-900 flex flex-col items-center overflow-hidden shadow-md border border-slate-300 shrink-0 select-none">
+              <div className="w-full bg-rose-600 text-white py-0.5 text-center text-[10px] sm:text-[11px] font-black uppercase tracking-wider">
+                {monthShort} · {monthNum}月
               </div>
-
-              {/* Date Text */}
-              <div className="flex flex-col text-left min-w-0">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Date · 日曆日期
+              <div className="flex-1 flex items-center justify-center">
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 leading-none">
+                  {dayNum}
                 </span>
-                <span className="text-lg sm:text-xl font-black text-white group-hover:text-blue-300 transition-colors truncate">
-                  {monthName} {dayNum}, {year}
-                </span>
-                <span className="text-xs sm:text-sm font-bold text-blue-200 mt-0.5">
-                  {year} 年 {monthNum} 月 {dayNum} 日
-                </span>
+              </div>
+              <div className="w-full bg-slate-200 py-0.5 text-center text-[9px] sm:text-[10px] font-black text-slate-600">
+                {year}
               </div>
             </div>
 
-            <div className="shrink-0 text-blue-400 group-hover:text-white transition-colors p-2">
-              <Volume2 className="w-4 h-4" />
+            <div className="flex flex-col text-left min-w-0">
+              <span className="text-xl sm:text-2xl lg:text-3xl font-black text-white group-hover:text-blue-300 transition-colors truncate">
+                {monthName} {dayNum}, {year}
+              </span>
+              <span className="text-sm sm:text-base font-bold text-blue-200 mt-1">
+                {year} 年 {monthNum} 月 {dayNum} 日
+              </span>
             </div>
-          </DebouncedTouchable>
+          </div>
+        </DebouncedTouchable>
 
-          {/* Card 3: Weekday & Visual Weekday Strip (Bottom Left) */}
-          <div
-            className={`
-              bg-slate-900 border-2 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg gap-2.5 transition-all duration-200
-              ${
-                isWeekdayActive
-                  ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
-                  : 'border-slate-800 hover:border-slate-700'
-              }
-            `}
-          >
-            <div className="flex items-center justify-between px-0.5">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Weekday · 星期
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleSpeakWeekday()}
-                className="text-sm sm:text-base font-black text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>{currentWeekday.name} ({currentWeekday.nameZh})</span>
-                <Volume2 className="w-3.5 h-3.5 text-amber-400" />
-              </button>
+        {/* CARD 3: WEEKDAY & 7-DAY STRIP (Bottom Left) */}
+        <div
+          className={`
+            bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg gap-3 transition-all duration-200
+            ${
+              isWeekdayActive
+                ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
+                : 'border-slate-800 hover:border-slate-700'
+            }
+          `}
+        >
+          {/* Card Header */}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-amber-400" />
+              <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">
+                Weekday · 星期
+              </span>
             </div>
+            <button
+              type="button"
+              onClick={() => handleSpeakWeekday()}
+              className="text-sm sm:text-base font-black text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <span>{currentWeekday.name} ({currentWeekday.nameZh})</span>
+              <Volume2 className="w-4 h-4 text-amber-400" />
+            </button>
+          </div>
 
-            {/* Visual 7-Day Weekday Tracker */}
+          {/* Visual 7-Day Weekday Tracker */}
+          <div className="my-auto py-1">
             <WeekdayBar
               currentDate={currentDate}
               onSelectDay={(day, isToday) => handleSpeakWeekday(day, isToday)}
@@ -332,25 +333,26 @@ export const TodayOrientationView: React.FC = () => {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Location & World Map (Top Right) */}
-        <div className="flex flex-col gap-3">
-          <div
-            className={`
-              bg-slate-900 border-2 rounded-2xl p-3.5 flex flex-col justify-between gap-2.5 shadow-lg h-full transition-all duration-200
-              ${
-                isLocationActive
-                  ? 'border-purple-400 ring-4 ring-purple-400/40 shadow-purple-950/60'
-                  : 'border-slate-800 hover:border-slate-700'
-              }
-            `}
-          >
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-1.5">
-                <Compass className="w-4 h-4 text-purple-400" />
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Location · 所在位置
-                </span>
-              </div>
+        {/* CARD 4: LOCATION & MAP (Bottom Right) */}
+        <div
+          className={`
+            bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3 shadow-lg transition-all duration-200
+            ${
+              isLocationActive
+                ? 'border-purple-400 ring-4 ring-purple-400/40 shadow-purple-950/60'
+                : 'border-slate-800 hover:border-slate-700'
+            }
+          `}
+        >
+          {/* Card Header */}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              <Compass className="w-5 h-5 text-purple-400" />
+              <span className="text-xs sm:text-sm font-bold text-slate-400 uppercase tracking-wider">
+                Location · 所在位置
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={refreshLocation}
@@ -359,18 +361,26 @@ export const TodayOrientationView: React.FC = () => {
                 aria-label="Refresh location"
                 title="Refresh GPS"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin text-purple-400' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${isLocating ? 'animate-spin text-purple-400' : ''}`} />
+              </button>
+              <button
+                type="button"
+                onClick={handleSpeakLocation}
+                className="text-purple-400 hover:text-white transition-colors p-1 cursor-pointer"
+                aria-label="Speak location"
+              >
+                <Volume2 className="w-5 h-5" />
               </button>
             </div>
+          </div>
 
-            {/* High-Contrast SVG World Map */}
-            <div className="flex-1 flex flex-col justify-center">
-              <WorldMapSvg
-                location={location}
-                onSelectLocation={handleSpeakLocation}
-                isSpeakingLocation={isLocationActive}
-              />
-            </div>
+          {/* High-Contrast SVG World Map */}
+          <div className="flex-1 flex flex-col justify-center min-h-[140px]">
+            <WorldMapSvg
+              location={location}
+              onSelectLocation={handleSpeakLocation}
+              isSpeakingLocation={isLocationActive}
+            />
           </div>
         </div>
       </div>

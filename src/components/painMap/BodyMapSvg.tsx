@@ -52,39 +52,64 @@ export const BodyMapSvg: React.FC<BodyMapSvgProps> = ({
         role="group"
         aria-label={`Interactive ${orientation} body map`}
       >
-        {/* Head */}
-        <circle
-          cx="150"
-          cy="45"
-          r="32"
-          fill={getFillColor('head')}
-          stroke={getStrokeColor('head')}
-          strokeWidth={isSelected('head') ? 5 : 2}
-          className="cursor-pointer transition-colors duration-150 hover:brightness-125"
-          onClick={() => onSelectRegion('head')}
-        />
+        {/* Head & Face */}
         {orientation === 'front' ? (
           <>
-            <text x="150" y="24" textAnchor="middle" fill="#f8fafc" fontSize="9" fontWeight="bold" pointerEvents="none">
+            {/* Upper Head / Cranium */}
+            <path
+              d="M 119 40 A 32 32 0 0 1 181 40 Z"
+              fill={getFillColor('head')}
+              stroke={getStrokeColor('head')}
+              strokeWidth={isSelected('head') ? 5 : 2}
+              className="cursor-pointer transition-colors duration-150 hover:brightness-125"
+              onClick={() => onSelectRegion('head')}
+            />
+            <text x="150" y="30" textAnchor="middle" fill="#f8fafc" fontSize="9" fontWeight="bold" pointerEvents="none">
               Head
             </text>
-            {/* Eyes */}
-            <circle cx="140" cy="38" r="3" fill="#f8fafc" pointerEvents="none" />
-            <circle cx="160" cy="38" r="3" fill="#f8fafc" pointerEvents="none" />
-            {/* Smile */}
+
+            {/* Face & Jaw */}
             <path
-              d="M 138 49 Q 150 60 162 49"
+              d="M 119 40 A 32 32 0 0 0 181 40 Z"
+              fill={getFillColor('face')}
+              stroke={getStrokeColor('face')}
+              strokeWidth={isSelected('face') ? 5 : 2}
+              className="cursor-pointer transition-colors duration-150 hover:brightness-125"
+              onClick={() => onSelectRegion('face')}
+            />
+            {/* Eyes */}
+            <circle cx="140" cy="50" r="2.5" fill="#f8fafc" pointerEvents="none" />
+            <circle cx="160" cy="50" r="2.5" fill="#f8fafc" pointerEvents="none" />
+            {/* Smile / Mouth */}
+            <path
+              d="M 141 60 Q 150 67 159 60"
               fill="none"
               stroke="#f8fafc"
-              strokeWidth="3"
+              strokeWidth="2.5"
               strokeLinecap="round"
               pointerEvents="none"
             />
+            <text x="150" y="73" textAnchor="middle" fill="#f8fafc" fontSize="8.5" fontWeight="bold" pointerEvents="none">
+              Face
+            </text>
           </>
         ) : (
-          <text x="150" y="49" textAnchor="middle" fill="#f8fafc" fontSize="12" fontWeight="bold" pointerEvents="none">
-            Head
-          </text>
+          <>
+            {/* Back of Head */}
+            <circle
+              cx="150"
+              cy="45"
+              r="32"
+              fill={getFillColor('head')}
+              stroke={getStrokeColor('head')}
+              strokeWidth={isSelected('head') ? 5 : 2}
+              className="cursor-pointer transition-colors duration-150 hover:brightness-125"
+              onClick={() => onSelectRegion('head')}
+            />
+            <text x="150" y="49" textAnchor="middle" fill="#f8fafc" fontSize="12" fontWeight="bold" pointerEvents="none">
+              Head
+            </text>
+          </>
         )}
 
         {/* Throat (Front) or Neck (Back) */}
