@@ -298,14 +298,24 @@ export const TodayOrientationView: React.FC = () => {
 
           {/* CARD 3: WEEKDAY & 7-DAY STRIP (Bottom Left) */}
           <div
+            onClick={() => handleSpeakWeekday()}
             className={`
-              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg gap-3 transition-all duration-200
+              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-lg gap-3 transition-all duration-200 cursor-pointer group
               ${
                 isWeekdayActive
                   ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
-                  : 'border-slate-800 hover:border-slate-700'
+                  : 'border-slate-800 hover:border-amber-500/60'
               }
             `}
+            role="button"
+            tabIndex={0}
+            aria-label={`Current weekday: ${currentWeekday.name}, ${currentWeekday.nameZh}. Tap to hear.`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSpeakWeekday();
+              }
+            }}
           >
             {/* Card Header */}
             <div className="flex items-center justify-between w-full">
@@ -315,18 +325,17 @@ export const TodayOrientationView: React.FC = () => {
                   Weekday · 星期
                 </span>
               </div>
-              <button
-                type="button"
-                onClick={() => handleSpeakWeekday()}
-                className="text-sm sm:text-base font-black text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
+              <div className="text-sm sm:text-base font-black text-amber-300 group-hover:text-amber-200 flex items-center gap-1.5 transition-colors">
                 <span>{currentWeekday.name} ({currentWeekday.nameZh})</span>
-                <Volume2 className="w-4 h-4 text-amber-400" />
-              </button>
+                <Volume2 className="w-4 h-4 text-amber-400 group-hover:text-white transition-colors" />
+              </div>
             </div>
 
             {/* Visual 7-Day Weekday Tracker */}
-            <div className="my-auto py-1">
+            <div
+              className="my-auto py-1"
+              onClick={(e) => e.stopPropagation()}
+            >
               <WeekdayBar
                 currentDate={currentDate}
                 onSelectDay={(day, isToday) => handleSpeakWeekday(day, isToday)}
@@ -339,14 +348,24 @@ export const TodayOrientationView: React.FC = () => {
         {/* RIGHT COLUMN: LOCATION & BIG WORLD MAP */}
         <div className="flex flex-col">
           <div
+            onClick={handleSpeakLocation}
             className={`
-              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-lg h-full transition-all duration-200
+              bg-slate-900 border-2 rounded-2xl p-4 sm:p-5 flex flex-col justify-between gap-3.5 shadow-lg h-full transition-all duration-200 cursor-pointer group
               ${
                 isLocationActive
                   ? 'border-purple-400 ring-4 ring-purple-400/40 shadow-purple-950/60'
-                  : 'border-slate-800 hover:border-slate-700'
+                  : 'border-slate-800 hover:border-purple-500/60'
               }
             `}
+            role="button"
+            tabIndex={0}
+            aria-label={`Current location: ${location.city || 'Unknown'}, ${location.country || ''}. Tap to hear.`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSpeakLocation();
+              }
+            }}
           >
             {/* Card Header */}
             <div className="flex items-center justify-between w-full">
@@ -359,7 +378,10 @@ export const TodayOrientationView: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={refreshLocation}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    refreshLocation();
+                  }}
                   disabled={isLocating}
                   className="p-1 text-slate-400 hover:text-purple-300 transition-colors disabled:opacity-50 cursor-pointer"
                   aria-label="Refresh location"
@@ -367,14 +389,12 @@ export const TodayOrientationView: React.FC = () => {
                 >
                   <RefreshCw className={`w-4 h-4 ${isLocating ? 'animate-spin text-purple-400' : ''}`} />
                 </button>
-                <button
-                  type="button"
-                  onClick={handleSpeakLocation}
-                  className="text-purple-400 hover:text-white transition-colors p-1 cursor-pointer"
-                  aria-label="Speak location"
+                <div
+                  className="text-purple-400 group-hover:text-white transition-colors p-1"
+                  aria-hidden="true"
                 >
                   <Volume2 className="w-5 h-5" />
-                </button>
+                </div>
               </div>
             </div>
 
