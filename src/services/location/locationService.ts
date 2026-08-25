@@ -209,6 +209,18 @@ export function getDayPeriod(hours: number): { en: string; zh: string; icon: str
   }
 }
 
+export function getGreeting(hours: number): { en: string; zh: string; icon: string } {
+  if (hours >= 5 && hours < 12) {
+    return { en: 'Good Morning, Dad!', zh: '早安！', icon: '🌅' };
+  } else if (hours >= 12 && hours < 17) {
+    return { en: 'Good Afternoon, Dad!', zh: '午安！', icon: '☀️' };
+  } else if (hours >= 17 && hours < 21) {
+    return { en: 'Good Evening, Dad!', zh: '傍晚好！', icon: '🌇' };
+  } else {
+    return { en: 'Good Night, Dad!', zh: '晚安！', icon: '🌙' };
+  }
+}
+
 /**
  * Format English & Traditional Chinese speech for the Weekday
  */

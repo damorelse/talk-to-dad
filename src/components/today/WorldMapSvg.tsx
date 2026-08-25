@@ -5,11 +5,13 @@ import { MapPin } from 'lucide-react';
 interface WorldMapSvgProps {
   location: UserLocationInfo;
   onSelectLocation?: () => void;
+  isSpeakingLocation?: boolean;
 }
 
 export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
   location,
   onSelectLocation,
+  isSpeakingLocation = false,
 }) => {
   // Equirectangular projection: viewBox 0 0 1000 500
   const lat = location.latitude ?? 37.77;
@@ -25,7 +27,14 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
   return (
     <div
       onClick={onSelectLocation}
-      className="relative w-full aspect-[2/1] max-h-[320px] bg-slate-950 rounded-2xl border border-slate-800 p-2 overflow-hidden shadow-inner cursor-pointer select-none group"
+      className={`
+        relative w-full aspect-[2/1] max-h-[320px] bg-slate-950 rounded-2xl border p-2 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-200
+        ${
+          isSpeakingLocation
+            ? 'border-purple-400 ring-4 ring-purple-400/50 shadow-2xl shadow-purple-950/60 scale-[1.01]'
+            : 'border-slate-800 hover:border-purple-500/60'
+        }
+      `}
       role="button"
       aria-label={`Current location on world map: ${location.city}, ${location.country}`}
       tabIndex={0}

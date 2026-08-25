@@ -7,12 +7,14 @@ interface WeekdayBarProps {
   currentDate: Date;
   onSelectDay: (day: WeekdayDef, isToday: boolean) => void;
   debounceMs?: number;
+  activeGlowDayIndex?: number | null;
 }
 
 export const WeekdayBar: React.FC<WeekdayBarProps> = ({
   currentDate,
   onSelectDay,
   debounceMs = 200,
+  activeGlowDayIndex = null,
 }) => {
   const currentDayIndex = currentDate.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
 
@@ -33,6 +35,7 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
       <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5 w-full">
         {WEEKDAYS.map((day) => {
           const isToday = day.index === currentDayIndex;
+          const isGlowSpeaking = activeGlowDayIndex === day.index;
 
           return (
             <DebouncedTouchable
@@ -41,9 +44,11 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
               debounceMs={debounceMs}
               minTouchSize="md"
               className={`
-                relative flex flex-col items-center justify-between p-1.5 sm:p-2.5 rounded-2xl border-2 sm:border-3 transition-all duration-200 cursor-pointer
+                relative flex flex-col items-center justify-between min-h-[72px] sm:min-h-[84px] p-1.5 sm:p-2.5 rounded-2xl border-2 sm:border-3 transition-all duration-200 cursor-pointer
                 ${
-                  isToday
+                  isGlowSpeaking
+                    ? 'bg-amber-500/40 border-amber-300 ring-4 ring-amber-300 scale-105 shadow-2xl brightness-125 z-20 animate-pulse'
+                    : isToday
                     ? 'bg-gradient-to-b from-amber-500/30 to-amber-600/40 border-amber-400 shadow-xl shadow-amber-950/50 ring-4 ring-amber-400/40 scale-105 z-10 brightness-110'
                     : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:bg-slate-800/80 hover:text-slate-200 hover:border-slate-700'
                 }
