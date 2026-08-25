@@ -55,22 +55,11 @@ export const BodyMapSvg: React.FC<BodyMapSvgProps> = ({
         {/* Head & Face */}
         {orientation === 'front' ? (
           <>
-            {/* Upper Head / Cranium */}
-            <path
-              d="M 119 40 A 32 32 0 0 1 181 40 Z"
-              fill={getFillColor('head')}
-              stroke={getStrokeColor('head')}
-              strokeWidth={isSelected('head') ? 5 : 2}
-              className="cursor-pointer transition-colors duration-150 hover:brightness-125"
-              onClick={() => onSelectRegion('head')}
-            />
-            <text x="150" y="30" textAnchor="middle" fill="#f8fafc" fontSize="9" fontWeight="bold" pointerEvents="none">
-              Head
-            </text>
-
-            {/* Face & Jaw */}
-            <path
-              d="M 119 40 A 32 32 0 0 0 181 40 Z"
+            {/* Full Face Circle (matches Head circle on back) */}
+            <circle
+              cx="150"
+              cy="45"
+              r="32"
               fill={getFillColor('face')}
               stroke={getStrokeColor('face')}
               strokeWidth={isSelected('face') ? 5 : 2}
@@ -78,18 +67,18 @@ export const BodyMapSvg: React.FC<BodyMapSvgProps> = ({
               onClick={() => onSelectRegion('face')}
             />
             {/* Eyes */}
-            <circle cx="140" cy="50" r="2.5" fill="#f8fafc" pointerEvents="none" />
-            <circle cx="160" cy="50" r="2.5" fill="#f8fafc" pointerEvents="none" />
+            <circle cx="138" cy="38" r="2.5" fill="#f8fafc" pointerEvents="none" />
+            <circle cx="162" cy="38" r="2.5" fill="#f8fafc" pointerEvents="none" />
             {/* Smile / Mouth */}
             <path
-              d="M 141 60 Q 150 67 159 60"
+              d="M 139 48 Q 150 56 161 48"
               fill="none"
               stroke="#f8fafc"
               strokeWidth="2.5"
               strokeLinecap="round"
               pointerEvents="none"
             />
-            <text x="150" y="73" textAnchor="middle" fill="#f8fafc" fontSize="8.5" fontWeight="bold" pointerEvents="none">
+            <text x="150" y="66" textAnchor="middle" fill="#f8fafc" fontSize="11" fontWeight="bold" pointerEvents="none">
               Face
             </text>
           </>

@@ -30,7 +30,7 @@ export interface BodyRegionDef {
 }
 
 export const BODY_REGIONS: BodyRegionDef[] = [
-  { id: 'head', name: 'Head', nameZh: '頭部', view: 'both' },
+  { id: 'head', name: 'Head', nameZh: '頭部', view: 'back' },
   { id: 'face', name: 'Face & Jaw', nameZh: '臉部與下巴', view: 'front' },
   { id: 'throat', name: 'Throat', nameZh: '喉嚨', view: 'front' },
   { id: 'neck', name: 'Neck', nameZh: '頸部', view: 'back' },
