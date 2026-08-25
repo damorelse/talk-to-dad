@@ -199,45 +199,56 @@ export const TodayOrientationView: React.FC = () => {
 
       {/* 2. BALANCED 4-CARD ORIENTATION GRID */}
       <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-2 gap-3 min-h-0">
-        {/* LEFT COLUMN: Weekday + Date */}
+        {/* LEFT COLUMN: 1. Time (top), 2. Date (middle), 3. Weekday (bottom) */}
         <div className="flex flex-col gap-3">
-          {/* Card 1: Weekday & Visual Weekday Strip */}
-          <div
+          {/* Card 1: Bedside Digital Clock (Top Left) */}
+          <DebouncedTouchable
+            onPress={handleSpeakTime}
+            minTouchSize="lg"
             className={`
-              bg-slate-900 border-2 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg gap-2.5 transition-all duration-200
+              bg-slate-900 border-2 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between shadow-lg transition-all duration-200 cursor-pointer group
               ${
-                isWeekdayActive
-                  ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
-                  : 'border-slate-800 hover:border-slate-700'
+                isTimeActive
+                  ? 'border-emerald-400 ring-4 ring-emerald-400/40 shadow-emerald-950/60'
+                  : 'border-slate-800 hover:border-emerald-500/60'
               }
             `}
+            aria-label={`Current time: ${displayHours12}:${minStr} ${ampm}. Tap to hear.`}
           >
-            <div className="flex items-center justify-between px-0.5">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-amber-400" />
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Weekday · 星期
+            <div className="flex items-center gap-3.5 min-w-0">
+              {/* Day Phase Icon Badge */}
+              <div className="w-16 h-18 sm:w-18 sm:h-20 rounded-xl bg-gradient-to-br from-emerald-700 to-teal-800 text-white flex flex-col items-center justify-center shadow-md border border-emerald-400/40 shrink-0">
+                <span className="text-2xl sm:text-3xl drop-shadow">{dayPeriod.icon}</span>
+                <span className="text-[10px] font-black uppercase text-emerald-100 mt-0.5 tracking-wider">
+                  {dayPeriod.zh}
                 </span>
               </div>
-              <button
-                type="button"
-                onClick={() => handleSpeakWeekday()}
-                className="text-sm sm:text-base font-black text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <span>{currentWeekday.name} ({currentWeekday.nameZh})</span>
-                <Volume2 className="w-3.5 h-3.5 text-amber-400" />
-              </button>
+
+              {/* Clock Digits & Chinese Time */}
+              <div className="flex flex-col text-left min-w-0">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Live Time · 現在時間
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
+                    {displayHours12}:{minStr}
+                  </span>
+                  <span className="text-xs font-black text-emerald-300 bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/30">
+                    {ampm}
+                  </span>
+                </div>
+                <span className="text-xs sm:text-sm font-bold text-emerald-200 mt-0.5 truncate">
+                  {dayPeriod.zh} {displayHours12} 點 {minutes === 0 ? '整' : `${minutes} 分`}
+                </span>
+              </div>
             </div>
 
-            {/* Visual 7-Day Weekday Tracker */}
-            <WeekdayBar
-              currentDate={currentDate}
-              onSelectDay={(day, isToday) => handleSpeakWeekday(day, isToday)}
-              activeGlowDayIndex={isWeekdayActive ? currentWeekday.index : null}
-            />
-          </div>
+            <div className="shrink-0 text-emerald-400 group-hover:text-white transition-colors p-2">
+              <Volume2 className="w-4 h-4" />
+            </div>
+          </DebouncedTouchable>
 
-          {/* Card 2: Date Card */}
+          {/* Card 2: Date Card (Middle Left) */}
           <DebouncedTouchable
             onPress={handleSpeakDate}
             minTouchSize="lg"
@@ -285,61 +296,49 @@ export const TodayOrientationView: React.FC = () => {
               <Volume2 className="w-4 h-4" />
             </div>
           </DebouncedTouchable>
-        </div>
 
-        {/* RIGHT COLUMN: Time + Location */}
-        <div className="flex flex-col gap-3">
-          {/* Card 3: Bedside Digital Clock */}
-          <DebouncedTouchable
-            onPress={handleSpeakTime}
-            minTouchSize="lg"
-            className={`
-              bg-slate-900 border-2 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between shadow-lg transition-all duration-200 cursor-pointer group
-              ${
-                isTimeActive
-                  ? 'border-emerald-400 ring-4 ring-emerald-400/40 shadow-emerald-950/60'
-                  : 'border-slate-800 hover:border-emerald-500/60'
-              }
-            `}
-            aria-label={`Current time: ${displayHours12}:${minStr} ${ampm}. Tap to hear.`}
-          >
-            <div className="flex items-center gap-3.5 min-w-0">
-              {/* Day Phase Icon Badge */}
-              <div className="w-16 h-18 sm:w-18 sm:h-20 rounded-xl bg-gradient-to-br from-emerald-700 to-teal-800 text-white flex flex-col items-center justify-center shadow-md border border-emerald-400/40 shrink-0">
-                <span className="text-2xl sm:text-3xl drop-shadow">{dayPeriod.icon}</span>
-                <span className="text-[10px] font-black uppercase text-emerald-100 mt-0.5 tracking-wider">
-                  {dayPeriod.zh}
-                </span>
-              </div>
-
-              {/* Clock Digits & Chinese Time */}
-              <div className="flex flex-col text-left min-w-0">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Live Time · 現在時間
-                </span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
-                    {displayHours12}:{minStr}
-                  </span>
-                  <span className="text-xs font-black text-emerald-300 bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/30">
-                    {ampm}
-                  </span>
-                </div>
-                <span className="text-xs sm:text-sm font-bold text-emerald-200 mt-0.5 truncate">
-                  {dayPeriod.zh} {displayHours12} 點 {minutes === 0 ? '整' : `${minutes} 分`}
-                </span>
-              </div>
-            </div>
-
-            <div className="shrink-0 text-emerald-400 group-hover:text-white transition-colors p-2">
-              <Volume2 className="w-4 h-4" />
-            </div>
-          </DebouncedTouchable>
-
-          {/* Card 4: Location & Map */}
+          {/* Card 3: Weekday & Visual Weekday Strip (Bottom Left) */}
           <div
             className={`
-              bg-slate-900 border-2 rounded-2xl p-3 flex flex-col gap-2 shadow-lg transition-all duration-200
+              bg-slate-900 border-2 rounded-2xl p-3.5 flex flex-col justify-between shadow-lg gap-2.5 transition-all duration-200
+              ${
+                isWeekdayActive
+                  ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
+                  : 'border-slate-800 hover:border-slate-700'
+              }
+            `}
+          >
+            <div className="flex items-center justify-between px-0.5">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-amber-400" />
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Weekday · 星期
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleSpeakWeekday()}
+                className="text-sm sm:text-base font-black text-amber-300 hover:text-amber-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>{currentWeekday.name} ({currentWeekday.nameZh})</span>
+                <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+              </button>
+            </div>
+
+            {/* Visual 7-Day Weekday Tracker */}
+            <WeekdayBar
+              currentDate={currentDate}
+              onSelectDay={(day, isToday) => handleSpeakWeekday(day, isToday)}
+              activeGlowDayIndex={isWeekdayActive ? currentWeekday.index : null}
+            />
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: Location & World Map (Top Right) */}
+        <div className="flex flex-col gap-3">
+          <div
+            className={`
+              bg-slate-900 border-2 rounded-2xl p-3.5 flex flex-col justify-between gap-2.5 shadow-lg h-full transition-all duration-200
               ${
                 isLocationActive
                   ? 'border-purple-400 ring-4 ring-purple-400/40 shadow-purple-950/60'
@@ -367,11 +366,13 @@ export const TodayOrientationView: React.FC = () => {
             </div>
 
             {/* High-Contrast SVG World Map */}
-            <WorldMapSvg
-              location={location}
-              onSelectLocation={handleSpeakLocation}
-              isSpeakingLocation={isLocationActive}
-            />
+            <div className="flex-1 flex flex-col justify-center">
+              <WorldMapSvg
+                location={location}
+                onSelectLocation={handleSpeakLocation}
+                isSpeakingLocation={isLocationActive}
+              />
+            </div>
           </div>
         </div>
       </div>
