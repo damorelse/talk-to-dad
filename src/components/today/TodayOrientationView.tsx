@@ -138,8 +138,6 @@ export const TodayOrientationView: React.FC = () => {
   const dayPeriod = getDayPeriod(hours);
   const greeting = getGreeting(hours);
 
-  const fullSpeech = formatFullOrientationSpeech(currentDate, location);
-
   // Active Glow Indicators for Visual-Audio Synchrony
   const isWeekdayActive = isSpeaking && (activeSpeechType === 'weekday' || activeSpeechType === 'all');
   const isDateActive = isSpeaking && (activeSpeechType === 'date' || activeSpeechType === 'all');
@@ -375,28 +373,6 @@ export const TodayOrientationView: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* 3. CLEAN TRANSCRIPTION SUBTITLE BAR */}
-      <div className="w-full bg-slate-950 border border-slate-800/80 rounded-xl px-3.5 py-2.5 flex items-center justify-between gap-3 shadow-inner">
-        <div className="flex flex-col min-w-0">
-          <p className="text-xs sm:text-sm font-semibold text-amber-300 truncate">
-            "{fullSpeech.en}"
-          </p>
-          <p className="text-xs sm:text-sm font-semibold text-slate-300 truncate mt-0.5">
-            「{fullSpeech.zh}」
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleSpeakAll}
-          className="text-slate-400 hover:text-indigo-300 p-1.5 rounded-lg hover:bg-slate-900 transition-colors shrink-0 cursor-pointer"
-          aria-label="Play full orientation statement"
-          title="Play aloud"
-        >
-          <Volume2 className="w-4 h-4" />
-        </button>
       </div>
     </div>
   );
