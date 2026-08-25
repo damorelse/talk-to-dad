@@ -104,8 +104,8 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
         source: 'geolocation',
       };
       const speech = formatLocationSpeech(loc);
-      assert.equal(speech.en, 'We are currently in Seattle, Washington, United States.');
-      assert.equal(speech.zh, '我們現在在美國華盛頓州西雅圖。');
+      assert.equal(speech.en, 'You are in Seattle, Washington, United States.');
+      assert.equal(speech.zh, '您現在在美國華盛頓州西雅圖。');
     });
 
     it('should format international city without state', () => {
@@ -117,8 +117,8 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
         source: 'geolocation',
       };
       const speech = formatLocationSpeech(loc);
-      assert.equal(speech.en, 'We are currently in Taipei, Taiwan.');
-      assert.equal(speech.zh, '我們現在在台灣台北。');
+      assert.equal(speech.en, 'You are in Taipei, Taiwan.');
+      assert.equal(speech.zh, '您現在在台灣台北。');
     });
 
     it('should map standard timezones to accurate offline coordinates and location', () => {
@@ -131,7 +131,7 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
   });
 
   describe('5. Full Composite Orientation Statement', () => {
-    it('should generate complete bilingual orientation sentence in Time -> Weekday -> Date -> Location sequence', () => {
+    it('should generate complete bilingual orientation sentence in Greeting -> Time -> Weekday & Date -> Location sequence', () => {
       const d = new Date(2026, 7, 25, 14, 15, 0);
       const loc = {
         city: 'San Francisco',
@@ -144,13 +144,28 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
       };
       const full = formatFullOrientationSpeech(d, loc);
 
-      // English Order Check: Time -> Weekday -> Date -> Location
-      const expectedEn = 'The current time is 2:15 PM in the afternoon. Today is Tuesday. Today is August 25, 2026. We are currently in San Francisco, California, United States.';
+      // English Order Check: Greeting -> Time -> Weekday, Date -> Location
+      const expectedEn = 'Good afternoon, Dad! It is currently 2:15 PM in the afternoon. Today is Tuesday, August 25, 2026. You are in San Francisco, California, United States.';
       assert.equal(full.en, expectedEn);
 
-      // Chinese Order Check: Time -> Weekday -> Date -> Location
-      const expectedZh = '現在時間是下午 2 點 15 分。 今天是星期二。 今天是 2026 年 8 月 25 日。 我們現在在美國加州舊金山。';
+      // Chinese Order Check: Greeting -> Time -> Weekday, Date -> Location
+      const expectedZh = '午安！ 現在時間是下午 2 點 15 分。 今天是星期二，2026 年 8 月 25 日。 您現在在美國加州舊金山。';
       assert.equal(full.zh, expectedZh);
+
+      // Verify segments array
+      assert.equal(full.segments.length, 4);
+      assert.equal(full.segments[0].type, 'greeting');
+      assert.equal(full.segments[0].en, 'Good afternoon, Dad!');
+      assert.equal(full.segments[0].zh, '午安！');
+      assert.equal(full.segments[1].type, 'time');
+      assert.equal(full.segments[1].en, 'It is currently 2:15 PM in the afternoon.');
+      assert.equal(full.segments[1].zh, '現在時間是下午 2 點 15 分。');
+      assert.equal(full.segments[2].type, 'date');
+      assert.equal(full.segments[2].en, 'Today is Tuesday, August 25, 2026.');
+      assert.equal(full.segments[2].zh, '今天是星期二，2026 年 8 月 25 日。');
+      assert.equal(full.segments[3].type, 'location');
+      assert.equal(full.segments[3].en, 'You are in San Francisco, California, United States.');
+      assert.equal(full.segments[3].zh, '您現在在美國加州舊金山。');
     });
   });
 

@@ -59,17 +59,46 @@ export const TodayOrientationView: React.FC = () => {
     refreshLocation();
   }, [refreshLocation]);
 
+  const abortSpeakAllRef = React.useRef(false);
+
   // Speech handlers
   const handleSpeakAll = async () => {
+    abortSpeakAllRef.current = false;
     setActiveSpeechType('all');
-    const { en, zh } = formatFullOrientationSpeech(currentDate, location);
-    await speakBilingual(en, zh, undefined, {
-      onEnd: () => setActiveSpeechType(null),
-      onError: () => setActiveSpeechType(null),
-    });
+    const { segments } = formatFullOrientationSpeech(currentDate, location);
+
+    try {
+      for (let i = 0; i < segments.length; i++) {
+        if (abortSpeakAllRef.current) break;
+        const seg = segments[i];
+
+        // Active card highlight matching the segment being spoken
+        setActiveSpeechType(seg.type === 'greeting' ? 'all' : seg.type);
+
+        await speakBilingual(seg.en, seg.zh, undefined, {
+          onError: () => {
+            setActiveSpeechType(null);
+          },
+        });
+
+        if (abortSpeakAllRef.current) break;
+        if (i < segments.length - 1) {
+          await new Promise((r) => setTimeout(r, 200));
+        }
+      }
+    } finally {
+      setActiveSpeechType(null);
+    }
+  };
+
+  const handleStopAll = () => {
+    abortSpeakAllRef.current = true;
+    setActiveSpeechType(null);
+    stopAll();
   };
 
   const handleSpeakWeekday = async (day?: WeekdayDef, isToday: boolean = true) => {
+    abortSpeakAllRef.current = true;
     setActiveSpeechType('weekday');
     let en = '';
     let zh = '';
@@ -88,6 +117,7 @@ export const TodayOrientationView: React.FC = () => {
   };
 
   const handleSpeakDate = async () => {
+    abortSpeakAllRef.current = true;
     setActiveSpeechType('date');
     const { en, zh } = formatDateSpeech(currentDate);
     await speakBilingual(en, zh, undefined, {
@@ -97,6 +127,7 @@ export const TodayOrientationView: React.FC = () => {
   };
 
   const handleSpeakTime = async () => {
+    abortSpeakAllRef.current = true;
     setActiveSpeechType('time');
     const { en, zh } = formatTimeSpeech(currentDate);
     await speakBilingual(en, zh, undefined, {
@@ -106,6 +137,7 @@ export const TodayOrientationView: React.FC = () => {
   };
 
   const handleSpeakLocation = async () => {
+    abortSpeakAllRef.current = true;
     setActiveSpeechType('location');
     const { en, zh } = formatLocationSpeech(location);
     await speakBilingual(en, zh, undefined, {
@@ -139,7 +171,7 @@ export const TodayOrientationView: React.FC = () => {
   const greeting = getGreeting(hours);
 
   // Active Glow Indicators for Visual-Audio Synchrony
-  const isWeekdayActive = isSpeaking && (activeSpeechType === 'weekday' || activeSpeechType === 'all');
+  const isWeekdayActive = isSpeaking && (activeSpeechType === 'weekday' || activeSpeechType === 'date' || activeSpeechType === 'all');
   const isDateActive = isSpeaking && (activeSpeechType === 'date' || activeSpeechType === 'all');
   const isTimeActive = isSpeaking && (activeSpeechType === 'time' || activeSpeechType === 'all');
   const isLocationActive = isSpeaking && (activeSpeechType === 'location' || activeSpeechType === 'all');
@@ -171,7 +203,7 @@ export const TodayOrientationView: React.FC = () => {
             className={`
               h-10 sm:h-11 px-4 sm:px-5 rounded-xl font-black text-white flex items-center gap-2 shadow-lg transition-all duration-200 cursor-pointer border border-indigo-400/30 text-xs sm:text-sm
               ${
-                isSpeaking && activeSpeechType === 'all'
+                isSpeaking && (activeSpeechType === 'all' || activeSpeechType === 'time' || activeSpeechType === 'date' || activeSpeechType === 'location')
                   ? 'bg-gradient-to-r from-indigo-500 to-violet-500 ring-4 ring-indigo-300/70 scale-105 shadow-indigo-500/60 animate-pulse'
                   : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 active:from-indigo-700 active:to-violet-700 shadow-indigo-950/50 hover:scale-[1.02] hover:shadow-indigo-500/30'
               }
@@ -187,7 +219,7 @@ export const TodayOrientationView: React.FC = () => {
           {isSpeaking && (
             <button
               type="button"
-              onClick={stopAll}
+              onClick={handleStopAll}
               className="h-10 sm:h-11 px-3.5 sm:px-4 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white rounded-xl text-xs sm:text-sm font-black shadow-lg border border-rose-400 flex items-center gap-1.5 transition-all cursor-pointer hover:scale-105"
               aria-label="Stop speaking"
             >

@@ -211,13 +211,13 @@ export function getDayPeriod(hours: number): { en: string; zh: string; icon: str
 
 export function getGreeting(hours: number): { en: string; zh: string; icon: string } {
   if (hours >= 5 && hours < 12) {
-    return { en: 'Good Morning, Dad!', zh: '早安！', icon: '🌅' };
+    return { en: 'Good morning, Dad!', zh: '早安！', icon: '🌅' };
   } else if (hours >= 12 && hours < 17) {
-    return { en: 'Good Afternoon, Dad!', zh: '午安！', icon: '☀️' };
+    return { en: 'Good afternoon, Dad!', zh: '午安！', icon: '☀️' };
   } else if (hours >= 17 && hours < 21) {
-    return { en: 'Good Evening, Dad!', zh: '傍晚好！', icon: '🌇' };
+    return { en: 'Good evening, Dad!', zh: '傍晚好！', icon: '🌇' };
   } else {
-    return { en: 'Good Night, Dad!', zh: '晚安！', icon: '🌙' };
+    return { en: 'Good night, Dad!', zh: '晚安！', icon: '🌙' };
   }
 }
 
@@ -302,6 +302,26 @@ export function formatDateSpeech(date: Date): { en: string; zh: string } {
 }
 
 /**
+ * Format English & Traditional Chinese speech for combined Weekday & Date
+ */
+export function formatWeekdayAndDateSpeech(date: Date): { en: string; zh: string } {
+  const day = WEEKDAYS[date.getDay()];
+  const monthsEn = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+  const monthEn = monthsEn[date.getMonth()];
+  const monthNum = date.getMonth() + 1;
+  const dayNum = date.getDate();
+  const year = date.getFullYear();
+
+  return {
+    en: `Today is ${day.name}, ${monthEn} ${dayNum}, ${year}.`,
+    zh: `今天是${day.nameZh}，${year} 年 ${monthNum} 月 ${dayNum} 日。`,
+  };
+}
+
+/**
  * Format English & Traditional Chinese speech for the Time
  */
 export function formatTimeSpeech(date: Date): { en: string; zh: string } {
@@ -312,7 +332,7 @@ export function formatTimeSpeech(date: Date): { en: string; zh: string } {
   const ampm = hours >= 12 ? 'PM' : 'AM';
   const minText = minutes < 10 ? `0${minutes}` : `${minutes}`;
 
-  const en = `The current time is ${displayHours12}:${minText} ${ampm} in the ${period.en}.`;
+  const en = `It is currently ${displayHours12}:${minText} ${ampm} in the ${period.en}.`;
   const zh = `現在時間是${period.zh} ${displayHours12} 點 ${minutes === 0 ? '整' : `${minutes} 分`}。`;
 
   return { en, zh };
@@ -335,23 +355,42 @@ export function formatLocationSpeech(loc: UserLocationInfo): { en: string; zh: s
   if (loc.cityZh || loc.city) zhStr += (loc.cityZh || loc.city);
 
   return {
-    en: `We are currently in ${enStr}.`,
-    zh: `我們現在在${zhStr || enStr}。`,
+    en: `You are in ${enStr}.`,
+    zh: `您現在在${zhStr || enStr}。`,
   };
+}
+
+export interface OrientationSpeechSegment {
+  type: 'greeting' | 'time' | 'date' | 'location';
+  en: string;
+  zh: string;
+}
+
+export interface FullOrientationSpeech {
+  en: string;
+  zh: string;
+  segments: OrientationSpeechSegment[];
 }
 
 /**
  * Format the Full Orientation Composite Speech
- * Order: Time -> Weekday -> Date -> Location
+ * Sequence: Greeting -> Time -> Weekday & Date -> Location
  */
-export function formatFullOrientationSpeech(date: Date, loc: UserLocationInfo): { en: string; zh: string } {
+export function formatFullOrientationSpeech(date: Date, loc: UserLocationInfo): FullOrientationSpeech {
+  const greeting = getGreeting(date.getHours());
   const timeSpeech = formatTimeSpeech(date);
-  const weekdaySpeech = formatWeekdaySpeech(date);
-  const dateSpeech = formatDateSpeech(date);
+  const weekdayAndDateSpeech = formatWeekdayAndDateSpeech(date);
   const locSpeech = formatLocationSpeech(loc);
 
-  const en = `${timeSpeech.en} ${weekdaySpeech.en} ${dateSpeech.en} ${locSpeech.en}`;
-  const zh = `${timeSpeech.zh} ${weekdaySpeech.zh} ${dateSpeech.zh} ${locSpeech.zh}`;
+  const segments: OrientationSpeechSegment[] = [
+    { type: 'greeting', en: greeting.en, zh: greeting.zh },
+    { type: 'time', en: timeSpeech.en, zh: timeSpeech.zh },
+    { type: 'date', en: weekdayAndDateSpeech.en, zh: weekdayAndDateSpeech.zh },
+    { type: 'location', en: locSpeech.en, zh: locSpeech.zh },
+  ];
 
-  return { en, zh };
+  const en = `${greeting.en} ${timeSpeech.en} ${weekdayAndDateSpeech.en} ${locSpeech.en}`;
+  const zh = `${greeting.zh} ${timeSpeech.zh} ${weekdayAndDateSpeech.zh} ${locSpeech.zh}`;
+
+  return { en, zh, segments };
 }
