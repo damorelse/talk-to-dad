@@ -146,8 +146,8 @@ export const TodayOrientationView: React.FC = () => {
 
   return (
     <div className="w-full h-full flex flex-col gap-3 overflow-y-auto p-1 select-none scrollbar-thin">
-      {/* 1. HERO GREETING & MASTER SPEAK BUTTON */}
-      <div className="w-full bg-slate-900/90 border border-slate-800 rounded-2xl px-5 py-3.5 shadow-lg flex items-center justify-between gap-3 min-w-0">
+      {/* 1. HERO GREETING & MASTER SPEAK BUTTON (Transparent Header) */}
+      <div className="w-full bg-transparent px-1.5 py-1 flex items-center justify-between gap-3 min-w-0">
         <div className="flex items-center gap-3.5 min-w-0">
           <span className="text-3xl sm:text-4xl shrink-0 drop-shadow">
             {greeting.icon}
