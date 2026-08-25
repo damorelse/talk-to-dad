@@ -146,50 +146,62 @@ export const TodayOrientationView: React.FC = () => {
 
   return (
     <div className="w-full h-full flex flex-col gap-3 overflow-y-auto p-1 select-none scrollbar-thin">
-      {/* 1. HERO GREETING & MASTER SPEAK BUTTON (Transparent Header) */}
-      <div className="w-full bg-transparent px-1.5 py-1 flex items-center justify-between gap-3 min-w-0">
+      {/* 1. HERO GREETING & MASTER SPEAK BUTTON (Option 2: Enlarged Header CTA) */}
+      <div className="w-full bg-transparent px-1.5 py-1 flex items-center justify-between gap-3 min-w-0 flex-wrap sm:flex-nowrap">
         <div className="flex items-center gap-3.5 min-w-0">
           <span className="text-3xl sm:text-4xl shrink-0 drop-shadow">
             {greeting.icon}
           </span>
           <div className="flex items-baseline gap-2.5 min-w-0 flex-wrap">
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight truncate">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight truncate">
               {greeting.en}
             </h1>
-            <span className="text-base sm:text-lg font-extrabold text-indigo-300">
+            <span className="text-base sm:text-lg md:text-xl font-extrabold text-indigo-300">
               {greeting.zh}
             </span>
           </div>
         </div>
 
         {/* Master Speak & Stop Controls */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
           <DebouncedTouchable
             onPress={handleSpeakAll}
             minTouchSize="lg"
             className={`
-              px-4 sm:px-5 py-2.5 rounded-xl font-black text-white flex items-center gap-2 shadow-lg transition-all duration-200 text-sm sm:text-base cursor-pointer
+              min-h-[52px] sm:min-h-[56px] px-5 sm:px-6 py-2 rounded-2xl font-black text-white flex items-center gap-3 shadow-xl transition-all duration-200 cursor-pointer border border-indigo-400/30
               ${
                 isSpeaking && activeSpeechType === 'all'
-                  ? 'bg-indigo-500 ring-4 ring-indigo-300/60 scale-105 shadow-indigo-500/50'
-                  : 'bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 hover:scale-[1.02]'
+                  ? 'bg-gradient-to-r from-indigo-500 to-violet-500 ring-4 ring-indigo-300/70 scale-105 shadow-indigo-500/60 animate-pulse'
+                  : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 active:from-indigo-700 active:to-violet-700 shadow-indigo-950/50 hover:scale-[1.03] hover:shadow-indigo-500/30'
               }
             `}
-            aria-label="Speak orientation information aloud"
+            aria-label="Speak all orientation information aloud"
           >
-            <Volume2 className="w-5 h-5 stroke-[2.5]" />
-            <span>Speak</span>
+            <div className="p-1.5 bg-white/15 rounded-xl flex items-center justify-center shrink-0">
+              <Volume2 className="w-6 h-6 stroke-[2.5] text-white" />
+            </div>
+            <div className="flex flex-col items-start leading-tight">
+              <span className="text-base sm:text-lg font-black tracking-wide text-white">
+                Speak All
+              </span>
+              <span className="text-xs font-bold text-indigo-200">
+                朗讀全部
+              </span>
+            </div>
           </DebouncedTouchable>
 
           {isSpeaking && (
             <button
               type="button"
               onClick={stopAll}
-              className="px-3 py-2.5 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white rounded-xl text-xs font-black shadow border border-rose-400 flex items-center gap-1.5 transition-all cursor-pointer"
+              className="min-h-[52px] sm:min-h-[56px] px-3.5 sm:px-4 py-2 bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white rounded-2xl text-xs sm:text-sm font-black shadow-lg border border-rose-400 flex items-center gap-2 transition-all cursor-pointer hover:scale-105"
               aria-label="Stop speaking"
             >
-              <VolumeX className="w-4 h-4" />
-              <span>Stop</span>
+              <VolumeX className="w-5 h-5" />
+              <div className="flex flex-col items-start leading-tight">
+                <span>Stop</span>
+                <span className="text-[10px] text-rose-200 font-bold">停止</span>
+              </div>
             </button>
           )}
         </div>
