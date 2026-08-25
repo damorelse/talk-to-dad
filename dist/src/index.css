@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+
+  html,
+  body {
+    height: 100%;
+    height: 100dvh;
+    height: -webkit-fill-available;
+    width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: auto;
+  }
+
+  body {
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+    box-sizing: border-box;
+  }
+
+  #root {
+    height: 100%;
+    height: 100dvh;
+    height: -webkit-fill-available;
+    width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+}
+
+/* High contrast accessibility theme override */
+.high-contrast-mode {
+  filter: contrast(135%);
+  background-color: #000000 !important;
+}
+
+.high-contrast-mode button {
+  border-width: 3px !important;
+  font-weight: 900 !important;
+}
+
+/* Shake animation for PIN errors */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-10px); }
+  40%, 80% { transform: translateX(10px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
