@@ -1,7 +1,6 @@
 import React from 'react';
 import { UserLocationInfo } from '../../types';
 import { getCountryFlag } from '../../services/location/locationService';
-import { Volume2, MapPin } from 'lucide-react';
 
 interface WorldMapSvgProps {
   location: UserLocationInfo;
@@ -277,12 +276,9 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
         </g>
       </svg>
 
-      {/* Clean Floating Badge Over Map with Red Pin Accent */}
-      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-rose-500/30 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center justify-between shadow-xl text-white">
+      {/* Clean Floating Badge Over Map */}
+      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-rose-500/30 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center shadow-xl text-white">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center shrink-0 shadow-inner">
-            <MapPin className="w-5 h-5 text-rose-400 fill-rose-500/20" />
-          </div>
           <span className="text-xl sm:text-2xl shrink-0 drop-shadow">
             {flag}
           </span>
@@ -294,10 +290,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
               {location.countryZh}{location.stateZh ? location.stateZh : ''}{location.cityZh ? location.cityZh : ''}
             </span>
           </div>
-        </div>
-
-        <div className="shrink-0 ml-1.5 text-rose-300 group-hover:text-white transition-colors">
-          <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
       </div>
     </div>

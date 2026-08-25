@@ -21,7 +21,6 @@ import {
   Volume2,
   Calendar,
   Clock,
-  RefreshCw,
   MapPin,
   VolumeX,
 } from 'lucide-react';
@@ -29,7 +28,6 @@ import {
 export const TodayOrientationView: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
   const [location, setLocation] = useState<UserLocationInfo>(() => getFallbackLocationFromTimezone());
-  const [isLocating, setIsLocating] = useState<boolean>(false);
   const [activeSpeechType, setActiveSpeechType] = useState<'all' | 'weekday' | 'date' | 'time' | 'location' | null>(null);
 
   const { speakBilingual, stopAll, isSpeaking } = useAudio();
@@ -43,21 +41,18 @@ export const TodayOrientationView: React.FC = () => {
   }, []);
 
   // Detect location on mount
-  const refreshLocation = useCallback(async () => {
-    setIsLocating(true);
+  const detectLocation = useCallback(async () => {
     try {
       const loc = await detectUserLocation();
       setLocation(loc);
     } catch (err) {
       console.warn('Location detection error:', err);
-    } finally {
-      setIsLocating(false);
     }
   }, []);
 
   useEffect(() => {
-    refreshLocation();
-  }, [refreshLocation]);
+    detectLocation();
+  }, [detectLocation]);
 
   const abortSpeakAllRef = React.useRef(false);
 
@@ -410,26 +405,11 @@ export const TodayOrientationView: React.FC = () => {
                   Location · 所在位置
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    refreshLocation();
-                  }}
-                  disabled={isLocating}
-                  className="p-1 text-slate-400 hover:text-rose-300 transition-colors disabled:opacity-50 cursor-pointer"
-                  aria-label="Refresh location"
-                  title="Refresh GPS"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isLocating ? 'animate-spin text-rose-400' : ''}`} />
-                </button>
-                <div
-                  className="text-rose-400 group-hover:text-white transition-colors p-0.5"
-                  aria-hidden="true"
-                >
-                  <Volume2 className="w-4 h-4" />
-                </div>
+              <div
+                className="text-rose-400 group-hover:text-white transition-colors p-0.5"
+                aria-hidden="true"
+              >
+                <Volume2 className="w-4 h-4" />
               </div>
             </div>
 
