@@ -39,11 +39,11 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
       onClick={onSelectLocation}
       onKeyDown={handleKeyDown}
       className={`
-        relative w-full aspect-[2/1] max-h-[320px] bg-slate-950 rounded-2xl border p-2 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-300
+        relative w-full aspect-[2.2/1] max-h-[280px] bg-slate-950 rounded-2xl border p-2 overflow-hidden shadow-inner cursor-pointer select-none group transition-all duration-300
         ${
           isSpeakingLocation
             ? 'border-purple-400 ring-4 ring-purple-400/50 shadow-2xl shadow-purple-950/60 scale-[1.01]'
-            : 'border-slate-800 hover:border-purple-500/60 hover:shadow-purple-950/30'
+            : 'border-slate-800 hover:border-purple-500/60'
         }
       `}
       role="button"
@@ -77,25 +77,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
 
         {/* Ocean Background */}
         <rect x="0" y="0" width="1000" height="500" fill="url(#oceanGlow)" rx="16" />
-
-        {/* Latitude & Longitude Graticule Lines */}
-        <g stroke="#334155" strokeWidth="0.8" strokeDasharray="3 5" opacity="0.6">
-          {/* Equator (0 deg) */}
-          <line x1="0" y1="250" x2="1000" y2="250" stroke="#475569" strokeWidth="1.2" strokeDasharray="none" />
-          {/* Tropics */}
-          <line x1="0" y1="185" x2="1000" y2="185" />
-          <line x1="0" y1="315" x2="1000" y2="315" />
-          {/* Polar Circles */}
-          <line x1="0" y1="65" x2="1000" y2="65" />
-          <line x1="0" y1="435" x2="1000" y2="435" />
-          {/* Prime Meridian (0 deg) */}
-          <line x1="500" y1="0" x2="500" y2="500" stroke="#475569" strokeWidth="1.2" strokeDasharray="none" />
-          {/* Longitude Grid Lines */}
-          <line x1="166" y1="0" x2="166" y2="500" />
-          <line x1="333" y1="0" x2="333" y2="500" />
-          <line x1="666" y1="0" x2="666" y2="500" />
-          <line x1="833" y1="0" x2="833" y2="500" />
-        </g>
 
         {/* Continent Landmass Outlines */}
         <g fill="url(#landGrad)" stroke="#475569" strokeWidth="1.5" strokeLinejoin="round" opacity="0.95">
@@ -178,10 +159,10 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <circle
             cx={pinX}
             cy={pinY}
-            r="18"
+            r="16"
             fill="none"
-            stroke="#a855f7"
-            strokeWidth="2.5"
+            stroke="#c084fc"
+            strokeWidth="2"
             className="animate-ping origin-center opacity-75"
             style={{ animationDuration: '2.5s' }}
           />
@@ -190,7 +171,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <circle
             cx={pinX}
             cy={pinY}
-            r="10"
+            r="9"
             fill="#9333ea"
             className="opacity-60"
           />
@@ -199,7 +180,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <circle
             cx={pinX}
             cy={pinY}
-            r="5.5"
+            r="5"
             fill="#facc15"
             stroke="#ffffff"
             strokeWidth="1.5"
@@ -207,27 +188,24 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
         </g>
       </svg>
 
-      {/* Floating Interactive Badge Over Map */}
-      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/90 backdrop-blur border border-slate-700/80 rounded-xl px-3 py-2 flex items-center justify-between shadow-lg text-white group-hover:border-purple-500/80 transition-colors">
+      {/* Clean Floating Badge Over Map */}
+      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl px-3 py-2 flex items-center justify-between shadow-lg text-white">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="text-xl sm:text-2xl shrink-0 drop-shadow">
+          <span className="text-xl sm:text-2xl shrink-0 drop-shadow">
             {flag}
-          </div>
+          </span>
           <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <span className="text-xs sm:text-sm font-black text-white truncate">
-                {location.city}{location.state ? `, ${location.state}` : ''}, {location.country}
-              </span>
-            </div>
-            <span className="text-[10px] sm:text-xs font-bold text-purple-300 truncate">
-              {location.countryZh}{location.stateZh ? location.stateZh : ''}{location.cityZh ? location.cityZh : ''} · {lat.toFixed(1)}°, {lon.toFixed(1)}°
+            <span className="text-xs sm:text-sm font-black text-white truncate">
+              {location.city}{location.state ? `, ${location.state}` : ''}, {location.country}
+            </span>
+            <span className="text-[11px] font-bold text-purple-300 truncate">
+              {location.countryZh}{location.stateZh ? location.stateZh : ''}{location.cityZh ? location.cityZh : ''}
             </span>
           </div>
         </div>
 
-        <div className="shrink-0 ml-2 flex items-center gap-1 bg-purple-500/20 text-purple-300 border border-purple-500/40 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-wider group-hover:bg-purple-500 group-hover:text-white transition-colors">
-          <Volume2 className="w-3.5 h-3.5" />
-          <span>Tap to Hear</span>
+        <div className="shrink-0 ml-2 text-purple-300 group-hover:text-white transition-colors">
+          <Volume2 className="w-4 h-4" />
         </div>
       </div>
     </div>
