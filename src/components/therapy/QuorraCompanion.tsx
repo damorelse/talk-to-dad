@@ -110,6 +110,9 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
   const onCompleteRef = React.useRef(onComplete);
   onCompleteRef.current = onComplete;
 
+  const dismissTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const petTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Normalize legacy aliases
   const resolvedType = React.useMemo<CornerAnimationType | CrossingAnimationType | null>(() => {
     if (!animationType) return null;
@@ -122,24 +125,30 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
 
   const isCrossing = resolvedType && resolvedType.startsWith("cross-");
 
-  // Play audio on initial entrance & handle auto-dismiss
+  // Play audio on initial entrance & handle auto-dismiss (6.0s for corner, 5.0s for crossing)
   useEffect(() => {
     if (resolvedType) {
       setIsPetted(false);
       setPetHearts([]);
       playPuppyBark();
 
-      // Crossing animations take 5.0s, corner animations take 3.0s
-      const durationMs = isCrossing ? 5200 : 3200;
-      const timer = setTimeout(() => {
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+      if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
+
+      // Crossing animations take 5.0s, corner animations stay for 6.0s by default
+      const durationMs = isCrossing ? 5200 : 6200;
+      dismissTimerRef.current = setTimeout(() => {
         onCompleteRef.current?.();
       }, durationMs);
 
-      return () => clearTimeout(timer);
+      return () => {
+        if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+        if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
+      };
     }
   }, [resolvedType, animationKey, isCrossing, playPuppyBark]);
 
-  // Handle tap-to-pet interaction
+  // Handle tap-to-pet interaction: extends stay by 5.0s on every pet
   const handlePet = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       e.stopPropagation();
@@ -151,13 +160,23 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
         x: (Math.random() - 0.5) * 50,
         y: -15 - Math.random() * 25,
       };
-      setPetHearts((prev) => [...prev.slice(-4), newHeart]);
+      setPetHearts((prev) => [...prev.slice(-5), newHeart]);
 
-      setTimeout(() => {
+      // Keep petted celebration state active for 2.5s
+      if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
+      petTimeoutRef.current = setTimeout(() => {
         setIsPetted(false);
-      }, 900);
+      }, 2500);
+
+      // In corner mode: extend the overall stay by an additional 5.0s from each tap
+      if (!isCrossing) {
+        if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+        dismissTimerRef.current = setTimeout(() => {
+          onCompleteRef.current?.();
+        }, 5000);
+      }
     },
-    [playPuppyBark]
+    [isCrossing, playPuppyBark]
   );
 
   if (!resolvedType) return null;
@@ -730,7 +749,11 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           onClick={handlePet}
           className="absolute -bottom-1 left-2 sm:left-6 z-30 cursor-pointer select-none pointer-events-auto group"
           style={{
-            animation: "quorraCornerPeekLeft 3.0s ease-in-out forwards",
+            animation: isPetted
+              ? "none"
+              : "quorraCornerPeekLeft6s 6.0s ease-in-out forwards",
+            transform: isPetted ? "translateY(0) scale(1)" : undefined,
+            opacity: isPetted ? 1 : undefined,
           }}
         >
           {/* Main Dog Container with fixed width/height so base position never shifts */}
@@ -813,7 +836,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
         </div>
       )}
 
-      {/* Global CSS Keyframes for 5s Crossing and Bottom-Left Corner */}
+      {/* Global CSS Keyframes for 5s Crossing and 6s Bottom-Left Corner */}
       <style>{`
         @keyframes quorraCross5s {
           0% {
@@ -834,16 +857,16 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           }
         }
 
-        @keyframes quorraCornerPeekLeft {
+        @keyframes quorraCornerPeekLeft6s {
           0% {
-            transform: translateY(85px) scale(0.85);
+            transform: translateY(90px) scale(0.85);
             opacity: 0;
           }
-          15% {
+          8% {
             transform: translateY(0) scale(1);
             opacity: 1;
           }
-          85% {
+          90% {
             transform: translateY(0) scale(1);
             opacity: 1;
           }
