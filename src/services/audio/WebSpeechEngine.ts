@@ -21,12 +21,16 @@ export function isChineseText(text: string): boolean {
 export class WebSpeechEngine {
   private voices: SpeechSynthesisVoice[] = [];
   private activeUtterances: Set<SpeechSynthesisUtterance> = new Set();
+  private keepAliveTimer: any = null;
 
   constructor() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       this.loadVoices();
       if (window.speechSynthesis.onvoiceschanged !== undefined) {
         window.speechSynthesis.onvoiceschanged = () => this.loadVoices();
+      }
+      if (typeof window.speechSynthesis.addEventListener === 'function') {
+        window.speechSynthesis.addEventListener('voiceschanged', () => this.loadVoices());
       }
     }
   }
@@ -41,6 +45,24 @@ export class WebSpeechEngine {
       this.loadVoices();
     }
     return this.voices;
+  }
+
+  private startKeepAlive(): void {
+    this.stopKeepAlive();
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    this.keepAliveTimer = setInterval(() => {
+      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        window.speechSynthesis.pause();
+        window.speechSynthesis.resume();
+      }
+    }, 10000);
+  }
+
+  private stopKeepAlive(): void {
+    if (this.keepAliveTimer) {
+      clearInterval(this.keepAliveTimer);
+      this.keepAliveTimer = null;
+    }
   }
 
   /**
@@ -58,7 +80,7 @@ export class WebSpeechEngine {
     if (locale === 'zh-TW') {
       const isZhTW = (lang: string) => {
         const l = (lang || '').replace('_', '-').toLowerCase();
-        return l === 'zh-tw' || l.includes('zh-hant-tw') || l.includes('cmn-hant-tw') || l === 'zh-hant_tw';
+        return l === 'zh-tw' || l.includes('zh-hant') || l.includes('cmn-hant') || l.includes('taiwan') || l === 'zh-hant_tw';
       };
 
       const isMeijia = (name: string) => {
@@ -80,20 +102,28 @@ export class WebSpeechEngine {
       const anyZhTW = voices.find(v => isZhTW(v.lang) && !isExcludedVoice(v.name));
       if (anyZhTW) return anyZhTW;
 
-      const anyGoogleZh = voices.find(v => (v.lang || '').startsWith('zh') && v.name.toLowerCase().includes('google') && !isExcludedVoice(v.name));
+      // 3. Fallback to any Chinese / Mandarin / Cantonese dialect voice on system
+      const isAnyChinese = (lang: string, name: string) => {
+        const l = (lang || '').replace('_', '-').toLowerCase();
+        const n = (name || '').toLowerCase();
+        return l.startsWith('zh') || l.startsWith('cmn') || l.startsWith('yue') || l.includes('chinese') || n.includes('chinese') || n.includes('國語') || n.includes('普通话') || n.includes('中文');
+      };
+
+      const anyGoogleZh = voices.find(v => isAnyChinese(v.lang, v.name) && v.name.toLowerCase().includes('google') && !isExcludedVoice(v.name));
       if (anyGoogleZh) return anyGoogleZh;
 
-      const anyZh = voices.find(v => (v.lang || '').startsWith('zh') && !isExcludedVoice(v.name));
+      const anyZh = voices.find(v => isAnyChinese(v.lang, v.name) && !isExcludedVoice(v.name));
       if (anyZh) return anyZh;
     } else {
       const isEnUS = (lang: string) => (lang || '').replace('_', '-').toLowerCase() === 'en-us';
+      const isAnyEn = (lang: string) => (lang || '').replace('_', '-').toLowerCase().startsWith('en');
 
       // 1. Prioritize Samantha as the default en-US voice
       const samanthaVoice = voices.find(v => isEnUS(v.lang) && v.name.toLowerCase().includes('samantha') && !isExcludedVoice(v.name));
       if (samanthaVoice) return samanthaVoice;
 
       // 2. High quality English fallback keywords
-      const priorityKeywords = ['Samantha', 'Alex', 'Ava', 'Allison', 'Siri', 'Google US English', 'Google', 'Natural', 'Enhanced', 'Daniel'];
+      const priorityKeywords = ['Samantha', 'Alex', 'Ava', 'Allison', 'Siri', 'Google US English', 'Google', 'Natural', 'Enhanced', 'Daniel', 'Tom', 'Karen'];
       for (const kw of priorityKeywords) {
         const matched = voices.find(v => isEnUS(v.lang) && v.name.includes(kw) && !isExcludedVoice(v.name));
         if (matched) return matched;
@@ -102,10 +132,10 @@ export class WebSpeechEngine {
       const anyEnUS = voices.find(v => isEnUS(v.lang) && !isExcludedVoice(v.name));
       if (anyEnUS) return anyEnUS;
 
-      const anyGoogleEn = voices.find(v => (v.lang || '').startsWith('en') && v.name.toLowerCase().includes('google') && !isExcludedVoice(v.name));
+      const anyGoogleEn = voices.find(v => isAnyEn(v.lang) && v.name.toLowerCase().includes('google') && !isExcludedVoice(v.name));
       if (anyGoogleEn) return anyGoogleEn;
 
-      const anyEn = voices.find(v => (v.lang || '').startsWith('en') && !isExcludedVoice(v.name));
+      const anyEn = voices.find(v => isAnyEn(v.lang) && !isExcludedVoice(v.name));
       if (anyEn) return anyEn;
     }
 
@@ -126,7 +156,7 @@ export class WebSpeechEngine {
   }
 
   /**
-   * Synthesizes text with optional word boundary synchronization.
+   * Synthesizes text with optional word boundary synchronization and watchdog protection.
    */
   async speak(text: string, options: SpeechOptions = {}): Promise<void> {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
@@ -171,6 +201,24 @@ export class WebSpeechEngine {
 
       // Retain reference to prevent premature Chromium garbage collection
       this.activeUtterances.add(utterance);
+      this.startKeepAlive();
+
+      // Watchdog timer: safety net in case browser TTS drops utterance or fails to emit onend
+      const estimatedDurationMs = Math.max(5000, Math.ceil((text.length / (options.rate || 0.9)) * 500));
+      const watchdogTimer = setTimeout(() => {
+        this.activeUtterances.delete(utterance);
+        if (this.activeUtterances.size === 0) {
+          this.stopKeepAlive();
+        }
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) {
+          window.speechSynthesis.cancel();
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+        }
+        options.onEnd?.();
+        resolve();
+      }, estimatedDurationMs);
 
       utterance.onstart = () => {
         options.onStart?.();
@@ -181,13 +229,21 @@ export class WebSpeechEngine {
       };
 
       utterance.onend = () => {
+        clearTimeout(watchdogTimer);
         this.activeUtterances.delete(utterance);
+        if (this.activeUtterances.size === 0) {
+          this.stopKeepAlive();
+        }
         options.onEnd?.();
         resolve();
       };
 
       utterance.onerror = (e) => {
+        clearTimeout(watchdogTimer);
         this.activeUtterances.delete(utterance);
+        if (this.activeUtterances.size === 0) {
+          this.stopKeepAlive();
+        }
         // 'interrupted' or 'canceled' are expected when user taps another card
         if (e.error === 'interrupted' || e.error === 'canceled') {
           resolve();
@@ -204,6 +260,7 @@ export class WebSpeechEngine {
   cancel(): void {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       this.activeUtterances.clear();
+      this.stopKeepAlive();
       window.speechSynthesis.cancel();
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
@@ -270,44 +327,69 @@ export function isExcludedVoice(name: string): boolean {
 }
 
 /**
- * Filters voice list to only non-excluded en-US and zh-TW, grouped by locale and sorted alphabetically by voice name.
+ * Filters voice list to non-excluded English and Chinese voices, grouped and prioritized.
  */
 export function filterAndGroupVoices(voices: SpeechSynthesisVoice[]): GroupedVoiceLocale[] {
-  const isEnUS = (lang: string) => {
-    const l = (lang || '').replace('_', '-').toLowerCase();
-    return l === 'en-us';
-  };
+  const isEnUS = (lang: string) => (lang || '').replace('_', '-').toLowerCase() === 'en-us';
+  const isAnyEn = (lang: string) => (lang || '').replace('_', '-').toLowerCase().startsWith('en');
 
   const isZhTW = (lang: string) => {
     const l = (lang || '').replace('_', '-').toLowerCase();
-    return l === 'zh-tw' || l.includes('zh-hant-tw') || l.includes('cmn-hant-tw') || l === 'zh-hant_tw';
+    return l === 'zh-tw' || l.includes('zh-hant') || l.includes('cmn-hant') || l.includes('taiwan') || l === 'zh-hant_tw';
+  };
+
+  const isAnyZh = (lang: string, name: string) => {
+    const l = (lang || '').replace('_', '-').toLowerCase();
+    const n = (name || '').toLowerCase();
+    return (
+      l.startsWith('zh') ||
+      l.startsWith('cmn') ||
+      l.startsWith('yue') ||
+      l.includes('chinese') ||
+      n.includes('chinese') ||
+      n.includes('國語') ||
+      n.includes('普通话') ||
+      n.includes('中文')
+    );
   };
 
   const eligibleVoices = voices.filter((v) => !isExcludedVoice(v.name));
 
-  const enUSVoices = eligibleVoices
-    .filter((v) => isEnUS(v.lang))
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  // Sort English voices: en-US first, then alphabetically
+  const enVoices = eligibleVoices
+    .filter((v) => isAnyEn(v.lang))
+    .sort((a, b) => {
+      const aIsUS = isEnUS(a.lang) ? 0 : 1;
+      const bIsUS = isEnUS(b.lang) ? 0 : 1;
+      if (aIsUS !== bIsUS) return aIsUS - bIsUS;
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    });
 
-  const zhTWVoices = eligibleVoices
-    .filter((v) => isZhTW(v.lang))
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  // Sort Chinese voices: zh-TW / Traditional Chinese first, then alphabetically
+  const zhVoices = eligibleVoices
+    .filter((v) => isAnyZh(v.lang, v.name))
+    .sort((a, b) => {
+      const aIsTW = isZhTW(a.lang) ? 0 : 1;
+      const bIsTW = isZhTW(b.lang) ? 0 : 1;
+      if (aIsTW !== bIsTW) return aIsTW - bIsTW;
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    });
 
   const groups: GroupedVoiceLocale[] = [];
 
-  if (enUSVoices.length > 0) {
+  if (enVoices.length > 0) {
     groups.push({
       locale: 'en-US',
       label: '🇺🇸 English (United States) — en-US',
-      voices: enUSVoices,
+      voices: enVoices,
     });
   }
 
-  if (zhTWVoices.length > 0) {
+  if (zhVoices.length > 0) {
     groups.push({
       locale: 'zh-TW',
-      label: '🇹🇼 Chinese (Taiwan) — zh-TW',
-      voices: zhTWVoices,
+      label: '🇹🇼 Chinese (Traditional / Taiwan) — zh-TW',
+      voices: zhVoices,
     });
   }
 
