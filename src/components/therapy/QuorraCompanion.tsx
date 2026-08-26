@@ -721,7 +721,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
             <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-full shadow-xl border-2 border-white flex items-center gap-1.5 whitespace-nowrap">
               <span>🐾</span>
               {categoryName ? (
-                <span>{categoryName} {categoryNameZh && `(${categoryNameZh})`}</span>
+                <span>{categoryName}</span>
               ) : resolvedType === "cross-skateboard" ? (
                 <span>Cruising Along! 🛹</span>
               ) : resolvedType === "cross-tennis-chase" ? (
