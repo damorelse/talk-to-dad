@@ -113,11 +113,16 @@ describe('Tier 1: Feature Verification (F01 - F16)', () => {
       assert.ok(garden, 'Garden scene must exist');
       assert.equal(garden.title, 'Garden');
 
-      // Verify Living Room Hotspots (couch, remote, water)
+      // Verify Living Room Hotspots (couch, remote, water, pet quorra)
       const couch = DEFAULT_HOTSPOTS.find(hs => hs.id === 'hs-chair' && hs.sceneId === 'scene-livingroom');
       assert.ok(couch, 'Couch hotspot must exist in Living Room');
       assert.equal(couch.label, 'Couch', 'Living room hotspot must be labeled "Couch"');
       assert.ok(couch.spokenText.includes('couch'), 'Spoken text should reference couch');
+
+      const petQuorra = DEFAULT_HOTSPOTS.find(hs => hs.id === 'hs-pet-quorra' && hs.sceneId === 'scene-livingroom');
+      assert.ok(petQuorra, 'Pet Quorra hotspot must exist in Living Room');
+      assert.equal(petQuorra.label, 'Pet Quorra');
+      assert.ok(petQuorra.spokenText.includes('Quorra'), 'Spoken text should reference Quorra');
 
       // Verify Kitchen Hotspots (refrigerator, sink, coffee maker, dining table, water cup)
       const fridge = DEFAULT_HOTSPOTS.find(hs => hs.id === 'hs-fridge' && hs.sceneId === 'scene-kitchen');

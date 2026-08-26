@@ -129,10 +129,27 @@ export class AppDatabase extends Dexie {
         const existing = await this.hotspots.get(hs.id);
         if (!existing) {
           await this.hotspots.put(hs);
-        } else if (!existing.labelZh || !existing.spokenTextZh) {
-          existing.labelZh = existing.labelZh || hs.labelZh;
-          existing.spokenTextZh = existing.spokenTextZh || hs.spokenTextZh;
-          await this.hotspots.put(existing);
+        } else {
+          let updated = false;
+          if (!existing.labelZh || !existing.spokenTextZh) {
+            existing.labelZh = existing.labelZh || hs.labelZh;
+            existing.spokenTextZh = existing.spokenTextZh || hs.spokenTextZh;
+            updated = true;
+          }
+          // If hs-chair has legacy coordinates, update to new coordinates so couch and pet quorra don't overlap
+          if (existing.id === 'hs-chair' && existing.height === 50) {
+            existing.x = hs.x;
+            existing.y = hs.y;
+            existing.width = hs.width;
+            existing.height = hs.height;
+            existing.labelZh = hs.labelZh;
+            existing.spokenText = hs.spokenText;
+            existing.spokenTextZh = hs.spokenTextZh;
+            updated = true;
+          }
+          if (updated) {
+            await this.hotspots.put(existing);
+          }
         }
       }
     }
