@@ -44,44 +44,70 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
   const isJapan = countryLower.includes('japan') || location.countryZh === '日本';
   const isUK = countryLower.includes('united kingdom') || countryLower.includes('uk') || location.countryZh === '英國';
 
-  // Specific coordinates for Seattle and San Jose in World Map (1000x500)
-  const worldSeattleX = (( -122.33 + 180) / 360) * 1000; // ~160.2
-  const worldSeattleY = (( 90 - 47.61) / 180) * 500;    // ~117.8
-  const worldSjX = (( -121.89 + 180) / 360) * 1000;      // ~161.4
-  const worldSjY = (( 90 - 37.34) / 180) * 500;         // ~146.3
+  // Known US cities for accurate positioning on Albers USA projection (viewBox 170 -20 1060 760)
+  const KNOWN_US_CITIES: Record<string, { x: number; y: number }> = {
+    'san jose': { x: 320, y: 256 },
+    'san josé': { x: 320, y: 256 },
+    'san francisco': { x: 318, y: 250 },
+    'santa clara': { x: 320, y: 256 },
+    'sunnyvale': { x: 320, y: 256 },
+    'oakland': { x: 322, y: 248 },
+    'los angeles': { x: 345, y: 350 },
+    'san diego': { x: 360, y: 375 },
+    'seattle': { x: 368, y: 44 },
+    'portland': { x: 365, y: 85 },
+    'las vegas': { x: 415, y: 290 },
+    'phoenix': { x: 470, y: 375 },
+    'salt lake city': { x: 490, y: 215 },
+    'denver': { x: 600, y: 280 },
+    'dallas': { x: 730, y: 410 },
+    'austin': { x: 715, y: 460 },
+    'houston': { x: 745, y: 475 },
+    'san antonio': { x: 700, y: 480 },
+    'minneapolis': { x: 805, y: 130 },
+    'kansas city': { x: 775, y: 285 },
+    'st. louis': { x: 835, y: 295 },
+    'st louis': { x: 835, y: 295 },
+    'chicago': { x: 885, y: 220 },
+    'detroit': { x: 945, y: 195 },
+    'nashville': { x: 935, y: 345 },
+    'atlanta': { x: 995, y: 395 },
+    'miami': { x: 1055, y: 565 },
+    'orlando': { x: 1045, y: 505 },
+    'tampa': { x: 1025, y: 515 },
+    'washington': { x: 1092, y: 260 },
+    'philadelphia': { x: 1105, y: 230 },
+    'new york': { x: 1120, y: 205 },
+    'boston': { x: 1165, y: 165 },
+    'honolulu': { x: 599, y: 623 },
+    'anchorage': { x: 336, y: 618 },
+  };
 
-  // City & State detection for focus highlighting
   const cityLower = (location.city || '').toLowerCase();
-  const isUserAtSeattle =
-    isUSA &&
-    (cityLower.includes('seattle') ||
-      location.cityZh?.includes('西雅圖') ||
-      Math.hypot(pinX - worldSeattleX, pinY - worldSeattleY) < 15);
-  const isUserAtSJ =
-    isUSA &&
-    !isUserAtSeattle &&
-    (cityLower.includes('san jose') ||
-      cityLower.includes('san josé') ||
-      cityLower.includes('san francisco') ||
-      cityLower.includes('santa clara') ||
-      cityLower.includes('sunnyvale') ||
-      location.cityZh?.includes('聖荷西') ||
-      location.cityZh?.includes('舊金山') ||
-      Math.hypot(pinX - worldSjX, pinY - worldSjY) < 20);
-
-  // Specific coordinates for Seattle and San Jose in Albers USA Zoom (170 -20 1060 760)
-  const regSeattleX = 368;
-  const regSeattleY = 44;
-  const regSjX = 320;
-  const regSjY = 256;
-
-  // Active state lookup
   const userStateRaw = (location.state || '').toLowerCase().trim();
-  const userStateId = STATE_NAME_TO_ID[userStateRaw] || (isUserAtSeattle ? 'wa' : isUserAtSJ ? 'ca' : undefined);
+  const userStateId = STATE_NAME_TO_ID[userStateRaw] || (cityLower.includes('seattle') ? 'wa' : cityLower.includes('san') ? 'ca' : undefined);
+
+  // Compute user position on USA Albers Map
+  let userUsaX = 320;
+  let userUsaY = 256;
+  const cityMatch = Object.entries(KNOWN_US_CITIES).find(([k]) => cityLower.includes(k));
+  if (cityMatch) {
+    userUsaX = cityMatch[1].x;
+    userUsaY = cityMatch[1].y;
+  } else if (userStateId && STATE_CENTROIDS[userStateId]) {
+    userUsaX = STATE_CENTROIDS[userStateId].x;
+    userUsaY = STATE_CENTROIDS[userStateId].y;
+  }
+
+  // Determine badge placement to avoid clipping
+  const isBadgeOnLeft = userUsaX > 800;
+  const badgeWidth = 280;
+  const badgeHeight = 56;
+  const badgeYOffset = userUsaY < 50 ? 4 : -28;
 
   // On-map floating label calculations for user location in World Map
-  const cityLabel = location.city || location.country || 'You Are Here';
-  const pillWidth = Math.max(90, Math.min(180, cityLabel.length * 8.5 + 30));
+  const hereLabel = 'YOU ARE HERE · 您在這裡';
+  const pillWidth = 240;
   const calloutX = Math.max(pillWidth / 2 + 12, Math.min(1000 - pillWidth / 2 - 12, pinX));
   const isNearTop = pinY < 80;
   const calloutY = isNearTop ? pinY + 54 : pinY - 48;
@@ -177,7 +203,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <g id="us-states" strokeLinejoin="round">
             {USA_STATES.map((state) => {
               const isStateActive = state.id === userStateId;
-              const isWestCoastPinState = state.id === 'wa' || state.id === 'ca';
 
               let fill = 'url(#usStateGrad)';
               let stroke = '#384860';
@@ -187,10 +212,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
                 fill = 'rgba(239, 68, 68, 0.28)';
                 stroke = '#ef4444';
                 strokeWidth = 2.8;
-              } else if (isWestCoastPinState) {
-                fill = 'rgba(56, 189, 248, 0.2)';
-                stroke = '#38bdf8';
-                strokeWidth = 2.2;
               }
 
               return (
@@ -210,18 +231,15 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           {/* Major State Code Text Accents (Filtered to avoid badge collisions) */}
           <g fontSize="20" fontWeight="900" pointerEvents="none" textAnchor="middle" opacity="0.85">
             {Object.entries(STATE_CENTROIDS).map(([id, info]) => {
-              // Suppress WA and CA centroid text labels since the large city badges mark them clearly
-              if (id === 'wa' || id === 'ca') return null;
-
-              const isActive = id === userStateId;
-              const labelColor = isActive ? '#ef4444' : '#64748b';
+              // Suppress centroid label for active user state to keep badge area clean
+              if (id === userStateId) return null;
 
               return (
                 <text
                   key={id}
                   x={info.x}
                   y={info.y}
-                  fill={labelColor}
+                  fill="#64748b"
                   fontSize={id === 'tx' ? '24' : '19'}
                 >
                   {info.label}
@@ -231,118 +249,95 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           </g>
 
           {/* ================================================================= */}
-          {/* PIN 1: SEATTLE (WASHINGTON)                                       */}
+          {/* USER LOCATION PIN: YOU ARE HERE                                   */}
           {/* ================================================================= */}
-          <g transform={`translate(${regSeattleX}, ${regSeattleY})`} filter="url(#pinShadow)">
-            {/* Static Halo Ring */}
+          <g transform={`translate(${userUsaX}, ${userUsaY})`} filter="url(#pinShadow)">
+            {/* Outer Pulsing/Glow Halo Ring */}
             <circle
               cx="0"
               cy="0"
-              r={isUserAtSeattle ? 28 : 18}
-              fill={isUserAtSeattle ? 'rgba(239, 68, 68, 0.25)' : 'rgba(56, 189, 248, 0.2)'}
-              stroke={isUserAtSeattle ? '#ef4444' : '#38bdf8'}
+              r="28"
+              fill="rgba(239, 68, 68, 0.25)"
+              stroke="#ef4444"
               strokeWidth="2.5"
               opacity="0.9"
             />
             <ellipse cx="0" cy="2" rx="12" ry="4.5" fill="#000000" opacity="0.6" />
             <path
               d="M 0 0 C -4 -8, -16 -18, -16 -32 A 16 16 0 1 1 16 -32 C 16 -18, 4 -8, 0 0 Z"
-              fill={isUserAtSeattle ? 'url(#redPinGrad)' : 'url(#cyanPinGrad)'}
+              fill="url(#redPinGrad)"
               stroke="#ffffff"
               strokeWidth="2.5"
               strokeLinejoin="round"
             />
             <circle cx="0" cy="-32" r="6.5" fill="#ffffff" />
-            <circle cx="0" cy="-32" r="3.2" fill={isUserAtSeattle ? '#dc2626' : '#0284c7'} />
+            <circle cx="0" cy="-32" r="3.2" fill="#dc2626" />
 
-            {/* Seattle Callout Pill Badge (Large, Ultra-Legible & Safe from Clipping) */}
+            {/* YOU ARE HERE Callout Pill Badge */}
             <g pointerEvents="none">
-              <polygon
-                points="14,0 28,-10 28,10"
-                fill={isUserAtSeattle ? '#ef4444' : '#0284c7'}
-                stroke="#ffffff"
-                strokeWidth="2"
-              />
-              <rect
-                x="26"
-                y="-28"
-                width="280"
-                height="56"
-                rx="28"
-                fill={isUserAtSeattle ? '#ef4444' : '#0284c7'}
-                stroke="#ffffff"
-                strokeWidth="3"
-                filter="url(#regionalGlow)"
-              />
-              <text
-                x="166"
-                y="9"
-                textAnchor="middle"
-                fill="#ffffff"
-                fontSize="26"
-                fontWeight="900"
-                letterSpacing="0.6"
-              >
-                Seattle · 西雅圖
-              </text>
-            </g>
-          </g>
-
-          {/* ================================================================= */}
-          {/* PIN 2: SAN JOSE (CALIFORNIA / SILICON VALLEY)                     */}
-          {/* ================================================================= */}
-          <g transform={`translate(${regSjX}, ${regSjY})`} filter="url(#pinShadow)">
-            {/* Static Halo Ring */}
-            <circle
-              cx="0"
-              cy="0"
-              r={isUserAtSJ ? 28 : 18}
-              fill={isUserAtSJ ? 'rgba(239, 68, 68, 0.25)' : 'rgba(56, 189, 248, 0.2)'}
-              stroke={isUserAtSJ ? '#ef4444' : '#38bdf8'}
-              strokeWidth="2.5"
-              opacity="0.9"
-            />
-            <ellipse cx="0" cy="2" rx="12" ry="4.5" fill="#000000" opacity="0.6" />
-            <path
-              d="M 0 0 C -4 -8, -16 -18, -16 -32 A 16 16 0 1 1 16 -32 C 16 -18, 4 -8, 0 0 Z"
-              fill={isUserAtSJ ? 'url(#redPinGrad)' : 'url(#cyanPinGrad)'}
-              stroke="#ffffff"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-            />
-            <circle cx="0" cy="-32" r="6.5" fill="#ffffff" />
-            <circle cx="0" cy="-32" r="3.2" fill={isUserAtSJ ? '#dc2626' : '#0284c7'} />
-
-            {/* San Jose Callout Pill Badge (Large, Ultra-Legible & Safe from Clipping) */}
-            <g pointerEvents="none">
-              <polygon
-                points="14,0 28,-10 28,10"
-                fill={isUserAtSJ ? '#ef4444' : '#0284c7'}
-                stroke="#ffffff"
-                strokeWidth="2"
-              />
-              <rect
-                x="26"
-                y="-28"
-                width="290"
-                height="56"
-                rx="28"
-                fill={isUserAtSJ ? '#ef4444' : '#0284c7'}
-                stroke="#ffffff"
-                strokeWidth="3"
-                filter="url(#regionalGlow)"
-              />
-              <text
-                x="171"
-                y="9"
-                textAnchor="middle"
-                fill="#ffffff"
-                fontSize="26"
-                fontWeight="900"
-                letterSpacing="0.6"
-              >
-                San Jose · 聖荷西
-              </text>
+              {isBadgeOnLeft ? (
+                <>
+                  <polygon
+                    points="-14,0 -28,-10 -28,10"
+                    fill="#ef4444"
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                  />
+                  <rect
+                    x={-badgeWidth - 26}
+                    y={badgeYOffset}
+                    width={badgeWidth}
+                    height={badgeHeight}
+                    rx={badgeHeight / 2}
+                    fill="#ef4444"
+                    stroke="#ffffff"
+                    strokeWidth="3"
+                    filter="url(#regionalGlow)"
+                  />
+                  <text
+                    x={-badgeWidth / 2 - 26}
+                    y={badgeYOffset + 37}
+                    textAnchor="middle"
+                    fill="#ffffff"
+                    fontSize="24"
+                    fontWeight="900"
+                    letterSpacing="0.8"
+                  >
+                    YOU ARE HERE · 您在這裡
+                  </text>
+                </>
+              ) : (
+                <>
+                  <polygon
+                    points="14,0 28,-10 28,10"
+                    fill="#ef4444"
+                    stroke="#ffffff"
+                    strokeWidth="2"
+                  />
+                  <rect
+                    x="26"
+                    y={badgeYOffset}
+                    width={badgeWidth}
+                    height={badgeHeight}
+                    rx={badgeHeight / 2}
+                    fill="#ef4444"
+                    stroke="#ffffff"
+                    strokeWidth="3"
+                    filter="url(#regionalGlow)"
+                  />
+                  <text
+                    x={badgeWidth / 2 + 26}
+                    y={badgeYOffset + 37}
+                    textAnchor="middle"
+                    fill="#ffffff"
+                    fontSize="24"
+                    fontWeight="900"
+                    letterSpacing="0.8"
+                  >
+                    YOU ARE HERE · 您在這裡
+                  </text>
+                </>
+              )}
             </g>
           </g>
         </svg>
@@ -527,7 +522,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             )}
             <rect x={-pillWidth / 2} y="-24" width={pillWidth} height="22" rx="11" fill="#ef4444" stroke="#ffffff" strokeWidth="2" filter="url(#pinGlow)" />
             <text x="0" y="-9" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
-              {cityLabel}
+              {hereLabel}
             </text>
           </g>
         </svg>
