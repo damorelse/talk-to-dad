@@ -243,13 +243,13 @@ export const TodayOrientationView: React.FC = () => {
       {/* 2. 2-COLUMN LAYOUT: Left (Time, Weekday, Date) | Right (Location with World Map) */}
       <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3 min-h-0">
         {/* LEFT COLUMN: Time (top) -> Weekday (middle) -> Date (bottom) */}
-        <div className="flex flex-col gap-2.5 sm:gap-3">
+        <div className="flex flex-col gap-2.5 sm:gap-3 h-full">
           {/* CARD 1: TIME (Top Left) */}
           <DebouncedTouchable
             onPress={handleSpeakTime}
             minTouchSize="lg"
             className={`
-              bg-slate-900 border-2 rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group
+              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-1 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group min-h-[90px]
               ${
                 isTimeActive
                   ? 'border-emerald-400 ring-4 ring-emerald-400/40 shadow-emerald-950/60'
@@ -272,7 +272,7 @@ export const TodayOrientationView: React.FC = () => {
             </div>
 
             {/* Time Display */}
-            <div className="flex flex-col my-auto py-0.5">
+            <div className="flex flex-col my-auto py-1">
               <div className="flex items-baseline gap-2.5">
                 <span className="text-2xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
                   {displayHours12}:{minStr}
@@ -291,7 +291,7 @@ export const TodayOrientationView: React.FC = () => {
           <div
             onClick={() => handleSpeakWeekday()}
             className={`
-              bg-slate-900 border-2 rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 flex flex-col justify-between shadow-lg gap-1.5 transition-all duration-200 cursor-pointer group
+              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-1 flex flex-col justify-between shadow-lg gap-1.5 transition-all duration-200 cursor-pointer group min-h-[110px]
               ${
                 isWeekdayActive
                   ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
@@ -324,7 +324,7 @@ export const TodayOrientationView: React.FC = () => {
 
             {/* Visual 7-Day Weekday Tracker */}
             <div
-              className="my-auto py-0.5"
+              className="my-auto py-1"
               onClick={(e) => e.stopPropagation()}
             >
               <WeekdayBar
@@ -340,7 +340,7 @@ export const TodayOrientationView: React.FC = () => {
             onPress={handleSpeakDate}
             minTouchSize="lg"
             className={`
-              bg-slate-900 border-2 rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group
+              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-1 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group min-h-[90px]
               ${
                 isDateActive
                   ? 'border-blue-400 ring-4 ring-blue-400/40 shadow-blue-950/60'
@@ -363,7 +363,7 @@ export const TodayOrientationView: React.FC = () => {
             </div>
 
             {/* Date Display */}
-            <div className="flex items-center gap-3 sm:gap-3.5 my-auto py-0.5 min-w-0">
+            <div className="flex items-center gap-3 sm:gap-3.5 my-auto py-1 min-w-0">
               <div className="w-12 h-14 sm:w-14 sm:h-15 rounded-xl bg-slate-100 text-slate-900 flex flex-col items-center overflow-hidden shadow-md border border-slate-300 shrink-0 select-none">
                 <div className="w-full bg-rose-600 text-white py-0.5 text-center text-[9px] sm:text-[10px] font-black uppercase tracking-wider">
                   {monthShort} · {monthNum}月
@@ -396,7 +396,7 @@ export const TodayOrientationView: React.FC = () => {
           <div
             onClick={handleSpeakLocation}
             className={`
-              bg-slate-900 border-2 rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 flex flex-col justify-between gap-2 shadow-lg flex-1 transition-all duration-200 cursor-pointer group min-h-[160px] sm:min-h-[180px]
+              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex flex-col justify-between gap-2 shadow-lg flex-1 transition-all duration-200 cursor-pointer group min-h-[160px] sm:min-h-[180px]
               ${
                 isLocationActive
                   ? 'border-rose-400 ring-4 ring-rose-400/40 shadow-rose-950/60'
