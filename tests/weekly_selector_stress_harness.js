@@ -272,9 +272,9 @@ async function runWeeklySelectorStressHarness() {
   // ===========================================================================
   console.log('\n--- 4. Week Rollover & Card Rotation / Starvation Analysis ---');
 
-  await runStressSection('Rotation 4.1: 52 consecutive weeks rotation on 21-card category (Food & Drink)', () => {
+  await runStressSection('Rotation 4.1: 52 consecutive weeks rotation on 22-card category (Food & Drink)', () => {
     const foodCards = DEFAULT_CARDS.filter(c => c.categoryId === 'cat-food');
-    assert.equal(foodCards.length, 21);
+    assert.equal(foodCards.length, 22);
 
     const cardSelectionFrequency = new Map(foodCards.map(c => [c.id, 0]));
     let previousWeekIds = '';
@@ -390,12 +390,12 @@ async function runWeeklySelectorStressHarness() {
     }
   });
 
-  await runStressSection('SmallCategories 5.2: Production default categories with exactly 5 cards (cat-family, cat-places)', () => {
+  await runStressSection('SmallCategories 5.2: Production default categories with small card counts (cat-family: 5, cat-places: 6)', () => {
     const familyCards = DEFAULT_CARDS.filter(c => c.categoryId === 'cat-family');
     const placesCards = DEFAULT_CARDS.filter(c => c.categoryId === 'cat-places');
 
     assert.equal(familyCards.length, 5, 'cat-family must have exactly 5 default cards');
-    assert.equal(placesCards.length, 5, 'cat-places must have exactly 5 default cards');
+    assert.equal(placesCards.length, 6, 'cat-places must have exactly 6 default cards');
 
     for (let w = 1; w <= 52; w++) {
       const weekKey = `2026-W${w < 10 ? `0${w}` : w}`;
@@ -410,15 +410,15 @@ async function runWeeklySelectorStressHarness() {
 
   await runStressSection('SmallCategories 5.3: Production card counts across all 9 categories', () => {
     const categoryExpectedSizes = {
-      'cat-needs': { total: 10, expectedWeekly: 2 },
-      'cat-health': { total: 6, expectedWeekly: 2 },
-      'cat-food': { total: 21, expectedWeekly: 2 },
+      'cat-needs': { total: 11, expectedWeekly: 2 },
+      'cat-health': { total: 8, expectedWeekly: 2 },
+      'cat-food': { total: 22, expectedWeekly: 2 },
       'cat-feelings': { total: 7, expectedWeekly: 2 },
       'cat-family': { total: 5, expectedWeekly: 2 },
-      'cat-places': { total: 5, expectedWeekly: 2 },
+      'cat-places': { total: 6, expectedWeekly: 2 },
       'cat-time': { total: 19, expectedWeekly: 2 },
       'cat-numbers': { total: 23, expectedWeekly: 2 },
-      'cat-activities': { total: 6, expectedWeekly: 2 },
+      'cat-activities': { total: 7, expectedWeekly: 2 },
     };
 
     for (const [catId, { total, expectedWeekly }] of Object.entries(categoryExpectedSizes)) {
@@ -474,9 +474,9 @@ async function runWeeklySelectorStressHarness() {
   // ===========================================================================
   console.log('\n--- 7. Custom Count Parameter & Edge Values ---');
 
-  await runStressSection('CustomCount 7.1: Sweep count parameter from 0 to 30 on 10-card deck', () => {
+  await runStressSection('CustomCount 7.1: Sweep count parameter from 0 to 30 on 11-card deck', () => {
     const deck = DEFAULT_CARDS.filter(c => c.categoryId === 'cat-needs');
-    assert.equal(deck.length, 10);
+    assert.equal(deck.length, 11);
 
     // count = 0
     const res0 = getWeeklyCardsForCategory(deck, 'cat-needs', '2026-W35', 0);
@@ -506,13 +506,13 @@ async function runWeeklySelectorStressHarness() {
     assert.equal(res7.length, 7);
     assert.equal(new Set(res7.map(c => c.id)).size, 7);
 
-    // count = 10 (exact match)
-    const res10 = getWeeklyCardsForCategory(deck, 'cat-needs', '2026-W35', 10);
-    assert.equal(res10.length, 10);
+    // count = 11 (exact match)
+    const res11 = getWeeklyCardsForCategory(deck, 'cat-needs', '2026-W35', 11);
+    assert.equal(res11.length, 11);
 
     // count = 30 (exceeds pool)
     const res30 = getWeeklyCardsForCategory(deck, 'cat-needs', '2026-W35', 30);
-    assert.equal(res30.length, 10);
+    assert.equal(res30.length, 11);
   });
 
   // ===========================================================================

@@ -100,12 +100,21 @@ describe('Tier 8: Sound It Out AAC Card Vocabulary Sourcing', () => {
     });
 
     it('should split compound slash labels into distinct practice words', () => {
-      // E.g. "Rest / Nap" -> "Rest" and "Nap"
-      const restCard = DEFAULT_CARDS.find((c) => c.id === 'card-rest');
-      assert.ok(restCard, 'card-rest must exist in default cards');
-      assert.equal(restCard.label, 'Rest / Nap');
+      // E.g. custom/slash card: "Rest / Nap" -> "Rest" and "Nap"
+      const slashCard = {
+        id: 'card-custom-rest-nap',
+        categoryId: 'cat-needs',
+        label: 'Rest / Nap',
+        labelZh: '休息 / 睡覺',
+        spokenText: 'I want to rest.',
+        spokenTextZh: '我想休息。',
+        fitzgeraldCategory: 'verbs',
+        order: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      };
 
-      const items = extractVocabItems([restCard], DEFAULT_CATEGORIES, 'words');
+      const items = extractVocabItems([slashCard], DEFAULT_CATEGORIES, 'words');
       assert.equal(items.length, 2, 'Should extract 2 distinct items for "Rest / Nap"');
       assert.equal(items[0].wordEn, 'Rest');
       assert.equal(items[1].wordEn, 'Nap');
@@ -120,8 +129,8 @@ describe('Tier 8: Sound It Out AAC Card Vocabulary Sourcing', () => {
       const items = extractVocabItems([waterCard], DEFAULT_CATEGORIES, 'phrases');
       assert.equal(items.length, 1);
       assert.equal(items[0].isPhrase, true);
-      assert.equal(items[0].wordEn, 'I would like some water, please.');
-      assert.equal(items[0].wordZh, '請給我一杯水。');
+      assert.equal(items[0].wordEn, waterCard.spokenText);
+      assert.equal(items[0].wordZh, waterCard.spokenTextZh);
     });
   });
 
