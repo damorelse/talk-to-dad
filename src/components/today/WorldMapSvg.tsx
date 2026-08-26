@@ -122,7 +122,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
         <svg
           viewBox="0 0 800 500"
           preserveAspectRatio="xMidYMid meet"
-          className="w-full flex-1 filter drop-shadow animate-in fade-in zoom-in-95 duration-300"
+          className="w-full flex-1 filter drop-shadow"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
@@ -239,7 +239,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
               stroke="#38bdf8"
               strokeWidth="2.5"
               strokeDasharray="6 4"
-              className="animate-pulse"
             />
             {/* Route Distance Label Badge */}
             <rect x="36" y="153" width="62" height="18" rx="9" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
@@ -252,15 +251,15 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           {/* PIN 1: SEATTLE (WASHINGTON)                                       */}
           {/* ================================================================= */}
           <g transform={`translate(${regSeattleX}, ${regSeattleY})`} filter="url(#pinShadow)">
-            {/* Expanding Ping Ripple (if active or pulsing beacon) */}
+            {/* Static Halo Ring */}
             <circle
               cx="0"
               cy="0"
-              r={isUserAtSeattle ? 32 : 14}
-              fill="none"
+              r={isUserAtSeattle ? 22 : 14}
+              fill={isUserAtSeattle ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.15)'}
               stroke={isUserAtSeattle ? '#ef4444' : '#38bdf8'}
-              strokeWidth="2"
-              className={isUserAtSeattle ? 'animate-ping origin-center opacity-75' : 'animate-pulse opacity-60'}
+              strokeWidth="1.5"
+              opacity="0.8"
             />
             <ellipse cx="0" cy="1" rx="8" ry="3" fill="#000000" opacity="0.5" />
             <path
@@ -297,15 +296,15 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           {/* PIN 2: SAN FRANCISCO (CALIFORNIA)                                 */}
           {/* ================================================================= */}
           <g transform={`translate(${regSfX}, ${regSfY})`} filter="url(#pinShadow)">
-            {/* Expanding Ping Ripple (if active or pulsing beacon) */}
+            {/* Static Halo Ring */}
             <circle
               cx="0"
               cy="0"
-              r={!isUserAtSeattle ? 32 : 14}
-              fill="none"
+              r={!isUserAtSeattle ? 22 : 14}
+              fill={!isUserAtSeattle ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.15)'}
               stroke={!isUserAtSeattle ? '#ef4444' : '#38bdf8'}
-              strokeWidth="2"
-              className={!isUserAtSeattle ? 'animate-ping origin-center opacity-75' : 'animate-pulse opacity-60'}
+              strokeWidth="1.5"
+              opacity="0.8"
             />
             <ellipse cx="0" cy="1" rx="8" ry="3" fill="#000000" opacity="0.5" />
             <path
@@ -347,7 +346,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
         <svg
           viewBox="0 0 1000 500"
           preserveAspectRatio="xMidYMid meet"
-          className="w-full flex-1 filter drop-shadow animate-in fade-in zoom-in-95 duration-300"
+          className="w-full flex-1 filter drop-shadow"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
@@ -500,21 +499,20 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
                 strokeWidth="2.5"
                 strokeLinejoin="round"
                 strokeDasharray="6 3"
-                className="animate-pulse"
               />
             </g>
           )}
 
-          {/* Focus Highlight: Taiwan Glowing Beacon Ring */}
+          {/* Focus Highlight: Taiwan Halo Ring */}
           {isTaiwan && (
             <circle
               cx="815"
               cy="225"
-              r="16"
-              fill="none"
+              r="14"
+              fill="rgba(56, 189, 248, 0.2)"
               stroke="#38bdf8"
-              strokeWidth="2"
-              className="animate-ping origin-center opacity-75"
+              strokeWidth="1.5"
+              opacity="0.8"
             />
           )}
 
@@ -522,7 +520,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           {isUSA && !isUserAtSeattle && (
             <g>
               <g transform={`translate(${worldSeattleX}, ${worldSeattleY})`} filter="url(#pinShadow)">
-                <circle cx="0" cy="0" r="10" fill="none" stroke="#38bdf8" strokeWidth="1.8" className="animate-pulse opacity-60" />
+                <circle cx="0" cy="0" r="10" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" strokeWidth="1.5" opacity="0.7" />
                 <ellipse cx="0" cy="1" rx="6" ry="2.2" fill="#000000" opacity="0.4" />
                 <path d="M 0 0 C -2.5 -4, -8 -10, -8 -18 A 8 8 0 1 1 8 -18 C 8 -10, 2.5 -4, 0 0 Z" fill="url(#cyanPinGrad)" stroke="#ffffff" strokeWidth="1.6" strokeLinejoin="round" />
                 <circle cx="0" cy="-18" r="3" fill="#ffffff" />
@@ -542,7 +540,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           {isUSA && !isUserAtSF && (
             <g>
               <g transform={`translate(${worldSfX}, ${worldSfY})`} filter="url(#pinShadow)">
-                <circle cx="0" cy="0" r="10" fill="none" stroke="#38bdf8" strokeWidth="1.8" className="animate-pulse opacity-60" />
+                <circle cx="0" cy="0" r="10" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" strokeWidth="1.5" opacity="0.7" />
                 <ellipse cx="0" cy="1" rx="6" ry="2.2" fill="#000000" opacity="0.4" />
                 <path d="M 0 0 C -2.5 -4, -8 -10, -8 -18 A 8 8 0 1 1 8 -18 C 8 -10, 2.5 -4, 0 0 Z" fill="url(#cyanPinGrad)" stroke="#ffffff" strokeWidth="1.6" strokeLinejoin="round" />
                 <circle cx="0" cy="-18" r="3" fill="#ffffff" />
@@ -560,8 +558,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
 
           {/* Primary Active User Location Pin in World Map */}
           <g transform={`translate(${pinX}, ${pinY})`} filter="url(#pinShadow)">
-            <circle cx="0" cy="0" r="28" fill="none" stroke="#ef4444" strokeWidth="2.5" className="animate-ping origin-center opacity-75" style={{ animationDuration: '2s' }} />
-            <circle cx="0" cy="0" r="16" fill="#ef4444" className="animate-pulse opacity-30" />
+            <circle cx="0" cy="0" r="18" fill="rgba(239, 68, 68, 0.2)" stroke="#ef4444" strokeWidth="1.5" opacity="0.8" />
             <ellipse cx="0" cy="1" rx="10" ry="3.5" fill="#000000" opacity="0.5" />
             <path d="M 0 0 C -3 -6, -14 -16, -14 -28 A 14 14 0 1 1 14 -28 C 14 -16, 3 -6, 0 0 Z" fill="url(#redPinGrad)" stroke="#ffffff" strokeWidth="2" strokeLinejoin="round" />
             <ellipse cx="-3" cy="-34" rx="4" ry="2" fill="#ffffff" opacity="0.6" transform="rotate(-30, -3, -34)" pointerEvents="none" />
