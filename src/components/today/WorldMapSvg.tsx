@@ -26,7 +26,34 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
 
   const flag = getCountryFlag(location.country);
 
-  // On-map floating label calculations
+  // Key Heritage Hub Coordinates
+  // Seattle: (47.61 N, -122.33 W) -> X ≈ 160.2, Y ≈ 117.8
+  const seaX = 160.2;
+  const seaY = 117.8;
+
+  // San Francisco: (37.77 N, -122.42 W) -> X ≈ 160.0, Y ≈ 145.1
+  const sfX = 160.0;
+  const sfY = 145.1;
+
+  // Taipei (Taiwan Island): (25.03 N, 121.56 E) -> X ≈ 815, Y ≈ 225
+  const tpeX = 815;
+  const tpeY = 225;
+
+  // Check if current user location is close to any of the 3 hubs
+  const isNearSeattle =
+    location.city?.toLowerCase().includes('seattle') ||
+    (Math.abs(clampedLat - 47.61) < 1.5 && Math.abs(clampedLon - (-122.33)) < 2.0);
+
+  const isNearSF =
+    location.city?.toLowerCase().includes('san francisco') ||
+    (Math.abs(clampedLat - 37.77) < 1.5 && Math.abs(clampedLon - (-122.42)) < 2.0);
+
+  const isNearTaipei =
+    location.city?.toLowerCase().includes('taipei') ||
+    location.country?.toLowerCase().includes('taiwan') ||
+    (Math.abs(clampedLat - 25.03) < 1.5 && Math.abs(clampedLon - 121.56) < 2.0);
+
+  // Floating label calculations for active user pin
   const cityLabel = location.city || location.country || 'You Are Here';
   const pillWidth = Math.max(90, Math.min(180, cityLabel.length * 8.5 + 30));
   const calloutX = Math.max(pillWidth / 2 + 12, Math.min(1000 - pillWidth / 2 - 12, pinX));
@@ -81,8 +108,24 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             <stop offset="100%" stopColor="#b91c1c" />
           </linearGradient>
 
+          {/* Transpacific Flight Arc Gradient */}
+          <linearGradient id="flightArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#ec4899" />
+            <stop offset="50%" stopColor="#38bdf8" />
+            <stop offset="100%" stopColor="#fbbf24" />
+          </linearGradient>
+
+          {/* Glow Filters */}
           <filter id="pinGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
+          <filter id="arcGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -155,8 +198,8 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <path d="M 750 240 L 790 240 L 810 290 L 775 300 L 760 270 Z" />
           {/* Japan */}
           <path d="M 890 140 L 910 160 L 895 190 L 880 180 Z" />
-          {/* Taiwan */}
-          <circle cx="815" cy="225" r="4.5" fill="#60a5fa" stroke="#93c5fd" />
+          {/* Taiwan (Highlighted) */}
+          <circle cx="815" cy="225" r="5.5" fill="#ec4899" stroke="#fbcfe8" strokeWidth="1.5" className="animate-pulse" />
 
           {/* Australia & New Zealand */}
           <path d="
@@ -172,9 +215,212 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           " />
         </g>
 
-        {/* User Location: Prominent Red Pin & Concentric Radar Ripples */}
+        {/* ============================================================ */}
+        {/* TRANSPACIFIC HERITAGE FLIGHT ARCS                            */}
+        {/* Connecting Taipei ↔ Seattle & San Francisco across Pacific   */}
+        {/* ============================================================ */}
+        <g filter="url(#arcGlow)" opacity="0.85">
+          {/* Arc 1: Taipei ↔ Seattle (Asia side to Date Line, Date Line to Seattle) */}
+          <path
+            d="M 815 225 Q 915 145, 1000 115"
+            fill="none"
+            stroke="url(#flightArcGrad)"
+            strokeWidth="2.5"
+            strokeDasharray="6 6"
+            strokeLinecap="round"
+            className="quorra-flight-dash"
+          />
+          <path
+            d="M 0 115 Q 75 85, 160.2 117.8"
+            fill="none"
+            stroke="url(#flightArcGrad)"
+            strokeWidth="2.5"
+            strokeDasharray="6 6"
+            strokeLinecap="round"
+            className="quorra-flight-dash"
+          />
+
+          {/* Arc 2: Taipei ↔ San Francisco */}
+          <path
+            d="M 815 225 Q 920 175, 1000 145"
+            fill="none"
+            stroke="#38bdf8"
+            strokeWidth="2"
+            strokeDasharray="4 6"
+            strokeLinecap="round"
+            opacity="0.8"
+            className="quorra-flight-dash"
+          />
+          <path
+            d="M 0 145 Q 80 115, 160.0 145.1"
+            fill="none"
+            stroke="#38bdf8"
+            strokeWidth="2"
+            strokeDasharray="4 6"
+            strokeLinecap="round"
+            opacity="0.8"
+            className="quorra-flight-dash"
+          />
+
+          {/* West Coast Corridor: Seattle ↔ San Francisco */}
+          <path
+            d="M 160.2 117.8 Q 155 131, 160.0 145.1"
+            fill="none"
+            stroke="#f59e0b"
+            strokeWidth="2.5"
+            strokeDasharray="4 4"
+            strokeLinecap="round"
+            className="quorra-flight-dash"
+          />
+        </g>
+
+        {/* ============================================================ */}
+        {/* HIGHLIGHTED HUBS: SEATTLE & SAN FRANCISCO & TAIPEI           */}
+        {/* ============================================================ */}
+
+        {/* 1. SEATTLE HUB (X = 160.2, Y = 117.8) */}
+        <g transform={`translate(${seaX}, ${seaY})`}>
+          {/* Radar Ripple */}
+          <circle
+            cx="0"
+            cy="0"
+            r="16"
+            fill="none"
+            stroke="#38bdf8"
+            strokeWidth="1.8"
+            className="animate-ping origin-center opacity-60"
+            style={{ animationDuration: '2.5s' }}
+          />
+          {/* Core Hub Dot */}
+          <circle cx="0" cy="0" r="5" fill="#0284c7" stroke="#ffffff" strokeWidth="1.8" />
+          <circle cx="0" cy="0" r="2.2" fill="#38bdf8" />
+
+          {/* Seattle Floating Label Badge (Positioned Above-Right) */}
+          <g transform="translate(14, -8)">
+            <rect
+              x="0"
+              y="-12"
+              width="112"
+              height="20"
+              rx="10"
+              fill="#0f172a"
+              stroke="#38bdf8"
+              strokeWidth="1.5"
+              opacity="0.95"
+              filter="url(#pinShadow)"
+            />
+            <text
+              x="56"
+              y="2"
+              textAnchor="middle"
+              fill="#e0f2fe"
+              fontSize="10"
+              fontWeight="900"
+              letterSpacing="0.3"
+              pointerEvents="none"
+            >
+              🌲 Seattle · 西雅圖
+            </text>
+          </g>
+        </g>
+
+        {/* 2. SAN FRANCISCO HUB (X = 160.0, Y = 145.1) */}
+        <g transform={`translate(${sfX}, ${sfY})`}>
+          {/* Radar Ripple */}
+          <circle
+            cx="0"
+            cy="0"
+            r="16"
+            fill="none"
+            stroke="#f59e0b"
+            strokeWidth="1.8"
+            className="animate-ping origin-center opacity-60"
+            style={{ animationDuration: '2.2s' }}
+          />
+          {/* Core Hub Dot */}
+          <circle cx="0" cy="0" r="5" fill="#d97706" stroke="#ffffff" strokeWidth="1.8" />
+          <circle cx="0" cy="0" r="2.2" fill="#fbbf24" />
+
+          {/* San Francisco Floating Label Badge (Positioned Below-Right) */}
+          <g transform="translate(14, 14)">
+            <rect
+              x="0"
+              y="-12"
+              width="132"
+              height="20"
+              rx="10"
+              fill="#0f172a"
+              stroke="#f59e0b"
+              strokeWidth="1.5"
+              opacity="0.95"
+              filter="url(#pinShadow)"
+            />
+            <text
+              x="66"
+              y="2"
+              textAnchor="middle"
+              fill="#fef3c7"
+              fontSize="10"
+              fontWeight="900"
+              letterSpacing="0.3"
+              pointerEvents="none"
+            >
+              🌉 San Francisco · 舊金山
+            </text>
+          </g>
+        </g>
+
+        {/* 3. TAIPEI HERITAGE HUB (X = 815, Y = 225) */}
+        <g transform={`translate(${tpeX}, ${tpeY})`}>
+          {/* Radar Ripple */}
+          <circle
+            cx="0"
+            cy="0"
+            r="18"
+            fill="none"
+            stroke="#ec4899"
+            strokeWidth="2"
+            className="animate-ping origin-center opacity-70"
+            style={{ animationDuration: '2s' }}
+          />
+          {/* Core Hub Dot */}
+          <circle cx="0" cy="0" r="5.5" fill="#db2777" stroke="#ffffff" strokeWidth="1.8" />
+          <circle cx="0" cy="0" r="2.5" fill="#fbcfe8" />
+
+          {/* Taipei Floating Label Badge (Positioned Right) */}
+          <g transform="translate(14, 0)">
+            <rect
+              x="0"
+              y="-12"
+              width="106"
+              height="20"
+              rx="10"
+              fill="#0f172a"
+              stroke="#ec4899"
+              strokeWidth="1.5"
+              opacity="0.95"
+              filter="url(#pinShadow)"
+            />
+            <text
+              x="53"
+              y="2"
+              textAnchor="middle"
+              fill="#fdf2f8"
+              fontSize="10"
+              fontWeight="900"
+              letterSpacing="0.3"
+              pointerEvents="none"
+            >
+              🏮 Taipei · 台北 🇹🇼
+            </text>
+          </g>
+        </g>
+
+        {/* ============================================================ */}
+        {/* ACTIVE USER LOCATION: 3D RED PIN & CALLOUT                   */}
+        {/* ============================================================ */}
         <g transform={`translate(${pinX}, ${pinY})`} filter="url(#pinShadow)">
-          {/* Animated Expanding Sonar Ripple 1 */}
+          {/* Animated Expanding Sonar Ripple */}
           <circle
             cx="0"
             cy="0"
@@ -228,56 +474,59 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <circle cx="0" cy="0" r="3.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
         </g>
 
-        {/* On-Map Floating Location Name Callout */}
-        <g transform={`translate(${calloutX}, ${calloutY})`}>
-          {/* Callout Pointer Triangle */}
-          {!isNearTop ? (
-            <polygon
-              points={`${pointerOffset},2 ${pointerOffset - 5},-3 ${pointerOffset + 5},-3`}
+        {/* Active Location Floating Callout Pill (if not exactly covering a known hub badge) */}
+        {!isNearSeattle && !isNearSF && !isNearTaipei && (
+          <g transform={`translate(${calloutX}, ${calloutY})`}>
+            {/* Callout Pointer Triangle */}
+            {!isNearTop ? (
+              <polygon
+                points={`${pointerOffset},2 ${pointerOffset - 5},-3 ${pointerOffset + 5},-3`}
+                fill="#ef4444"
+                stroke="#ffffff"
+                strokeWidth="1.5"
+              />
+            ) : (
+              <polygon
+                points={`${pointerOffset},-26 ${pointerOffset - 5},-21 ${pointerOffset + 5},-21`}
+                fill="#ef4444"
+                stroke="#ffffff"
+                strokeWidth="1.5"
+              />
+            )}
+
+            {/* Callout Pill */}
+            <rect
+              x={-pillWidth / 2}
+              y="-24"
+              width={pillWidth}
+              height="22"
+              rx="11"
               fill="#ef4444"
               stroke="#ffffff"
-              strokeWidth="1.5"
+              strokeWidth="2"
+              filter="url(#pinGlow)"
             />
-          ) : (
-            <polygon
-              points={`${pointerOffset},-26 ${pointerOffset - 5},-21 ${pointerOffset + 5},-21`}
-              fill="#ef4444"
-              stroke="#ffffff"
-              strokeWidth="1.5"
-            />
-          )}
 
-          {/* Callout Pill */}
-          <rect
-            x={-pillWidth / 2}
-            y="-24"
-            width={pillWidth}
-            height="22"
-            rx="11"
-            fill="#ef4444"
-            stroke="#ffffff"
-            strokeWidth="2"
-            filter="url(#pinGlow)"
-          />
-
-          {/* Callout Text */}
-          <text
-            x="0"
-            y="-9"
-            textAnchor="middle"
-            fill="#ffffff"
-            fontSize="11"
-            fontWeight="900"
-            letterSpacing="0.4"
-            pointerEvents="none"
-          >
-            {cityLabel}
-          </text>
-        </g>
+            {/* Callout Text */}
+            <text
+              x="0"
+              y="-9"
+              textAnchor="middle"
+              fill="#ffffff"
+              fontSize="11"
+              fontWeight="900"
+              letterSpacing="0.4"
+              pointerEvents="none"
+            >
+              {cityLabel}
+            </text>
+          </g>
+        )}
       </svg>
 
-      {/* Clean Floating Badge Over Map */}
-      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-rose-500/30 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center shadow-xl text-white">
+      {/* Floating Badge Over Map with Active Location & Transpacific Corridor Info */}
+      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-rose-500/30 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center justify-between shadow-xl text-white">
+        {/* Left: Detected Location */}
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="text-xl sm:text-2xl shrink-0 drop-shadow">
             {flag}
@@ -291,7 +540,29 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Right: Transpacific Heritage Connection Chip */}
+        <div className="hidden sm:flex items-center gap-1.5 bg-slate-800/80 border border-amber-400/40 px-2.5 py-1 rounded-lg text-xs font-bold text-amber-200 shrink-0 shadow-xs">
+          <span>🇹🇼 台北</span>
+          <span className="text-sky-400 font-extrabold animate-pulse">✈️</span>
+          <span>🇺🇸 舊金山 · 西雅圖</span>
+        </div>
       </div>
+
+      {/* Embedded CSS for Flight Path Dashed Animation */}
+      <style>{`
+        @keyframes quorraFlightDash {
+          from {
+            stroke-dashoffset: 40;
+          }
+          to {
+            stroke-dashoffset: 0;
+          }
+        }
+        .quorra-flight-dash {
+          animation: quorraFlightDash 3s linear infinite;
+        }
+      `}</style>
     </div>
   );
 };
