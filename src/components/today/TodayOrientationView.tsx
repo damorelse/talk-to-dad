@@ -256,8 +256,8 @@ export const TodayOrientationView: React.FC = () => {
               </div>
             </div>
 
-            {/* Time Display - Centered in container with compact vertical spacing */}
-            <div className="flex flex-col items-center justify-center my-auto py-0.5 w-full text-center">
+            {/* Time Display - Centered in container with compact vertical spacing, shifted slightly right */}
+            <div className="flex flex-col items-center justify-center my-auto py-0.5 w-full text-center translate-x-1.5 sm:translate-x-2">
               <div className="flex items-baseline gap-2.5 justify-center">
                 <span className="text-2xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
                   {displayHours12}:{minStr}
@@ -347,8 +347,8 @@ export const TodayOrientationView: React.FC = () => {
               </div>
             </div>
 
-            {/* Date Display - Centered in container with compact vertical spacing */}
-            <div className="flex items-center justify-center gap-3.5 sm:gap-4 my-auto py-0.5 w-full min-w-0">
+            {/* Date Display - Centered in container with compact vertical spacing, shifted slightly right */}
+            <div className="flex items-center justify-center gap-3.5 sm:gap-4 my-auto py-0.5 w-full min-w-0 translate-x-1.5 sm:translate-x-2">
               <div className="w-12 h-14 sm:w-14 sm:h-15 rounded-xl bg-slate-100 text-slate-900 flex flex-col items-center overflow-hidden shadow-md border border-slate-300 shrink-0 select-none">
                 <div className="w-full bg-rose-600 text-white py-0.5 text-center text-[9px] sm:text-[10px] font-black uppercase tracking-wider">
                   {monthShort} · {monthNum}月
