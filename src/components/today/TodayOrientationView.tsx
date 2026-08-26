@@ -234,7 +234,7 @@ export const TodayOrientationView: React.FC = () => {
             onPress={handleSpeakTime}
             minTouchSize="lg"
             className={`
-              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-[0.85] flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group min-h-[80px]
+              bg-slate-900 border-2 rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2.5 lg:px-4 lg:py-2.5 flex-[0.85] flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group min-h-[72px]
               ${
                 isTimeActive
                   ? 'border-emerald-400 ring-4 ring-emerald-400/40 shadow-emerald-950/60'
@@ -256,8 +256,8 @@ export const TodayOrientationView: React.FC = () => {
               </div>
             </div>
 
-            {/* Time Display - Centered in container */}
-            <div className="flex flex-col items-center justify-center my-auto py-1 w-full text-center">
+            {/* Time Display - Centered in container with compact vertical spacing */}
+            <div className="flex flex-col items-center justify-center my-auto py-0.5 w-full text-center">
               <div className="flex items-baseline gap-2.5 justify-center">
                 <span className="text-2xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
                   {displayHours12}:{minStr}
