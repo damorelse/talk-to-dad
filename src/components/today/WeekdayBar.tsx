@@ -29,7 +29,7 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
             debounceMs={debounceMs}
             minTouchSize="md"
             className={`
-              relative flex flex-col items-center justify-between min-h-[54px] sm:min-h-[62px] py-1.5 px-0.5 sm:px-1.5 rounded-2xl border-2 transition-all duration-200 cursor-pointer
+              relative flex flex-col items-center justify-between min-h-[58px] sm:min-h-[68px] py-2 sm:py-2.5 px-0.5 sm:px-1.5 rounded-2xl border-2 transition-all duration-200 cursor-pointer
               ${
                 isGlowSpeaking
                   ? 'bg-amber-500/40 border-amber-300 ring-4 ring-amber-300 scale-105 shadow-xl brightness-125 z-20 animate-pulse'

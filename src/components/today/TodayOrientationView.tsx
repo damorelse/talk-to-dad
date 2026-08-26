@@ -234,7 +234,7 @@ export const TodayOrientationView: React.FC = () => {
             onPress={handleSpeakTime}
             minTouchSize="lg"
             className={`
-              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-1 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group min-h-[90px]
+              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-[0.85] flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group min-h-[80px]
               ${
                 isTimeActive
                   ? 'border-emerald-400 ring-4 ring-emerald-400/40 shadow-emerald-950/60'
@@ -276,7 +276,7 @@ export const TodayOrientationView: React.FC = () => {
           <div
             onClick={() => handleSpeakWeekday()}
             className={`
-              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-1 flex flex-col justify-between shadow-lg gap-1.5 transition-all duration-200 cursor-pointer group min-h-[110px]
+              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-[1.35] flex flex-col justify-between shadow-lg gap-1.5 transition-all duration-200 cursor-pointer group min-h-[125px]
               ${
                 isWeekdayActive
                   ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
