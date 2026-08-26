@@ -79,7 +79,9 @@ export const AAC_CORE_VOCABULARY: AACVocabularyItem[] = [
   { word: 'Home', weight: 80 },
   { word: 'Family', weight: 80 },
   { word: 'Daughter', weight: 75 },
+  { word: 'Daughter-In-Law', weight: 74 },
   { word: 'Son', weight: 75 },
+  { word: 'Son-In-Law', weight: 74 },
   { word: 'Wife', weight: 75 },
   { word: 'Husband', weight: 75 },
 

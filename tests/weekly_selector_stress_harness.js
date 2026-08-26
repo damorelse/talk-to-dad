@@ -390,11 +390,11 @@ async function runWeeklySelectorStressHarness() {
     }
   });
 
-  await runStressSection('SmallCategories 5.2: Production default categories with small card counts (cat-family: 5, cat-places: 6)', () => {
+  await runStressSection('SmallCategories 5.2: Production default categories with small card counts (cat-family: 7, cat-places: 6)', () => {
     const familyCards = DEFAULT_CARDS.filter(c => c.categoryId === 'cat-family');
     const placesCards = DEFAULT_CARDS.filter(c => c.categoryId === 'cat-places');
 
-    assert.equal(familyCards.length, 5, 'cat-family must have exactly 5 default cards');
+    assert.equal(familyCards.length, 7, 'cat-family must have exactly 7 default cards');
     assert.equal(placesCards.length, 6, 'cat-places must have exactly 6 default cards');
 
     for (let w = 1; w <= 52; w++) {
@@ -414,7 +414,7 @@ async function runWeeklySelectorStressHarness() {
       'cat-health': { total: 8, expectedWeekly: 2 },
       'cat-food': { total: 22, expectedWeekly: 2 },
       'cat-feelings': { total: 12, expectedWeekly: 2 },
-      'cat-family': { total: 5, expectedWeekly: 2 },
+      'cat-family': { total: 7, expectedWeekly: 2 },
       'cat-places': { total: 6, expectedWeekly: 2 },
       'cat-time': { total: 19, expectedWeekly: 2 },
       'cat-numbers': { total: 23, expectedWeekly: 2 },

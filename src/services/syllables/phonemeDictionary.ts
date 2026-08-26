@@ -352,6 +352,18 @@ export const CANONICAL_PHONEME_DICTIONARY: Record<string, CanonicalDictionaryEnt
       { text: 'ter', ipa: 'təɹ', stress: 'unstressed', phonemes: ['t', 'ə', 'ɹ'] },
     ],
   },
+  'son': {
+    canonicalIpa: 'ˈsʌn',
+    syllables: [
+      { text: 'son', ipa: 'ˈsʌn', stress: 'primary', phonemes: ['s', 'ʌ', 'n'] },
+    ],
+  },
+  'law': {
+    canonicalIpa: 'lɔː',
+    syllables: [
+      { text: 'law', ipa: 'lɔː', stress: 'primary', phonemes: ['l', 'ɔː'] },
+    ],
+  },
   'family': {
     canonicalIpa: 'ˈfæməli',
     syllables: [
