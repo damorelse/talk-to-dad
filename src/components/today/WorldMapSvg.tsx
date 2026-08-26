@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import { UserLocationInfo } from '../../types';
 import { getCountryFlag } from '../../services/location/locationService';
 import { Globe, ZoomIn } from 'lucide-react';
+import {
+  USA_STATES,
+  USA_MAP_VIEWBOX,
+  STATE_CENTROIDS,
+  STATE_NAME_TO_ID,
+} from './usaMapData';
 
 interface WorldMapSvgProps {
   location: UserLocationInfo;
@@ -52,13 +58,17 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
   const isUserAtSeattle = isUSA && Math.hypot(pinX - worldSeattleX, pinY - worldSeattleY) < 15;
   const isUserAtSF = isUSA && !isUserAtSeattle && Math.hypot(pinX - worldSfX, pinY - worldSfY) < 15;
 
-  // Specific coordinates for Seattle and San Francisco in Regional USA Zoom (800x500)
-  const regSeattleX = 125;
-  const regSeattleY = 95;
-  const regSfX = 105;
-  const regSfY = 235;
+  // Specific coordinates for Seattle and San Francisco in Regional Albers USA Zoom (192 9 1028 746)
+  const regSeattleX = 368;
+  const regSeattleY = 44;
+  const regSfX = 312;
+  const regSfY = 249;
 
-  // On-map floating label calculations for user location
+  // Active state lookup
+  const userStateRaw = (location.state || '').toLowerCase().trim();
+  const userStateId = STATE_NAME_TO_ID[userStateRaw] || (isUserAtSeattle ? 'wa' : isUserAtSF ? 'ca' : undefined);
+
+  // On-map floating label calculations for user location in World Map
   const cityLabel = location.city || location.country || 'You Are Here';
   const pillWidth = Math.max(90, Math.min(180, cityLabel.length * 8.5 + 30));
   const calloutX = Math.max(pillWidth / 2 + 12, Math.min(1000 - pillWidth / 2 - 12, pinX));
@@ -116,11 +126,11 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
       </div>
 
       {/* =================================================================== */}
-      {/* MODE A: REGIONAL / COUNTRY ZOOM VIEW                                */}
+      {/* MODE A: RECOGNIZABLE ALBERS EQUAL-AREA USA VECTOR MAP               */}
       {/* =================================================================== */}
       {viewMode === 'regional' && isUSA && (
         <svg
-          viewBox="0 0 800 500"
+          viewBox={USA_MAP_VIEWBOX}
           preserveAspectRatio="xMidYMid meet"
           className="w-full flex-1 filter drop-shadow"
           xmlns="http://www.w3.org/2000/svg"
@@ -131,10 +141,9 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
               <stop offset="100%" stopColor="#020617" />
             </radialGradient>
 
-            <linearGradient id="usLandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#334155" />
-              <stop offset="50%" stopColor="#1e293b" />
-              <stop offset="100%" stopColor="#0f172a" />
+            <linearGradient id="usStateGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#243044" />
+              <stop offset="100%" stopColor="#131d31" />
             </linearGradient>
 
             <linearGradient id="redPinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -163,86 +172,85 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           </defs>
 
           {/* Ocean Background */}
-          <rect x="0" y="0" width="800" height="500" fill="url(#oceanRegionalGlow)" rx="16" />
+          <rect x="192" y="9" width="1028" height="746" fill="url(#oceanRegionalGlow)" rx="16" />
 
           {/* Ocean Watermark Text Labels */}
-          <text x="50" y="440" fill="#334155" fontSize="13" fontWeight="900" letterSpacing="1" opacity="0.6">
+          <text x="215" y="470" fill="#334155" fontSize="15" fontWeight="900" letterSpacing="1" opacity="0.6">
             PACIFIC OCEAN · 太平洋
           </text>
-          <text x="630" y="440" fill="#334155" fontSize="13" fontWeight="900" letterSpacing="1" opacity="0.6">
+          <text x="1040" y="470" fill="#334155" fontSize="15" fontWeight="900" letterSpacing="1" opacity="0.6">
             ATLANTIC OCEAN · 大西洋
           </text>
-          <text x="400" y="32" textAnchor="middle" fill="#475569" fontSize="11" fontWeight="800" letterSpacing="2" opacity="0.7">
+          <text x="700" y="45" textAnchor="middle" fill="#475569" fontSize="13" fontWeight="800" letterSpacing="2" opacity="0.7">
             CANADA · 加拿大
           </text>
+          <text x="560" y="720" fill="#334155" fontSize="14" fontWeight="800" letterSpacing="2" opacity="0.6">
+            MEXICO · 墨西哥
+          </text>
 
-          {/* Neighboring Canada Border Line */}
-          <path d="M 80 50 L 350 50 L 460 50 L 520 70 L 640 120 L 690 80 L 750 40" stroke="#334155" strokeWidth="1" strokeDasharray="4 4" fill="none" opacity="0.5" />
+          {/* 50 Individual US State Outlines (Albers Equal-Area Projection) */}
+          <g id="us-states" strokeLinejoin="round">
+            {USA_STATES.map((state) => {
+              const isStateActive = state.id === userStateId;
+              const isWestCoastPinState = state.id === 'wa' || state.id === 'ca';
 
-          {/* Neighboring Mexico Border Line */}
-          <path d="M 180 360 L 240 370 L 320 380 L 360 380 L 410 430 L 460 460" stroke="#334155" strokeWidth="1" strokeDasharray="4 4" fill="none" opacity="0.5" />
+              let fill = 'url(#usStateGrad)';
+              let stroke = '#384860';
+              let strokeWidth = 1.1;
 
-          {/* USA Mainland Landmass Contour */}
-          <g filter="url(#regionalGlow)">
-            <path
-              d="
-                M 80 50
-                L 70 70 L 130 95 L 70 85 L 80 150 L 75 175 L 85 200 L 105 235 L 115 265
-                L 140 310 L 160 330 L 180 360 L 240 370 L 320 380 L 360 380 L 410 430
-                L 460 460 L 480 410 L 520 390 L 590 390 L 630 380 L 680 370 L 720 420
-                L 745 470 L 740 390 L 720 350 L 710 310 L 735 255 L 715 215 L 725 180
-                L 730 160 L 755 130 L 770 75 L 750 40 L 690 80 L 640 120 L 580 100
-                L 520 70 L 460 50 L 380 50 L 230 50 Z
-              "
-              fill="url(#usLandGrad)"
-              stroke="#38bdf8"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-            />
+              if (isStateActive) {
+                fill = 'rgba(239, 68, 68, 0.25)';
+                stroke = '#ef4444';
+                strokeWidth = 2.4;
+              } else if (isWestCoastPinState) {
+                fill = 'rgba(56, 189, 248, 0.18)';
+                stroke = '#38bdf8';
+                strokeWidth = 1.8;
+              }
+
+              return (
+                <path
+                  key={state.id}
+                  id={state.id}
+                  d={state.path}
+                  fill={fill}
+                  stroke={stroke}
+                  strokeWidth={strokeWidth}
+                  className="transition-colors duration-200"
+                />
+              );
+            })}
           </g>
 
-          {/* West Coast Internal State Boundary Lines */}
-          <g stroke="#475569" strokeWidth="1.2" strokeDasharray="3 3" opacity="0.7" fill="none">
-            {/* WA / OR border (Columbia River) */}
-            <path d="M 75 125 L 180 125" />
-            {/* OR / CA border */}
-            <path d="M 80 190 L 190 190" />
-            {/* CA / NV border */}
-            <path d="M 190 190 L 220 320 L 180 360" />
-            {/* WA / ID & OR / ID border */}
-            <path d="M 180 50 L 180 190" />
-            {/* NV / UT border */}
-            <path d="M 240 190 L 240 310" />
-            {/* AZ / UT border */}
-            <path d="M 200 310 L 320 310" />
-            {/* Rocky Mountain / Midwest boundary */}
-            <path d="M 360 50 L 360 380" />
-            {/* Mississippi River corridor */}
-            <path d="M 520 70 L 530 180 L 590 390" />
+          {/* Major State Code Text Accents */}
+          <g fill="#64748b" fontSize="11" fontWeight="800" pointerEvents="none" textAnchor="middle" opacity="0.8">
+            {Object.entries(STATE_CENTROIDS).map(([id, info]) => {
+              // Highlight active / west coast state labels
+              const isActive = id === userStateId;
+              const isWestCoast = id === 'wa' || id === 'ca';
+              const labelColor = isActive ? '#ef4444' : isWestCoast ? '#38bdf8' : '#64748b';
+              const fontWeight = isActive || isWestCoast ? '900' : '800';
+
+              return (
+                <text key={id} x={info.x} y={info.y} fill={labelColor} fontWeight={fontWeight} fontSize={id === 'tx' || id === 'ca' ? '12' : '10'}>
+                  {info.label}
+                </text>
+              );
+            })}
           </g>
 
-          {/* State Text Accents */}
-          <text x="145" y="75" fill="#64748b" fontSize="11" fontWeight="800">WA</text>
-          <text x="135" y="160" fill="#64748b" fontSize="11" fontWeight="800">OR</text>
-          <text x="125" y="290" fill="#64748b" fontSize="12" fontWeight="900">CA</text>
-          <text x="210" y="240" fill="#64748b" fontSize="11" fontWeight="800">NV</text>
-          <text x="250" y="345" fill="#64748b" fontSize="11" fontWeight="800">AZ</text>
-          <text x="440" y="340" fill="#64748b" fontSize="12" fontWeight="900">TEXAS</text>
-          <text x="700" y="140" fill="#64748b" fontSize="11" fontWeight="800">NY</text>
-          <text x="690" y="420" fill="#64748b" fontSize="11" fontWeight="800">FL</text>
-
-          {/* West Coast Connecting Flight/Highway Arc (Seattle <-> San Francisco) */}
+          {/* West Coast Connecting Flight Arc (Seattle <-> San Francisco) */}
           <g opacity="0.85">
             <path
-              d={`M ${regSeattleX} ${regSeattleY} Q 60 165 ${regSfX} ${regSfY}`}
+              d={`M ${regSeattleX} ${regSeattleY} Q 280 140 ${regSfX} ${regSfY}`}
               fill="none"
               stroke="#38bdf8"
               strokeWidth="2.5"
               strokeDasharray="6 4"
             />
             {/* Route Distance Label Badge */}
-            <rect x="36" y="153" width="62" height="18" rx="9" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
-            <text x="67" y="165" textAnchor="middle" fill="#38bdf8" fontSize="9" fontWeight="800">
+            <rect x="250" y="132" width="68" height="20" rx="10" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
+            <text x="284" y="146" textAnchor="middle" fill="#38bdf8" fontSize="10" fontWeight="800">
               ✈️ 800 mi
             </text>
           </g>
@@ -277,17 +285,17 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <g transform={`translate(${regSeattleX}, ${regSeattleY - 26})`}>
             <polygon points="0,2 -5,-3 5,-3" fill={isUserAtSeattle ? '#ef4444' : '#0284c7'} stroke="#ffffff" strokeWidth="1.2" />
             <rect
-              x="-68"
-              y="-24"
-              width="136"
-              height="24"
-              rx="12"
+              x="-74"
+              y="-26"
+              width="148"
+              height="26"
+              rx="13"
               fill={isUserAtSeattle ? '#ef4444' : '#0284c7'}
               stroke="#ffffff"
               strokeWidth="1.8"
               filter="url(#regionalGlow)"
             />
-            <text x="0" y="-8" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
+            <text x="0" y="-9" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
               🌲 Seattle · 西雅圖
             </text>
           </g>
@@ -319,20 +327,20 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           </g>
 
           {/* San Francisco Callout Pill Badge */}
-          <g transform={`translate(${regSfX}, ${regSfY + 28})`}>
+          <g transform={`translate(${regSfX}, ${regSfY + 30})`}>
             <polygon points="0,-22 -5,-17 5,-17" fill={!isUserAtSeattle ? '#ef4444' : '#0284c7'} stroke="#ffffff" strokeWidth="1.2" />
             <rect
-              x="-82"
+              x="-88"
               y="-19"
-              width="164"
-              height="24"
-              rx="12"
+              width="176"
+              height="26"
+              rx="13"
               fill={!isUserAtSeattle ? '#ef4444' : '#0284c7'}
               stroke="#ffffff"
               strokeWidth="1.8"
               filter="url(#regionalGlow)"
             />
-            <text x="0" y="-3" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
+            <text x="0" y="-2" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
               🌉 San Francisco · 舊金山
             </text>
           </g>
