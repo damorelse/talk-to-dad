@@ -9,7 +9,7 @@ export interface UsStatePath {
   path: string;
 }
 
-export const USA_MAP_VIEWBOX = "192 9 1028 746";
+export const USA_MAP_VIEWBOX = "170 -20 1060 760";
 
 export const USA_STATES: UsStatePath[] = [
   {
