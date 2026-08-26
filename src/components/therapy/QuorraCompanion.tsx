@@ -112,6 +112,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
 
   const dismissTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const petTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastBarkTimeRef = React.useRef<number>(0);
 
   // Normalize legacy aliases
   const resolvedType = React.useMemo<CornerAnimationType | CrossingAnimationType | null>(() => {
@@ -125,18 +126,24 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
 
   const isCrossing = resolvedType && resolvedType.startsWith("cross-");
 
-  // Play audio on initial entrance & handle auto-dismiss (6.0s for corner, 5.0s for crossing)
+  // Play audio on initial entrance (throttled to 20s cooldown) & handle auto-dismiss (6.0s for corner, 3.8s for crossing)
   useEffect(() => {
     if (resolvedType) {
       setIsPetted(false);
       setPetHearts([]);
-      playPuppyBark();
+
+      // Throttle entrance audio bark to avoid sound fatigue on rapid category switching
+      const now = Date.now();
+      if (now - lastBarkTimeRef.current > 20000) {
+        playPuppyBark();
+        lastBarkTimeRef.current = now;
+      }
 
       if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
       if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
 
-      // Crossing animations take 5.0s, corner animations stay for 6.0s by default
-      const durationMs = isCrossing ? 5200 : 6200;
+      // Crossing animations take 3.8s (gentle trot), corner animations stay for 6.0s
+      const durationMs = isCrossing ? 4000 : 6200;
       dismissTimerRef.current = setTimeout(() => {
         onCompleteRef.current?.();
       }, durationMs);
@@ -154,6 +161,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       e.stopPropagation();
       setIsPetted(true);
       playPuppyBark();
+      lastBarkTimeRef.current = Date.now();
 
       const newHeart = {
         id: Date.now() + Math.random(),
@@ -428,16 +436,16 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
   return (
     <>
       {/* ============================================================ */}
-      {/* 1. TOP CROSSING ANIMATIONS (Left-to-Right, 5s, Non-blocking) */}
+      {/* 1. TOP CROSSING ANIMATIONS (Left-to-Right, 3.8s, Non-blocking) */}
       {/* ============================================================ */}
       {isCrossing && (
         <div className="absolute top-0 left-0 right-0 h-16 z-30 pointer-events-none flex items-center overflow-hidden">
           <div
             key={animationKey ?? resolvedType}
             onClick={handlePet}
-            className="relative flex items-center gap-2 cursor-pointer select-none pointer-events-auto hover:scale-105 transition-transform"
+            className="quorra-crossing-item relative flex items-center gap-2.5 cursor-pointer select-none pointer-events-auto hover:scale-105 transition-transform py-1 px-2 rounded-full"
             style={{
-              animation: "quorraCross5s 5s cubic-bezier(0.25, 1, 0.5, 1) forwards",
+              animation: "quorraCrossSmooth 3.8s cubic-bezier(0.35, 0, 0.25, 1) forwards",
             }}
           >
             {/* Tap-to-Pet Floating Hearts */}
@@ -754,6 +762,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           <div
             key={animationKey ?? resolvedType}
             onClick={handlePet}
+            className="quorra-corner-item"
             style={{
               animation: isPetted
                 ? "none"
@@ -843,23 +852,23 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
         </div>
       )}
 
-      {/* Global CSS Keyframes for 5s Crossing and 6s Bottom-Left Corner */}
+      {/* Global CSS Keyframes for 3.8s Crossing and 6s Bottom-Left Corner */}
       <style>{`
-        @keyframes quorraCross5s {
+        @keyframes quorraCrossSmooth {
           0% {
-            transform: translateX(-140px);
+            transform: translateX(-160px);
             opacity: 0;
           }
-          10% {
-            transform: translateX(10px);
+          8% {
+            transform: translateX(0px);
             opacity: 1;
           }
-          85% {
-            transform: translateX(calc(100vw - 280px));
+          90% {
+            transform: translateX(calc(100% - 20px));
             opacity: 1;
           }
           100% {
-            transform: translateX(calc(100vw - 120px));
+            transform: translateX(calc(100% + 140px));
             opacity: 0;
           }
         }
@@ -880,6 +889,30 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           100% {
             transform: translateY(90px) scale(0.85);
             opacity: 0;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .quorra-crossing-item {
+            animation: quorraFadeInTop 3.8s ease-in-out forwards !important;
+            transform: none !important;
+            margin: 0 auto;
+          }
+          .quorra-corner-item {
+            animation: quorraFadeInCorner 6.0s ease-in-out forwards !important;
+            transform: none !important;
+          }
+          @keyframes quorraFadeInTop {
+            0% { opacity: 0; transform: translateY(-8px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-8px); }
+          }
+          @keyframes quorraFadeInCorner {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
           }
         }
       `}</style>
