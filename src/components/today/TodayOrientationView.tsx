@@ -325,7 +325,7 @@ export const TodayOrientationView: React.FC = () => {
             onPress={handleSpeakDate}
             minTouchSize="lg"
             className={`
-              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-1 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group min-h-[90px]
+              bg-slate-900 border-2 rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2.5 lg:px-4 lg:py-2.5 flex-1 flex flex-col justify-between shadow-lg transition-all duration-200 cursor-pointer group min-h-[76px]
               ${
                 isDateActive
                   ? 'border-blue-400 ring-4 ring-blue-400/40 shadow-blue-950/60'
@@ -347,8 +347,8 @@ export const TodayOrientationView: React.FC = () => {
               </div>
             </div>
 
-            {/* Date Display - Centered in container */}
-            <div className="flex items-center justify-center gap-3.5 sm:gap-4 my-auto py-1 w-full min-w-0">
+            {/* Date Display - Centered in container with compact vertical spacing */}
+            <div className="flex items-center justify-center gap-3.5 sm:gap-4 my-auto py-0.5 w-full min-w-0">
               <div className="w-12 h-14 sm:w-14 sm:h-15 rounded-xl bg-slate-100 text-slate-900 flex flex-col items-center overflow-hidden shadow-md border border-slate-300 shrink-0 select-none">
                 <div className="w-full bg-rose-600 text-white py-0.5 text-center text-[9px] sm:text-[10px] font-black uppercase tracking-wider">
                   {monthShort} · {monthNum}月
