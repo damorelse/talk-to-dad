@@ -98,6 +98,10 @@ export class AppDatabase extends Dexie {
             existing.clueZh = card.clueZh;
             updated = true;
           }
+          if ((existing.id === 'card-pain' || existing.id === 'card-medicine') && existing.isFavorite) {
+            existing.isFavorite = false;
+            updated = true;
+          }
           if (updated) {
             await this.cards.put(existing);
           }
