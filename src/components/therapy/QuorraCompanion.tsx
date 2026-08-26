@@ -510,12 +510,11 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 68 44 Q 74 52 80 46" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
                   <circle cx="75" cy="53" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
 
+                  {/* Background Ear (streaming back in wind behind head) */}
+                  <path d="M 66 26 C 56 22 46 28 42 38 C 40 44 48 46 56 40 Z" fill="url(#qEarFur)" opacity="0.8" />
+
                   {/* Golden Head */}
                   <ellipse cx="80" cy="38" rx="19" ry="17" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-
-                  {/* Feathered Droop Ears Blowing Back */}
-                  <path d="M 70 28 C 58 34 56 50 64 56 C 70 52 72 38 74 28 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
-                  <path d="M 84 28 C 96 36 94 56 86 60 C 80 54 82 40 82 28 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
 
                   {/* Retro Goggles on Forehead (Eyes left open & clear!) */}
                   <rect x="70" y="24" width="10" height="7" rx="2.5" fill="#0f172a" stroke="#facc15" strokeWidth="1.2" />
@@ -535,6 +534,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <ellipse cx="80" cy="35" rx="3.8" ry="4.2" fill="#0f172a" />
                   <circle cx="78.5" cy="33.5" r="1.5" fill="#ffffff" />
                   <circle cx="81.5" cy="36" r="0.8" fill="#ffffff" />
+
+                  {/* Foreground Ear (Streaming back naturally in the wind, attached behind eye) */}
+                  <path
+                    d="M 74 26 C 66 26 50 30 46 40 C 44 48 52 52 62 48 C 70 44 76 36 76 28 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 72 27 Q 60 30 52 40" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
             ) : resolvedType === "cross-tennis-chase" ? (
@@ -568,9 +576,11 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 64 42 Q 70 50 76 44" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
                   <circle cx="71" cy="51" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
 
+                  {/* Background Ear */}
+                  <path d="M 62 24 C 52 20 44 26 40 34 C 40 40 48 42 56 36 Z" fill="url(#qEarFur)" opacity="0.8" />
+
                   {/* Golden Head Looking Ahead */}
                   <ellipse cx="76" cy="36" rx="19" ry="17" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-                  <path d="M 80 26 C 92 36 90 56 82 60 C 76 54 78 38 78 26 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
 
                   {/* Happy Open Mouth & Pink Tongue Panting */}
                   <ellipse cx="86" cy="40" rx="10" ry="7" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="0.8" />
@@ -583,6 +593,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <ellipse cx="76" cy="32" rx="4" ry="4.5" fill="#0f172a" />
                   <circle cx="74.5" cy="30.5" r="1.6" fill="#ffffff" />
                   <circle cx="77.5" cy="33" r="0.8" fill="#ffffff" />
+
+                  {/* Foreground Ear (Flapping back excitedly with sprint) */}
+                  <path
+                    d="M 70 24 C 62 24 48 28 44 38 C 42 46 50 50 60 46 C 68 42 74 34 72 25 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 68 25 Q 56 28 48 38" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
             ) : resolvedType === "cross-butterfly-follow" ? (
@@ -616,9 +635,11 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 64 44 Q 70 52 76 46" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
                   <circle cx="71" cy="53" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
 
+                  {/* Background Ear */}
+                  <path d="M 62 24 C 56 16 48 24 46 34 C 46 42 52 44 58 38 Z" fill="url(#qEarFur)" opacity="0.8" />
+
                   {/* Golden Head Tilted Slightly Up */}
                   <ellipse cx="76" cy="36" rx="19" ry="17" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-                  <path d="M 80 26 C 92 36 90 56 82 60 C 76 54 78 38 78 26 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
 
                   {/* Cream Muzzle & Gentle Smile */}
                   <ellipse cx="86" cy="38" rx="10" ry="7" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="0.8" />
@@ -630,6 +651,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <ellipse cx="76" cy="31" rx="4" ry="4.5" fill="#0f172a" />
                   <circle cx="75" cy="29" r="1.6" fill="#ffffff" />
                   <circle cx="78" cy="31" r="0.8" fill="#ffffff" />
+
+                  {/* Foreground Floppy Drop Ear (Hanging alertly behind the eye) */}
+                  <path
+                    d="M 70 24 C 74 25 76 34 74 44 C 72 54 66 58 60 56 C 56 52 56 40 58 32 C 60 26 66 24 70 24 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 67 25 Q 73 27 71 36" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
             ) : resolvedType === "cross-wagon" ? (
@@ -664,8 +694,24 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
 
                   {/* Golden Head */}
                   <ellipse cx="64" cy="30" rx="19" ry="17" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-                  <path d="M 52 20 C 42 26 42 42 50 48 C 56 44 56 30 58 20 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
-                  <path d="M 76 20 C 86 26 86 42 78 48 C 72 44 72 30 70 20 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
+
+                  {/* Left Drop Ear (Hanging naturally down outer left cheek) */}
+                  <path
+                    d="M 48 20 C 38 22 32 34 34 46 C 36 54 44 56 48 50 C 52 44 52 32 50 22 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 46 22 Q 40 25 40 34" stroke="#fef08a" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.85" />
+
+                  {/* Right Drop Ear (Hanging naturally down outer right cheek) */}
+                  <path
+                    d="M 80 20 C 90 22 96 34 94 46 C 92 54 84 56 80 50 C 76 44 76 32 78 22 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 82 22 Q 88 25 88 34" stroke="#fef08a" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.85" />
 
                   {/* Cream Muzzle & Big Smile */}
                   <ellipse cx="64" cy="36" rx="11" ry="8" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="0.8" />
@@ -701,9 +747,11 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 72 34 Q 78 42 84 36" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
                   <circle cx="79" cy="43" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
 
+                  {/* Background Ear */}
+                  <path d="M 68 22 C 56 18 46 24 44 34 C 44 40 52 42 60 36 Z" fill="url(#qEarFur)" opacity="0.8" />
+
                   {/* Golden Head */}
                   <ellipse cx="82" cy="32" rx="18" ry="16" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-                  <path d="M 84 22 C 96 30 92 48 84 52 C 78 46 80 32 80 22 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
 
                   {/* Cream Muzzle & Confident Grin */}
                   <ellipse cx="90" cy="35" rx="9" ry="6" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="0.8" />
@@ -715,6 +763,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <ellipse cx="80" cy="28" rx="3.8" ry="4.2" fill="#0f172a" />
                   <circle cx="78.5" cy="26.5" r="1.5" fill="#ffffff" />
                   <circle cx="81.5" cy="29" r="0.8" fill="#ffffff" />
+
+                  {/* Foreground Ear (Streaming back dynamically with superhero cape) */}
+                  <path
+                    d="M 76 22 C 66 22 52 26 48 36 C 46 42 54 46 64 42 C 72 38 78 30 78 23 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 74 23 Q 62 26 54 36" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
             ) : resolvedType === "cross-bicycle" ? (
@@ -746,10 +803,26 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 64 38 Q 70 46 76 40" stroke="#ef4444" strokeWidth="3.5" strokeLinecap="round" />
                   <circle cx="71" cy="47" r="3" fill="#facc15" />
 
-                  {/* Golden Head & Floppy Ears */}
+                  {/* Golden Head */}
                   <ellipse cx="68" cy="28" rx="18" ry="16" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-                  <path d="M 54 18 C 44 24 44 40 52 46 C 58 42 58 28 60 18 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
-                  <path d="M 78 18 C 88 24 88 40 80 46 C 74 42 74 28 72 18 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
+
+                  {/* Left Droop Ear */}
+                  <path
+                    d="M 52 18 C 42 20 36 32 38 44 C 40 52 48 54 52 48 C 56 42 56 30 54 20 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 50 20 Q 44 23 44 32" stroke="#fef08a" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.85" />
+
+                  {/* Right Droop Ear */}
+                  <path
+                    d="M 84 18 C 94 20 100 32 98 44 C 96 52 88 54 84 48 C 80 42 80 30 82 20 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 86 20 Q 92 23 92 32" stroke="#fef08a" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.85" />
 
                   {/* Cream Muzzle & Open Smile */}
                   <ellipse cx="72" cy="33" rx="9" ry="6" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="0.8" />
@@ -794,8 +867,24 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
 
                   {/* Golden Head */}
                   <ellipse cx="60" cy="48" rx="18" ry="16" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-                  <path d="M 46 38 C 36 44 36 60 44 66 C 50 62 50 48 52 38 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
-                  <path d="M 74 38 C 84 44 84 60 76 66 C 70 62 70 48 68 38 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
+
+                  {/* Left Floating Ear */}
+                  <path
+                    d="M 44 38 C 34 40 28 52 30 64 C 32 72 40 74 44 68 C 48 62 48 50 46 40 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 42 40 Q 36 44 36 54" stroke="#fef08a" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.85" />
+
+                  {/* Right Floating Ear */}
+                  <path
+                    d="M 76 38 C 86 40 92 52 90 64 C 88 72 80 74 76 68 C 72 62 72 50 74 40 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 78 40 Q 84 44 84 54" stroke="#fef08a" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.85" />
 
                   {/* Cream Muzzle & Happy Open Mouth */}
                   <ellipse cx="60" cy="54" rx="10" ry="7" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="0.8" />
@@ -843,9 +932,11 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 110 42 Q 116 50 122 44" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
                   <circle cx="117" cy="51" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
 
+                  {/* Background Ear */}
+                  <path d="M 108 22 C 102 14 94 22 92 32 C 92 38 98 40 104 34 Z" fill="url(#qEarFur)" opacity="0.8" />
+
                   {/* Golden Head */}
                   <ellipse cx="122" cy="34" rx="18" ry="16" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-                  <path d="M 126 24 C 138 32 134 52 126 56 C 120 50 122 36 122 24 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
 
                   {/* Cream Muzzle & Happy Smile */}
                   <ellipse cx="132" cy="38" rx="9" ry="6" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="0.8" />
@@ -857,6 +948,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="122" cy="30" r="3.5" fill="#0f172a" />
                   <circle cx="120.5" cy="28.5" r="1.5" fill="#ffffff" />
                   <circle cx="123.5" cy="31" r="0.8" fill="#ffffff" />
+
+                  {/* Foreground Ear (Hanging gracefully behind the eye) */}
+                  <path
+                    d="M 116 22 C 120 23 122 32 120 42 C 118 52 112 56 106 54 C 102 50 102 38 104 30 C 106 24 112 22 116 22 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 113 23 Q 119 25 117 34" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
             ) : resolvedType === "cross-rainbow-trail" ? (
@@ -888,9 +988,11 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 104 42 Q 110 50 116 44" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" />
                   <circle cx="111" cy="51" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
 
+                  {/* Background Ear */}
+                  <path d="M 102 22 C 92 18 84 24 82 34 C 82 40 90 42 98 36 Z" fill="url(#qEarFur)" opacity="0.8" />
+
                   {/* Golden Head */}
                   <ellipse cx="116" cy="34" rx="18" ry="16" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-                  <path d="M 120 24 C 132 32 128 52 120 56 C 114 50 116 36 116 24 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
 
                   {/* Cream Muzzle & Joyful Panting Tongue */}
                   <ellipse cx="126" cy="38" rx="9" ry="6" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="0.8" />
@@ -902,6 +1004,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="116" cy="30" r="3.5" fill="#0f172a" />
                   <circle cx="114.5" cy="28.5" r="1.5" fill="#ffffff" />
                   <circle cx="117.5" cy="31" r="0.8" fill="#ffffff" />
+
+                  {/* Foreground Ear (Streaming back in sprint) */}
+                  <path
+                    d="M 110 22 C 100 24 86 28 84 38 C 82 46 90 50 100 46 C 108 42 114 34 112 24 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 108 23 Q 96 26 88 36" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
             ) : (
@@ -926,12 +1037,11 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="73" cy="53" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
                   <circle cx="73" cy="53" r="1.2" fill="#ffffff" />
 
+                  {/* Background Ear (Far ear peeking behind skull crown) */}
+                  <path d="M 64 26 C 58 18 50 26 48 36 C 48 44 54 46 60 40 Z" fill="url(#qEarFur)" opacity="0.8" />
+
                   {/* Golden Head */}
                   <ellipse cx="78" cy="38" rx="20" ry="18" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
-
-                  {/* Floppy Feathered Golden Drop Ears */}
-                  <path d="M 68 28 C 58 36 60 52 66 56 C 70 52 70 38 70 28 Z" fill="url(#qEarFur)" opacity="0.85" />
-                  <path d="M 82 28 C 94 38 90 58 82 62 C 76 56 78 40 80 28 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="0.8" />
 
                   {/* Cream Muzzle, Black Button Nose, Open Smile & Joyful Pink Tongue */}
                   <ellipse cx="88" cy="42" rx="10" ry="7" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="0.8" />
@@ -945,6 +1055,17 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="76.5" cy="32.5" r="1.6" fill="#ffffff" />
                   <circle cx="79.5" cy="35" r="0.8" fill="#ffffff" />
                   <ellipse cx="77" cy="27" rx="2.5" ry="1.2" fill="#fef08a" />
+
+                  {/* Foreground Floppy Feathered Golden Drop Ear (Hanging down & back over cheek/neck) */}
+                  <path
+                    d="M 72 24 C 76 25 76 34 74 44 C 72 54 66 60 60 58 C 55 54 54 44 56 34 C 58 26 66 23 72 24 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  {/* Ear Fold Crease & Feathering Highlight */}
+                  <path d="M 68 25 Q 74 27 72 36" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
+                  <path d="M 57 44 Q 53 48 57 52" stroke="#9a3412" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.6" />
                 </svg>
               </div>
             )}
@@ -1047,8 +1168,21 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="50" cy="46" r="28" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
 
                   {/* Floppy Golden Feathered Ears */}
-                  <path d="M 28 32 Q 16 52 24 66 Q 36 62 34 38 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="1" />
-                  <path d="M 72 32 Q 84 52 76 66 Q 64 62 66 38 Z" fill="url(#qEarFur)" stroke="#b45309" strokeWidth="1" />
+                  <path
+                    d="M 32 30 C 20 32 14 46 16 62 C 18 72 28 74 34 66 C 36 60 36 44 34 30 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 30 32 Q 22 36 22 48" stroke="#fef08a" strokeWidth="1.4" fill="none" strokeLinecap="round" opacity="0.85" />
+
+                  <path
+                    d="M 68 30 C 80 32 86 46 84 62 C 82 72 72 74 66 66 C 64 60 64 44 66 30 Z"
+                    fill="url(#qEarFur)"
+                    stroke="#b45309"
+                    strokeWidth="1"
+                  />
+                  <path d="M 70 32 Q 78 36 78 48" stroke="#fef08a" strokeWidth="1.4" fill="none" strokeLinecap="round" opacity="0.85" />
 
                   {/* Cream Muzzle & Black Button Nose */}
                   <ellipse cx="50" cy="54" rx="14" ry="11" fill="url(#qMuzzleCream)" stroke="#d97706" strokeWidth="1" />
