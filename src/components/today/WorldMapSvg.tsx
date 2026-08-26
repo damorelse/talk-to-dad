@@ -283,7 +283,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
                 fontWeight="900"
                 letterSpacing="0.6"
               >
-                🌲 Seattle · 西雅圖
+                Seattle · 西雅圖
               </text>
             </g>
           </g>
@@ -341,7 +341,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
                 fontWeight="900"
                 letterSpacing="0.6"
               >
-                🌴 San Jose · 聖荷西
+                San Jose · 聖荷西
               </text>
             </g>
           </g>
