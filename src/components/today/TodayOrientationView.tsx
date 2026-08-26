@@ -15,8 +15,7 @@ import {
 } from '../../services/location/locationService';
 import { WeekdayBar } from './WeekdayBar';
 import { WorldMapSvg } from './WorldMapSvg';
-import { QuorraDailyPostcard } from './QuorraDailyPostcard';
-import { getQuorraDailyGreeting } from '../../services/quorra/quorraMessages';
+import { QuorraGreetingAvatar } from './QuorraGreetingAvatar';
 import { DebouncedTouchable } from '../common/DebouncedTouchable';
 import { useAudio } from '../../hooks/useAudio';
 import {
@@ -30,7 +29,7 @@ import {
 export const TodayOrientationView: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
   const [location, setLocation] = useState<UserLocationInfo>(() => getFallbackLocationFromTimezone());
-  const [activeSpeechType, setActiveSpeechType] = useState<'all' | 'weekday' | 'date' | 'time' | 'location' | 'postcard' | null>(null);
+  const [activeSpeechType, setActiveSpeechType] = useState<'all' | 'weekday' | 'date' | 'time' | 'location' | 'greeting' | null>(null);
 
   const { speakBilingual, stopAll, isSpeaking } = useAudio();
 
@@ -143,18 +142,6 @@ export const TodayOrientationView: React.FC = () => {
     });
   };
 
-  const handleSpeakPostcard = async (spokenEn?: string, spokenZh?: string) => {
-    abortSpeakAllRef.current = true;
-    setActiveSpeechType('postcard');
-    const greeting = getQuorraDailyGreeting(currentDate);
-    const en = spokenEn || greeting.spokenEn;
-    const zh = spokenZh || greeting.spokenZh;
-    await speakBilingual(en, zh, undefined, {
-      onEnd: () => setActiveSpeechType(null),
-      onError: () => setActiveSpeechType(null),
-    });
-  };
-
   // Date/Time Display Helpers
   const currentWeekday = WEEKDAYS[currentDate.getDay()];
   const monthsEn = [
@@ -184,17 +171,17 @@ export const TodayOrientationView: React.FC = () => {
   const isDateActive = isSpeaking && (activeSpeechType === 'date' || activeSpeechType === 'all');
   const isTimeActive = isSpeaking && (activeSpeechType === 'time' || activeSpeechType === 'all');
   const isLocationActive = isSpeaking && (activeSpeechType === 'location' || activeSpeechType === 'all');
-  const isPostcardActive = isSpeaking && activeSpeechType === 'postcard';
 
   return (
     <div className="w-full h-full flex flex-col gap-3 overflow-y-auto p-1 select-none scrollbar-thin">
-      {/* 1. HERO GREETING & MASTER SPEAK BUTTON (Placed directly next to greeting) */}
+      {/* 1. HERO GREETING & MASTER SPEAK BUTTON (Quorra Mascot + Greeting) */}
       <div className="w-full bg-transparent px-1.5 py-0.5 flex items-center justify-start gap-3.5 sm:gap-4 min-w-0 flex-wrap sm:flex-nowrap">
-        {/* Left: Greeting */}
-        <div className="flex items-center gap-2.5 shrink-0 min-w-0">
-          <span className="text-2xl sm:text-3xl shrink-0 drop-shadow">
-            {greeting.icon}
-          </span>
+        {/* Left: Quorra Mascot Avatar & Greeting */}
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 min-w-0">
+          <QuorraGreetingAvatar
+            currentDate={currentDate}
+            isSpeakingAll={isSpeaking && (activeSpeechType === 'all' || activeSpeechType === 'greeting')}
+          />
           <div className="flex items-baseline gap-2 min-w-0">
             <h1 className="text-lg sm:text-xl md:text-2xl font-black text-white tracking-tight truncate">
               {greeting.en}
@@ -390,7 +377,7 @@ export const TodayOrientationView: React.FC = () => {
           </DebouncedTouchable>
         </div>
 
-        {/* RIGHT COLUMN: LOCATION & BIG WORLD MAP + QUORRA'S DAILY POSTCARD */}
+        {/* RIGHT COLUMN: LOCATION & BIG WORLD MAP */}
         <div className="flex flex-col gap-2.5 sm:gap-3 h-full">
           {/* Card 4: Location */}
           <div
@@ -438,13 +425,6 @@ export const TodayOrientationView: React.FC = () => {
               />
             </div>
           </div>
-
-          {/* Card 5: Quorra's Daily Postcard */}
-          <QuorraDailyPostcard
-            currentDate={currentDate}
-            onSelectSpeech={handleSpeakPostcard}
-            isSpeakingPostcard={isPostcardActive}
-          />
         </div>
       </div>
     </div>
