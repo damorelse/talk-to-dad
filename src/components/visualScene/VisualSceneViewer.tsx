@@ -78,21 +78,101 @@ export const VisualSceneViewer: React.FC<VisualSceneViewerProps> = ({
                     <stop offset="0%" stopColor="#334155" />
                     <stop offset="100%" stopColor="#1e293b" />
                   </linearGradient>
+                  <linearGradient id="couchBackGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#1d4ed8" />
+                    <stop offset="100%" stopColor="#1e40af" />
+                  </linearGradient>
+                  <linearGradient id="couchSeatGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#1d4ed8" />
+                  </linearGradient>
+                  <linearGradient id="goldFurSleep" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fbbf24" />
+                    <stop offset="100%" stopColor="#d97706" />
+                  </linearGradient>
+                  <linearGradient id="earFurSleep" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#d97706" />
+                    <stop offset="100%" stopColor="#b45309" />
+                  </linearGradient>
                 </defs>
                 {/* Wall & Floor */}
                 <rect width="800" height="350" fill="url(#wallGrad)" />
                 <rect y="350" width="800" height="150" fill="url(#floorGrad)" />
-                {/* Window */}
-                <rect x="50" y="50" width="160" height="180" rx="10" fill="#38bdf8" fillOpacity="0.2" stroke="#64748b" strokeWidth="6" />
-                <line x1="130" y1="50" x2="130" y2="230" stroke="#64748b" strokeWidth="4" />
-                <line x1="50" y1="140" x2="210" y2="140" stroke="#64748b" strokeWidth="4" />
-                {/* Couch */}
-                <rect x="120" y="200" width="240" height="220" rx="30" fill="#2563eb" fillOpacity="0.8" stroke="#1d4ed8" strokeWidth="6" />
-                <text x="240" y="320" textAnchor="middle" fill="#ffffff" fontSize="24" fontWeight="bold">🛋️ Couch</text>
+
+                {/* Window with sunlight */}
+                <rect x="50" y="45" width="160" height="170" rx="10" fill="#38bdf8" fillOpacity="0.2" stroke="#64748b" strokeWidth="6" />
+                <line x1="130" y1="45" x2="130" y2="215" stroke="#64748b" strokeWidth="4" />
+                <line x1="50" y1="130" x2="210" y2="130" stroke="#64748b" strokeWidth="4" />
+
+                {/* Couch Structure */}
+                {/* Couch Backrest */}
+                <rect x="100" y="175" width="280" height="110" rx="20" fill="url(#couchBackGrad)" stroke="#1e3a8a" strokeWidth="4" />
+                {/* Couch Armrests */}
+                <rect x="85" y="215" width="38" height="185" rx="16" fill="#1d4ed8" stroke="#1e3a8a" strokeWidth="4" />
+                <rect x="357" y="215" width="38" height="185" rx="16" fill="#1d4ed8" stroke="#1e3a8a" strokeWidth="4" />
+                {/* Main Seat Cushion */}
+                <rect x="110" y="255" width="260" height="150" rx="24" fill="url(#couchSeatGrad)" stroke="#1d4ed8" strokeWidth="4" />
+
+                {/* Cozy Pillow */}
+                <rect x="120" y="260" width="45" height="40" rx="10" fill="#f43f5e" stroke="#e11d48" strokeWidth="2" />
+
+                {/* ============================================================== */}
+                {/* QUORRA THE GOLDEN RETRIEVER SLEEPING ON THE COUCH             */}
+                {/* ============================================================== */}
+                <g id="quorra-sleeping-couch">
+                  {/* Curled Golden Body */}
+                  <ellipse cx="255" cy="315" rx="55" ry="32" fill="url(#goldFurSleep)" />
+
+                  {/* Curled Fluffy Tail Tucked Around */}
+                  <path
+                    d="M 305 315 Q 328 332 300 344 Q 275 348 260 338"
+                    fill="none"
+                    stroke="url(#goldFurSleep)"
+                    strokeWidth="14"
+                    strokeLinecap="round"
+                  />
+
+                  {/* Tucked Front Paws */}
+                  <ellipse cx="205" cy="336" rx="9" ry="6" fill="#d97706" />
+                  <ellipse cx="225" cy="338" rx="9" ry="6" fill="#d97706" />
+
+                  {/* Golden Head Resting Peacefully */}
+                  <circle cx="198" cy="304" r="26" fill="url(#goldFurSleep)" />
+
+                  {/* Floppy Golden Ears */}
+                  <path d="M 180 290 Q 166 308 174 322 Q 186 318 184 298 Z" fill="url(#earFurSleep)" />
+                  <path d="M 216 290 Q 230 308 222 322 Q 210 318 212 298 Z" fill="url(#earFurSleep)" />
+
+                  {/* Soft Muzzle & Cute Black Nose */}
+                  <ellipse cx="196" cy="313" rx="12" ry="9" fill="#fef3c7" />
+                  <polygon points="196,309 190,304 202,304" fill="#0f172a" />
+                  <path d="M 196 309 Q 196 316 192 318 M 196 309 Q 196 316 200 318" stroke="#0f172a" strokeWidth="1.5" fill="none" />
+
+                  {/* Peaceful Sleeping Eyelids */}
+                  <path d="M 184 301 Q 189 306 194 301" stroke="#0f172a" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <path d="M 202 301 Q 207 306 212 301" stroke="#0f172a" strokeWidth="2" fill="none" strokeLinecap="round" />
+
+                  {/* Red Collar with Shiny Gold Tag */}
+                  <path d="M 180 326 Q 198 332 216 326" stroke="#ef4444" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+                  <circle cx="198" cy="330" r="3.2" fill="#facc15" />
+
+                  {/* Floating 'Zzz' Dream Cloud */}
+                  <g className="animate-pulse" opacity="0.95">
+                    <circle cx="178" cy="275" r="3.5" fill="#93c5fd" />
+                    <circle cx="168" cy="260" r="5.5" fill="#93c5fd" />
+                    <circle cx="154" cy="240" r="10" fill="#60a5fa" />
+                    <text x="154" y="244" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="900">Zzz</text>
+                  </g>
+                </g>
+
+                {/* Couch Label */}
+                <text x="240" y="388" textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="bold">🛋️ Couch · Quorra 🐕💤</text>
+
                 {/* TV Table & Screen */}
                 <rect x="420" y="180" width="180" height="130" rx="10" fill="#1e1e2e" stroke="#475569" strokeWidth="5" />
                 <text x="510" y="250" textAnchor="middle" fill="#ffffff" fontSize="20" fontWeight="bold">📺 TV</text>
                 <rect x="440" y="310" width="140" height="80" rx="8" fill="#475569" />
+
                 {/* Side Table with Water */}
                 <ellipse cx="680" cy="350" rx="70" ry="30" fill="#d97706" />
                 <text x="680" y="320" textAnchor="middle" fill="#ffffff" fontSize="22" fontWeight="bold">💧 Water Cup</text>
