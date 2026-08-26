@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { UserLocationInfo } from '../../types';
 import { getCountryFlag } from '../../services/location/locationService';
-import { Globe, ZoomIn } from 'lucide-react';
 import {
   USA_STATES,
   USA_MAP_VIEWBOX,
@@ -20,12 +19,9 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
   onSelectLocation,
   isSpeakingLocation = false,
 }) => {
-  // Toggle between high-contrast Regional/Country Zoom and full World View
-  const [viewMode, setViewMode] = useState<'regional' | 'world'>('regional');
-
-  // Equirectangular projection: viewBox 0 0 1000 500
-  const lat = location.latitude ?? 37.77;
-  const lon = location.longitude ?? -122.42;
+  // Equirectangular projection for world fallback: viewBox 0 0 1000 500
+  const lat = location.latitude ?? 37.34;
+  const lon = location.longitude ?? -121.89;
 
   // Clamped coordinates
   const clampedLat = Math.max(-85, Math.min(85, lat));
@@ -36,7 +32,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
 
   const flag = getCountryFlag(location.country);
 
-  // Country detection for focus highlighting
+  // Country detection
   const countryLower = (location.country || '').toLowerCase();
   const isUSA =
     countryLower.includes('united states') ||
@@ -48,25 +44,40 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
   const isJapan = countryLower.includes('japan') || location.countryZh === '日本';
   const isUK = countryLower.includes('united kingdom') || countryLower.includes('uk') || location.countryZh === '英國';
 
-  // Specific coordinates for Seattle and San Francisco in World Map
+  // Specific coordinates for Seattle and San Jose in World Map (1000x500)
   const worldSeattleX = (( -122.33 + 180) / 360) * 1000; // ~160.2
   const worldSeattleY = (( 90 - 47.61) / 180) * 500;    // ~117.8
-  const worldSfX = (( -122.42 + 180) / 360) * 1000;      // ~160.0
-  const worldSfY = (( 90 - 37.77) / 180) * 500;         // ~145.1
+  const worldSjX = (( -121.89 + 180) / 360) * 1000;      // ~161.4
+  const worldSjY = (( 90 - 37.34) / 180) * 500;         // ~146.3
 
-  // Check if active user pin matches Seattle or SF (within 15px radius)
-  const isUserAtSeattle = isUSA && Math.hypot(pinX - worldSeattleX, pinY - worldSeattleY) < 15;
-  const isUserAtSF = isUSA && !isUserAtSeattle && Math.hypot(pinX - worldSfX, pinY - worldSfY) < 15;
+  // City & State detection for focus highlighting
+  const cityLower = (location.city || '').toLowerCase();
+  const isUserAtSeattle =
+    isUSA &&
+    (cityLower.includes('seattle') ||
+      location.cityZh?.includes('西雅圖') ||
+      Math.hypot(pinX - worldSeattleX, pinY - worldSeattleY) < 15);
+  const isUserAtSJ =
+    isUSA &&
+    !isUserAtSeattle &&
+    (cityLower.includes('san jose') ||
+      cityLower.includes('san josé') ||
+      cityLower.includes('san francisco') ||
+      cityLower.includes('santa clara') ||
+      cityLower.includes('sunnyvale') ||
+      location.cityZh?.includes('聖荷西') ||
+      location.cityZh?.includes('舊金山') ||
+      Math.hypot(pinX - worldSjX, pinY - worldSjY) < 20);
 
-  // Specific coordinates for Seattle and San Francisco in Regional Albers USA Zoom (192 9 1028 746)
+  // Specific coordinates for Seattle and San Jose in Albers USA Zoom (192 9 1028 746)
   const regSeattleX = 368;
   const regSeattleY = 44;
-  const regSfX = 312;
-  const regSfY = 249;
+  const regSjX = 320;
+  const regSjY = 256;
 
   // Active state lookup
   const userStateRaw = (location.state || '').toLowerCase().trim();
-  const userStateId = STATE_NAME_TO_ID[userStateRaw] || (isUserAtSeattle ? 'wa' : isUserAtSF ? 'ca' : undefined);
+  const userStateId = STATE_NAME_TO_ID[userStateRaw] || (isUserAtSeattle ? 'wa' : isUserAtSJ ? 'ca' : undefined);
 
   // On-map floating label calculations for user location in World Map
   const cityLabel = location.city || location.country || 'You Are Here';
@@ -99,36 +110,10 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
       aria-label={`Current location on map: ${location.city}, ${location.country}. Tap to hear.`}
       tabIndex={0}
     >
-      {/* Interactive View Toggle Pill (Regional Zoom ↔ World Map) */}
-      <div className="absolute top-2 right-2 z-20 flex items-center">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setViewMode((m) => (m === 'regional' ? 'world' : 'regional'));
-          }}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900/90 hover:bg-slate-800 active:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/80 shadow-md text-xs font-bold transition-all cursor-pointer backdrop-blur-md"
-          aria-label={viewMode === 'regional' ? 'Switch to World Map View' : 'Switch to Regional Zoom View'}
-          title={viewMode === 'regional' ? 'Switch to World Map' : 'Switch to Regional Zoom'}
-        >
-          {viewMode === 'regional' ? (
-            <>
-              <Globe className="w-3.5 h-3.5 text-blue-400" />
-              <span>World Map</span>
-            </>
-          ) : (
-            <>
-              <ZoomIn className="w-3.5 h-3.5 text-rose-400" />
-              <span>{isUSA ? 'USA Zoom' : isTaiwan ? 'Taiwan Zoom' : 'Regional Zoom'}</span>
-            </>
-          )}
-        </button>
-      </div>
-
       {/* =================================================================== */}
-      {/* MODE A: RECOGNIZABLE ALBERS EQUAL-AREA USA VECTOR MAP               */}
+      {/* RECOGNIZABLE ALBERS EQUAL-AREA USA VECTOR MAP (When User is in USA) */}
       {/* =================================================================== */}
-      {viewMode === 'regional' && isUSA && (
+      {isUSA && (
         <svg
           viewBox={USA_MAP_VIEWBOX}
           preserveAspectRatio="xMidYMid meet"
@@ -225,7 +210,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           {/* Major State Code Text Accents */}
           <g fill="#64748b" fontSize="11" fontWeight="800" pointerEvents="none" textAnchor="middle" opacity="0.8">
             {Object.entries(STATE_CENTROIDS).map(([id, info]) => {
-              // Highlight active / west coast state labels
               const isActive = id === userStateId;
               const isWestCoast = id === 'wa' || id === 'ca';
               const labelColor = isActive ? '#ef4444' : isWestCoast ? '#38bdf8' : '#64748b';
@@ -239,22 +223,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             })}
           </g>
 
-          {/* West Coast Connecting Flight Arc (Seattle <-> San Francisco) */}
-          <g opacity="0.85">
-            <path
-              d={`M ${regSeattleX} ${regSeattleY} Q 280 140 ${regSfX} ${regSfY}`}
-              fill="none"
-              stroke="#38bdf8"
-              strokeWidth="2.5"
-              strokeDasharray="6 4"
-            />
-            {/* Route Distance Label Badge */}
-            <rect x="250" y="132" width="68" height="20" rx="10" fill="#0f172a" stroke="#38bdf8" strokeWidth="1" />
-            <text x="284" y="146" textAnchor="middle" fill="#38bdf8" fontSize="10" fontWeight="800">
-              ✈️ 800 mi
-            </text>
-          </g>
-
           {/* ================================================================= */}
           {/* PIN 1: SEATTLE (WASHINGTON)                                       */}
           {/* ================================================================= */}
@@ -263,11 +231,11 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             <circle
               cx="0"
               cy="0"
-              r={isUserAtSeattle ? 22 : 14}
-              fill={isUserAtSeattle ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.15)'}
+              r={isUserAtSeattle ? 24 : 15}
+              fill={isUserAtSeattle ? 'rgba(239, 68, 68, 0.22)' : 'rgba(56, 189, 248, 0.18)'}
               stroke={isUserAtSeattle ? '#ef4444' : '#38bdf8'}
-              strokeWidth="1.5"
-              opacity="0.8"
+              strokeWidth="1.6"
+              opacity="0.85"
             />
             <ellipse cx="0" cy="1" rx="8" ry="3" fill="#000000" opacity="0.5" />
             <path
@@ -281,76 +249,76 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             <circle cx="0" cy="-22" r="2" fill={isUserAtSeattle ? '#dc2626' : '#0284c7'} />
           </g>
 
-          {/* Seattle Callout Pill Badge */}
-          <g transform={`translate(${regSeattleX}, ${regSeattleY - 26})`}>
-            <polygon points="0,2 -5,-3 5,-3" fill={isUserAtSeattle ? '#ef4444' : '#0284c7'} stroke="#ffffff" strokeWidth="1.2" />
+          {/* Seattle Callout Pill Badge (Large & Highly Legible) */}
+          <g transform={`translate(${regSeattleX}, ${regSeattleY - 28})`}>
+            <polygon points="0,2 -6,-4 6,-4" fill={isUserAtSeattle ? '#ef4444' : '#0284c7'} stroke="#ffffff" strokeWidth="1.5" />
             <rect
-              x="-74"
-              y="-26"
-              width="148"
-              height="26"
-              rx="13"
+              x="-80"
+              y="-28"
+              width="160"
+              height="28"
+              rx="14"
               fill={isUserAtSeattle ? '#ef4444' : '#0284c7'}
               stroke="#ffffff"
-              strokeWidth="1.8"
+              strokeWidth="2"
               filter="url(#regionalGlow)"
             />
-            <text x="0" y="-9" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
+            <text x="0" y="-9" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
               🌲 Seattle · 西雅圖
             </text>
           </g>
 
           {/* ================================================================= */}
-          {/* PIN 2: SAN FRANCISCO (CALIFORNIA)                                 */}
+          {/* PIN 2: SAN JOSE (CALIFORNIA / SILICON VALLEY)                     */}
           {/* ================================================================= */}
-          <g transform={`translate(${regSfX}, ${regSfY})`} filter="url(#pinShadow)">
+          <g transform={`translate(${regSjX}, ${regSjY})`} filter="url(#pinShadow)">
             {/* Static Halo Ring */}
             <circle
               cx="0"
               cy="0"
-              r={!isUserAtSeattle ? 22 : 14}
-              fill={!isUserAtSeattle ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.15)'}
-              stroke={!isUserAtSeattle ? '#ef4444' : '#38bdf8'}
-              strokeWidth="1.5"
-              opacity="0.8"
+              r={isUserAtSJ ? 24 : 15}
+              fill={isUserAtSJ ? 'rgba(239, 68, 68, 0.22)' : 'rgba(56, 189, 248, 0.18)'}
+              stroke={isUserAtSJ ? '#ef4444' : '#38bdf8'}
+              strokeWidth="1.6"
+              opacity="0.85"
             />
             <ellipse cx="0" cy="1" rx="8" ry="3" fill="#000000" opacity="0.5" />
             <path
               d="M 0 0 C -3 -5, -12 -12, -12 -22 A 12 12 0 1 1 12 -22 C 12 -12, 3 -5, 0 0 Z"
-              fill={!isUserAtSeattle ? 'url(#redPinGrad)' : 'url(#cyanPinGrad)'}
+              fill={isUserAtSJ ? 'url(#redPinGrad)' : 'url(#cyanPinGrad)'}
               stroke="#ffffff"
               strokeWidth="2"
               strokeLinejoin="round"
             />
             <circle cx="0" cy="-22" r="4.5" fill="#ffffff" />
-            <circle cx="0" cy="-22" r="2" fill={!isUserAtSeattle ? '#dc2626' : '#0284c7'} />
+            <circle cx="0" cy="-22" r="2" fill={isUserAtSJ ? '#dc2626' : '#0284c7'} />
           </g>
 
-          {/* San Francisco Callout Pill Badge */}
-          <g transform={`translate(${regSfX}, ${regSfY + 30})`}>
-            <polygon points="0,-22 -5,-17 5,-17" fill={!isUserAtSeattle ? '#ef4444' : '#0284c7'} stroke="#ffffff" strokeWidth="1.2" />
+          {/* San Jose Callout Pill Badge (Large & Highly Legible) */}
+          <g transform={`translate(${regSjX}, ${regSjY + 30})`}>
+            <polygon points="0,-22 -6,-16 6,-16" fill={isUserAtSJ ? '#ef4444' : '#0284c7'} stroke="#ffffff" strokeWidth="1.5" />
             <rect
-              x="-88"
-              y="-19"
-              width="176"
-              height="26"
-              rx="13"
-              fill={!isUserAtSeattle ? '#ef4444' : '#0284c7'}
+              x="-86"
+              y="-18"
+              width="172"
+              height="28"
+              rx="14"
+              fill={isUserAtSJ ? '#ef4444' : '#0284c7'}
               stroke="#ffffff"
-              strokeWidth="1.8"
+              strokeWidth="2"
               filter="url(#regionalGlow)"
             />
-            <text x="0" y="-2" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
-              🌉 San Francisco · 舊金山
+            <text x="0" y="1" textAnchor="middle" fill="#ffffff" fontSize="13" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
+              🌴 San Jose · 聖荷西
             </text>
           </g>
         </svg>
       )}
 
       {/* =================================================================== */}
-      {/* MODE B: GLOBAL WORLD MAP (or non-USA regional default)             */}
+      {/* GLOBAL WORLD MAP (When User is Outside USA)                         */}
       {/* =================================================================== */}
-      {(viewMode === 'world' || !isUSA) && (
+      {!isUSA && (
         <svg
           viewBox="0 0 1000 500"
           preserveAspectRatio="xMidYMid meet"
@@ -493,24 +461,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             " />
           </g>
 
-          {/* Focus Highlight: USA Landmass Glow Overlay when user is in the USA */}
-          {isUSA && (
-            <g filter="url(#countryGlow)">
-              <path
-                d="
-                  M 140 115
-                  L 190 110 L 250 115 L 260 140 L 250 180 L 230 185 L 210 160 L 195 210
-                  L 210 245 L 200 240 L 170 180 L 140 150 Z
-                "
-                fill="rgba(56, 189, 248, 0.14)"
-                stroke="#38bdf8"
-                strokeWidth="2.5"
-                strokeLinejoin="round"
-                strokeDasharray="6 3"
-              />
-            </g>
-          )}
-
           {/* Focus Highlight: Taiwan Halo Ring */}
           {isTaiwan && (
             <circle
@@ -522,46 +472,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
               strokeWidth="1.5"
               opacity="0.8"
             />
-          )}
-
-          {/* Seattle Auxiliary Pin in World Map */}
-          {isUSA && !isUserAtSeattle && (
-            <g>
-              <g transform={`translate(${worldSeattleX}, ${worldSeattleY})`} filter="url(#pinShadow)">
-                <circle cx="0" cy="0" r="10" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" strokeWidth="1.5" opacity="0.7" />
-                <ellipse cx="0" cy="1" rx="6" ry="2.2" fill="#000000" opacity="0.4" />
-                <path d="M 0 0 C -2.5 -4, -8 -10, -8 -18 A 8 8 0 1 1 8 -18 C 8 -10, 2.5 -4, 0 0 Z" fill="url(#cyanPinGrad)" stroke="#ffffff" strokeWidth="1.6" strokeLinejoin="round" />
-                <circle cx="0" cy="-18" r="3" fill="#ffffff" />
-                <circle cx="0" cy="-18" r="1.4" fill="#0284c7" />
-              </g>
-              <g transform={`translate(${worldSeattleX}, 94)`}>
-                <polygon points="0,2 -4,-3 4,-3" fill="#0284c7" stroke="#ffffff" strokeWidth="1.2" />
-                <rect x="-48" y="-21" width="96" height="19" rx="9.5" fill="#0284c7" stroke="#38bdf8" strokeWidth="1.6" filter="url(#pinGlow)" />
-                <text x="0" y="-8" textAnchor="middle" fill="#ffffff" fontSize="9.5" fontWeight="800" letterSpacing="0.3" pointerEvents="none">
-                  Seattle · 西雅圖
-                </text>
-              </g>
-            </g>
-          )}
-
-          {/* San Francisco Auxiliary Pin in World Map */}
-          {isUSA && !isUserAtSF && (
-            <g>
-              <g transform={`translate(${worldSfX}, ${worldSfY})`} filter="url(#pinShadow)">
-                <circle cx="0" cy="0" r="10" fill="rgba(56, 189, 248, 0.15)" stroke="#38bdf8" strokeWidth="1.5" opacity="0.7" />
-                <ellipse cx="0" cy="1" rx="6" ry="2.2" fill="#000000" opacity="0.4" />
-                <path d="M 0 0 C -2.5 -4, -8 -10, -8 -18 A 8 8 0 1 1 8 -18 C 8 -10, 2.5 -4, 0 0 Z" fill="url(#cyanPinGrad)" stroke="#ffffff" strokeWidth="1.6" strokeLinejoin="round" />
-                <circle cx="0" cy="-18" r="3" fill="#ffffff" />
-                <circle cx="0" cy="-18" r="1.4" fill="#0284c7" />
-              </g>
-              <g transform={`translate(${worldSfX}, 168)`}>
-                <polygon points="0,-21 -4,-16 4,-16" fill="#0284c7" stroke="#ffffff" strokeWidth="1.2" />
-                <rect x="-64" y="-19" width="128" height="19" rx="9.5" fill="#0284c7" stroke="#38bdf8" strokeWidth="1.6" filter="url(#pinGlow)" />
-                <text x="0" y="-6" textAnchor="middle" fill="#ffffff" fontSize="9.5" fontWeight="800" letterSpacing="0.3" pointerEvents="none">
-                  San Francisco · 舊金山
-                </text>
-              </g>
-            </g>
           )}
 
           {/* Primary Active User Location Pin in World Map */}
