@@ -107,6 +107,13 @@ class IOSAudioUnlock {
   }
 
   getAudioContext(): AudioContext | null {
+    if (typeof window === 'undefined') return null;
+    if (!this.audioCtx) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContextClass) {
+        this.audioCtx = new AudioContextClass();
+      }
+    }
     return this.audioCtx;
   }
 }

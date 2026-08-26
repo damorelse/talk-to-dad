@@ -63,13 +63,13 @@ export class AudioService {
     audioBlobId?: string,
     options?: SpeechOptions
   ): Promise<void> {
-    this.stopAll();
     iosAudioUnlock.ensureUnlockedAndResumed();
 
     if (audioBlobId) {
       try {
         const blobRecord = await db.mediaBlobs.get(audioBlobId);
         if (blobRecord && blobRecord.dataBase64) {
+          this.stopAll();
           options?.onStart?.();
           await recordedAudioEngine.playBase64(blobRecord.dataBase64, blobRecord.mimeType);
           options?.onEnd?.();
@@ -90,8 +90,8 @@ export class AudioService {
     this.stopAll();
     iosAudioUnlock.ensureUnlockedAndResumed();
     this.playAlert();
-    // Short 120ms pause to let alert tone lead, then speak phrase
-    await new Promise(r => setTimeout(r, 120));
+    // 400ms pause to let 350ms alert siren tone finish cleanly before speaking phrase
+    await new Promise(r => setTimeout(r, 400));
     await speechEngine.speak(phrase, { rate: speechRate, pitch: 1.1 });
   }
 }

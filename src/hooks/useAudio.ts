@@ -11,9 +11,9 @@ export function useAudio() {
   const getVoiceForText = useCallback(
     (text: string) => {
       if (isChineseText(text)) {
-        return settings.selectedVoiceZhTW || settings.selectedVoiceURI || '';
+        return settings.selectedVoiceZhTW || '';
       }
-      return settings.selectedVoiceEnUS || settings.selectedVoiceURI || '';
+      return settings.selectedVoiceEnUS || '';
     },
     [settings]
   );
@@ -63,8 +63,8 @@ export function useAudio() {
     ) => {
       setIsSpeaking(true);
       const mode = settings.cardSpeechLanguage || 'en-then-zh';
-      const enVoice = customOptions?.voiceURI || settings.selectedVoiceEnUS || settings.selectedVoiceURI || '';
-      const zhVoice = settings.selectedVoiceZhTW || settings.selectedVoiceURI || '';
+      const enVoice = customOptions?.voiceURI || settings.selectedVoiceEnUS || '';
+      const zhVoice = settings.selectedVoiceZhTW || '';
 
       try {
         if (mode === 'zh') {
@@ -243,8 +243,8 @@ export function useAudio() {
       try {
         audioService.stopAll();
         audioService.playAlert();
-        // Short pause to let alert tone lead, then speak phrase(s) bilingually
-        await new Promise((r) => setTimeout(r, 120));
+        // 400ms pause to let 350ms alert siren tone finish cleanly before speaking phrase
+        await new Promise((r) => setTimeout(r, 400));
         await speakBilingual(enPhrase, zhPhrase, undefined, { pitch: 1.1 });
       } finally {
         setIsSpeaking(false);

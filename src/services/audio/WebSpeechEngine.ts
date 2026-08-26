@@ -22,6 +22,8 @@ export class WebSpeechEngine {
   private voices: SpeechSynthesisVoice[] = [];
   private activeUtterances: Set<SpeechSynthesisUtterance> = new Set();
   private keepAliveTimer: any = null;
+  private speakSequence = 0;
+  private isCancelling = false;
 
   constructor() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -72,8 +74,32 @@ export class WebSpeechEngine {
     const voices = this.getVoices();
     if (voices.length === 0) return null;
 
+    const isZh = (lang: string, name: string = '') => {
+      const l = (lang || '').replace('_', '-').toLowerCase();
+      const n = (name || '').toLowerCase();
+      return (
+        l.startsWith('zh') ||
+        l.startsWith('cmn') ||
+        l.startsWith('yue') ||
+        l.includes('chinese') ||
+        l.includes('taiwan') ||
+        l.includes('mandarin') ||
+        l.includes('cantonese') ||
+        l.includes('hant') ||
+        l.includes('hans') ||
+        n.includes('chinese') ||
+        n.includes('國語') ||
+        n.includes('普通话') ||
+        n.includes('中文')
+      );
+    };
+
+    const isEn = (lang: string) => (lang || '').replace('_', '-').toLowerCase().startsWith('en');
+
     if (preferredURI) {
-      const match = voices.find(v => v.voiceURI === preferredURI);
+      const match = voices.find(
+        (v) => v.voiceURI === preferredURI && (locale === 'zh-TW' ? isZh(v.lang, v.name) : isEn(v.lang))
+      );
       if (match) return match;
     }
 
@@ -103,20 +129,16 @@ export class WebSpeechEngine {
       if (anyZhTW) return anyZhTW;
 
       // 3. Fallback to any Chinese / Mandarin / Cantonese dialect voice on system
-      const isAnyChinese = (lang: string, name: string) => {
-        const l = (lang || '').replace('_', '-').toLowerCase();
-        const n = (name || '').toLowerCase();
-        return l.startsWith('zh') || l.startsWith('cmn') || l.startsWith('yue') || l.includes('chinese') || n.includes('chinese') || n.includes('國語') || n.includes('普通话') || n.includes('中文');
-      };
-
-      const anyGoogleZh = voices.find(v => isAnyChinese(v.lang, v.name) && v.name.toLowerCase().includes('google') && !isExcludedVoice(v.name));
+      const anyGoogleZh = voices.find(v => isZh(v.lang, v.name) && v.name.toLowerCase().includes('google') && !isExcludedVoice(v.name));
       if (anyGoogleZh) return anyGoogleZh;
 
-      const anyZh = voices.find(v => isAnyChinese(v.lang, v.name) && !isExcludedVoice(v.name));
+      const anyZh = voices.find(v => isZh(v.lang, v.name) && !isExcludedVoice(v.name));
       if (anyZh) return anyZh;
+
+      // Do not fall back to English voices[0] for Chinese; return null so browser's native/cloud engine handles zh-TW
+      return null;
     } else {
       const isEnUS = (lang: string) => (lang || '').replace('_', '-').toLowerCase() === 'en-us';
-      const isAnyEn = (lang: string) => (lang || '').replace('_', '-').toLowerCase().startsWith('en');
 
       // 1. Prioritize Samantha as the default en-US voice
       const samanthaVoice = voices.find(v => isEnUS(v.lang) && v.name.toLowerCase().includes('samantha') && !isExcludedVoice(v.name));
@@ -132,14 +154,14 @@ export class WebSpeechEngine {
       const anyEnUS = voices.find(v => isEnUS(v.lang) && !isExcludedVoice(v.name));
       if (anyEnUS) return anyEnUS;
 
-      const anyGoogleEn = voices.find(v => isAnyEn(v.lang) && v.name.toLowerCase().includes('google') && !isExcludedVoice(v.name));
+      const anyGoogleEn = voices.find(v => isEn(v.lang) && v.name.toLowerCase().includes('google') && !isExcludedVoice(v.name));
       if (anyGoogleEn) return anyGoogleEn;
 
-      const anyEn = voices.find(v => isAnyEn(v.lang) && !isExcludedVoice(v.name));
+      const anyEn = voices.find(v => isEn(v.lang) && !isExcludedVoice(v.name));
       if (anyEn) return anyEn;
-    }
 
-    return voices[0] || null;
+      return voices.find(v => !isExcludedVoice(v.name)) || voices[0] || null;
+    }
   }
 
   /**
@@ -163,6 +185,8 @@ export class WebSpeechEngine {
       return;
     }
 
+    const currentSeq = ++this.speakSequence;
+
     iosAudioUnlock.ensureUnlockedAndResumed();
 
     // If iOS Safari left speech in paused state, unpause it
@@ -171,13 +195,20 @@ export class WebSpeechEngine {
     }
 
     // Cancel any ongoing or pending speech before starting new speech.
-    // In Chromium, yield an event loop micro-tick after cancel() so the browser's
-    // speech dispatcher finishes clearing the internal queue before the next speak() call.
-    if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+    // In Chromium, wait 60ms after cancel() so the browser's asynchronous
+    // speech IPC dispatcher finishes clearing the internal queue before the next speak() call.
+    if (window.speechSynthesis.speaking || window.speechSynthesis.pending || this.isCancelling || this.activeUtterances.size > 0) {
       this.cancel();
-      await new Promise((r) => setTimeout(r, 20));
+      this.isCancelling = true;
+      const isMock = typeof window !== 'undefined' && (window.speechSynthesis as any)?.constructor?.name === 'MockSpeechSynthesis';
+      const cancelWaitMs = isMock ? 10 : 60;
+      await new Promise((r) => setTimeout(r, cancelWaitMs));
+      this.isCancelling = false;
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
+      }
+      if (currentSeq !== this.speakSequence) {
+        return;
       }
     }
 
@@ -196,6 +227,7 @@ export class WebSpeechEngine {
         utterance.voice = voice;
         utterance.lang = voice.lang || targetLocale;
       } else {
+        utterance.voice = null;
         utterance.lang = targetLocale;
       }
 

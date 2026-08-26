@@ -1,24 +1,18 @@
 import { iosAudioUnlock } from './iOSAudioUnlock';
 
 export class WebAudioToneEngine {
-  private ctx: AudioContext | null = null;
-
   private getContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
 
-    if (!this.ctx) {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioContextClass) {
-        this.ctx = new AudioContextClass();
-        iosAudioUnlock.init(this.ctx);
-      }
+    iosAudioUnlock.ensureUnlockedAndResumed();
+    const ctx = iosAudioUnlock.getAudioContext();
+    if (!ctx) return null;
+
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
     }
 
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume().catch(() => {});
-    }
-
-    return this.ctx;
+    return ctx;
   }
 
   /**

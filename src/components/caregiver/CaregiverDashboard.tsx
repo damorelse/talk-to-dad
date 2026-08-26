@@ -116,7 +116,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
       await speechEngine.speak('您好！測試繁體中文語音與語速設定。', {
         rate: settings.speechRate,
         pitch: settings.speechPitch,
-        voiceURI: settings.selectedVoiceZhTW || defaultZhVoiceURI || settings.selectedVoiceURI,
+        voiceURI: settings.selectedVoiceZhTW || defaultZhVoiceURI,
         locale: 'zh-TW',
       });
     } finally {
@@ -412,7 +412,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
 
                     <select
                       value={settings.selectedVoiceEnUS || defaultEnVoiceURI}
-                      onChange={(e) => updateSettings({ selectedVoiceEnUS: e.target.value, selectedVoiceURI: e.target.value })}
+                      onChange={(e) => updateSettings({ selectedVoiceEnUS: e.target.value })}
                       className="w-full p-2 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                     >
                       {enUSVoices.length === 0 && (

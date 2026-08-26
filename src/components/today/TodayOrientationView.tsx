@@ -80,7 +80,7 @@ export const TodayOrientationView: React.FC = () => {
 
         if (abortSpeakAllRef.current) break;
         if (i < segments.length - 1) {
-          await new Promise((r) => setTimeout(r, 200));
+          await new Promise((r) => setTimeout(r, 350));
         }
       }
     } finally {
