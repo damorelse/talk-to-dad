@@ -72,6 +72,10 @@ export const HotspotOverlay: React.FC<HotspotOverlayProps> = ({
       {hotspots.map((hs) => {
         const isActive = activeHotspotId === hs.id;
         const borderColor = hs.color || '#3B82F6';
+        const isQuorra =
+          hs.id === 'hs-pet-quorra' ||
+          hs.id.toLowerCase().includes('quorra') ||
+          hs.label.toLowerCase().includes('quorra');
         const isChair = hs.id === 'hs-chair';
 
         return (
@@ -91,7 +95,11 @@ export const HotspotOverlay: React.FC<HotspotOverlayProps> = ({
               ${isChair ? 'flex items-start justify-start p-1.5' : 'flex items-end justify-center p-1.5'}
               ${
                 isActive
-                  ? 'bg-yellow-400/40 scale-105 ring-4 ring-yellow-400 shadow-2xl z-20 animate-pulse'
+                  ? isQuorra
+                    ? 'bg-amber-400/35 scale-105 ring-4 ring-amber-400 shadow-2xl z-20 animate-pulse'
+                    : 'bg-yellow-400/40 scale-105 ring-4 ring-yellow-400 shadow-2xl z-20 animate-pulse'
+                  : isQuorra
+                  ? 'bg-transparent hover:bg-amber-400/10 active:scale-95 hover:border-amber-300'
                   : 'bg-black/30 hover:bg-black/40 active:scale-95 shadow-lg backdrop-blur-[1px] hover:border-white'
               }
             `}
