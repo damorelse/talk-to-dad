@@ -327,13 +327,12 @@ export function formatWeekdayAndDateSpeech(date: Date): { en: string; zh: string
 export function formatTimeSpeech(date: Date): { en: string; zh: string } {
   const hours = date.getHours();
   const minutes = date.getMinutes();
-  const period = getDayPeriod(hours);
   const displayHours12 = hours % 12 === 0 ? 12 : hours % 12;
   const ampm = hours >= 12 ? 'PM' : 'AM';
   const minText = minutes < 10 ? `0${minutes}` : `${minutes}`;
 
-  const en = `It is currently ${displayHours12}:${minText} ${ampm} in the ${period.en}.`;
-  const zh = `現在時間是${period.zh} ${displayHours12} 點 ${minutes === 0 ? '整' : `${minutes} 分`}。`;
+  const en = `It is currently ${displayHours12}:${minText} ${ampm}.`;
+  const zh = `現在時間是 ${displayHours12} 點 ${minutes === 0 ? '整' : `${minutes} 分`}。`;
 
   return { en, zh };
 }

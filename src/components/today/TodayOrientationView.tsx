@@ -8,7 +8,6 @@ import {
   formatTimeSpeech,
   formatLocationSpeech,
   formatFullOrientationSpeech,
-  getDayPeriod,
   getGreeting,
   WEEKDAYS,
   WeekdayDef,
@@ -163,7 +162,6 @@ export const TodayOrientationView: React.FC = () => {
   const displayHours12 = hours % 12 === 0 ? 12 : hours % 12;
   const ampm = hours >= 12 ? 'PM' : 'AM';
   const minStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
-  const dayPeriod = getDayPeriod(hours);
   const greeting = getGreeting(hours);
 
   // Active Glow Indicators for Visual-Audio Synchrony
@@ -269,7 +267,7 @@ export const TodayOrientationView: React.FC = () => {
                 </span>
               </div>
               <span className="text-xs sm:text-sm font-bold text-emerald-200 mt-0.5 truncate text-center">
-                {dayPeriod.zh} {displayHours12} 點 {minutes === 0 ? '整' : `${minutes} 分`}
+                {displayHours12} 點 {minutes === 0 ? '整' : `${minutes} 分`}
               </span>
             </div>
           </DebouncedTouchable>

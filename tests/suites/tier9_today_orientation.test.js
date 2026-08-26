@@ -60,11 +60,11 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
       assert.equal(getDayPeriod(2).zh, '晚上');
     });
 
-    it('should format 12-hour clock with AM/PM and period of day', () => {
+    it('should format 12-hour clock with AM/PM without repeating period of day', () => {
       const d = new Date(2026, 7, 25, 15, 30, 0); // 3:30 PM
       const speech = formatTimeSpeech(d);
-      assert.ok(speech.en.includes('3:30 PM in the afternoon'));
-      assert.ok(speech.zh.includes('下午 3 點 30 分'));
+      assert.equal(speech.en, 'It is currently 3:30 PM.');
+      assert.equal(speech.zh, '現在時間是 3 點 30 分。');
     });
 
     it('should handle midnight and noon correctly (12 AM / 12 PM)', () => {
@@ -72,12 +72,12 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
       const noon = new Date(2026, 7, 25, 12, 0, 0);
 
       const spMid = formatTimeSpeech(midnight);
-      assert.ok(spMid.en.includes('12:00 AM'));
-      assert.ok(spMid.zh.includes('12 點 整'));
+      assert.equal(spMid.en, 'It is currently 12:00 AM.');
+      assert.equal(spMid.zh, '現在時間是 12 點 整。');
 
       const spNoon = formatTimeSpeech(noon);
-      assert.ok(spNoon.en.includes('12:00 PM'));
-      assert.ok(spNoon.zh.includes('12 點 整'));
+      assert.equal(spNoon.en, 'It is currently 12:00 PM.');
+      assert.equal(spNoon.zh, '現在時間是 12 點 整。');
     });
   });
 
@@ -145,11 +145,11 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
       const full = formatFullOrientationSpeech(d, loc);
 
       // English Order Check: Greeting -> Time -> Weekday, Date -> Location
-      const expectedEn = 'Good afternoon, Dad! It is currently 2:15 PM in the afternoon. Today is Tuesday, August 25, 2026. You are in San Francisco, California, United States.';
+      const expectedEn = 'Good afternoon, Dad! It is currently 2:15 PM. Today is Tuesday, August 25, 2026. You are in San Francisco, California, United States.';
       assert.equal(full.en, expectedEn);
 
       // Chinese Order Check: Greeting -> Time -> Weekday, Date -> Location
-      const expectedZh = '午安！ 現在時間是下午 2 點 15 分。 今天是星期二，2026 年 8 月 25 日。 您現在在美國加州舊金山。';
+      const expectedZh = '午安！ 現在時間是 2 點 15 分。 今天是星期二，2026 年 8 月 25 日。 您現在在美國加州舊金山。';
       assert.equal(full.zh, expectedZh);
 
       // Verify segments array
@@ -158,8 +158,8 @@ describe('Tier 9: Today & Daily Orientation Clinical Invariants', () => {
       assert.equal(full.segments[0].en, 'Good afternoon, Dad!');
       assert.equal(full.segments[0].zh, '午安！');
       assert.equal(full.segments[1].type, 'time');
-      assert.equal(full.segments[1].en, 'It is currently 2:15 PM in the afternoon.');
-      assert.equal(full.segments[1].zh, '現在時間是下午 2 點 15 分。');
+      assert.equal(full.segments[1].en, 'It is currently 2:15 PM.');
+      assert.equal(full.segments[1].zh, '現在時間是 2 點 15 分。');
       assert.equal(full.segments[2].type, 'date');
       assert.equal(full.segments[2].en, 'Today is Tuesday, August 25, 2026.');
       assert.equal(full.segments[2].zh, '今天是星期二，2026 年 8 月 25 日。');
