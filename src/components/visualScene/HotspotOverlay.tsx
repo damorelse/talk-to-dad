@@ -68,11 +68,15 @@ export const HotspotOverlay: React.FC<HotspotOverlayProps> = ({
   }, debounceMs);
 
   return (
-    <div className="absolute inset-0 pointer-events-auto select-none overflow-hidden">
+    <div className="absolute inset-0 pointer-events-auto select-none overflow-visible">
       {hotspots.map((hs) => {
         const isActive = activeHotspotId === hs.id;
         const borderColor = hs.color || '#3B82F6';
-        const isQuorra = hs.id === 'hs-pet-quorra';
+        const isQuorra =
+          hs.id === 'hs-pet-quorra' ||
+          hs.id.toLowerCase().includes('quorra') ||
+          hs.label.toLowerCase().includes('quorra');
+        const isChair = hs.id === 'hs-chair';
 
         return (
           <button
@@ -87,30 +91,46 @@ export const HotspotOverlay: React.FC<HotspotOverlayProps> = ({
               borderColor: borderColor,
             }}
             className={`
-              absolute rounded-2xl border-4 transition-all duration-150 flex items-end justify-center p-1.5
-              cursor-pointer focus:outline-none focus:ring-4 focus:ring-yellow-300
+              absolute transition-all duration-150 cursor-pointer focus:outline-none focus:ring-4
               ${
-                isActive
-                  ? isQuorra
-                    ? 'bg-amber-400/45 scale-105 ring-4 ring-amber-400 shadow-2xl z-20 animate-pulse'
-                    : 'bg-yellow-400/40 scale-105 ring-4 ring-yellow-400 shadow-2xl z-20 animate-pulse'
-                  : isQuorra
-                  ? 'bg-amber-500/20 hover:bg-amber-500/35 active:scale-95 shadow-lg backdrop-blur-[1px] hover:border-amber-300'
-                  : 'bg-black/30 hover:bg-black/40 active:scale-95 shadow-lg backdrop-blur-[1px] hover:border-white'
+                isQuorra
+                  ? `rounded-3xl border-2 border-dashed border-amber-400/60 hover:border-amber-300 focus:ring-amber-300 flex items-center justify-center ${
+                      isActive
+                        ? 'bg-amber-400/35 ring-4 ring-amber-400 scale-105 shadow-2xl z-20 animate-pulse'
+                        : 'bg-amber-400/5 hover:bg-amber-400/20 active:scale-95 shadow-md backdrop-blur-[0.5px]'
+                    }`
+                  : `rounded-2xl border-4 focus:ring-yellow-300 ${
+                      isChair ? 'flex items-start justify-start p-1.5' : 'flex items-end justify-center p-1.5'
+                    } ${
+                      isActive
+                        ? 'bg-yellow-400/40 scale-105 ring-4 ring-yellow-400 shadow-2xl z-20 animate-pulse'
+                        : 'bg-black/30 hover:bg-black/40 active:scale-95 shadow-lg backdrop-blur-[1px] hover:border-white'
+                    }`
               }
             `}
             aria-label={`Hotspot: ${hs.label}. Speaks: ${hs.spokenText}`}
           >
-            <div className="bg-slate-950/90 text-white border border-slate-700 px-2.5 py-1 rounded-lg text-center max-w-full shadow-md flex flex-col items-center justify-center">
-              <div className="text-xs sm:text-sm font-black text-white leading-tight truncate">
-                {hs.label}
+            {isQuorra ? (
+              <div className="absolute -bottom-3.5 translate-y-full bg-amber-950/90 text-amber-100 border border-amber-400/70 px-2.5 py-0.5 rounded-full text-center shadow-lg flex items-center gap-1.5 whitespace-nowrap z-20 pointer-events-none">
+                <span className="text-xs sm:text-sm font-black text-amber-200">
+                  {hs.labelZh || hs.label}
+                </span>
+                <span className="text-[10px] sm:text-xs font-bold text-amber-300/80">
+                  ({hs.label})
+                </span>
               </div>
-              {hs.labelZh && (
-                <div className="text-[11px] sm:text-xs font-bold text-amber-300 leading-tight mt-0.5">
-                  {hs.labelZh}
+            ) : (
+              <div className="bg-slate-950/90 text-white border border-slate-700 px-2.5 py-1 rounded-lg text-center max-w-full shadow-md flex flex-col items-center justify-center">
+                <div className="text-xs sm:text-sm font-black text-white leading-tight truncate">
+                  {hs.label}
                 </div>
-              )}
-            </div>
+                {hs.labelZh && (
+                  <div className="text-[11px] sm:text-xs font-bold text-amber-300 leading-tight mt-0.5">
+                    {hs.labelZh}
+                  </div>
+                )}
+              </div>
+            )}
           </button>
         );
       })}

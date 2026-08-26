@@ -275,17 +275,6 @@ export const VisualSceneViewer: React.FC<VisualSceneViewerProps> = ({
                   )}
                 </g>
 
-                {/* Couch Label */}
-                <text x="240" y="388" textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="bold">
-                  {isQuorraPetted
-                    ? '🛋️ Couch · Happy Quorra 🐕💖'
-                    : couchPose === 'morning-sun'
-                    ? '🛋️ Couch · Quorra Morning Sun 🐕☀️'
-                    : couchPose === 'evening-blanket'
-                    ? '🛋️ Couch · Quorra Sweet Dreams 🐕🌙'
-                    : '🛋️ Couch · Quorra Afternoon Nap 🐕💤'}
-                </text>
-
                 {/* TV Table & Screen */}
                 <rect x="420" y="180" width="180" height="130" rx="10" fill="#1e1e2e" stroke="#475569" strokeWidth="5" />
                 <text x="510" y="250" textAnchor="middle" fill="#ffffff" fontSize="20" fontWeight="bold">📺 TV</text>

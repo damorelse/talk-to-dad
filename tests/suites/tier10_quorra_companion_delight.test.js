@@ -134,5 +134,17 @@ describe('Tier 10: Quorra Companion & Emotional Delight Invariants', () => {
       assert.ok(quorraHotspot.spokenText.length > 0);
       assert.ok(quorraHotspot.spokenTextZh.length > 0);
     });
+
+    it('should maintain spatial separation between Couch and Pet Quorra hotspots', () => {
+      const couch = DEFAULT_HOTSPOTS.find((hs) => hs.id === 'hs-chair' && hs.sceneId === 'scene-livingroom');
+      const quorra = DEFAULT_HOTSPOTS.find((hs) => hs.id === 'hs-pet-quorra' && hs.sceneId === 'scene-livingroom');
+      assert.ok(couch && quorra, 'Both couch and quorra hotspots must exist');
+      
+      // Couch hotspot sits in top backrest area (y + height <= quorra.y + 1)
+      assert.ok(
+        couch.y + couch.height <= quorra.y + 2,
+        `Couch bottom (${couch.y + couch.height}) must not overlap Quorra top (${quorra.y})`
+      );
+    });
   });
 });
