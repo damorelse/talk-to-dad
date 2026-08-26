@@ -120,8 +120,8 @@ describe('Tier 1: Feature Verification (F01 - F16)', () => {
       assert.ok(couch.spokenText.includes('couch'), 'Spoken text should reference couch');
 
       const petQuorra = DEFAULT_HOTSPOTS.find(hs => hs.id === 'hs-pet-quorra' && hs.sceneId === 'scene-livingroom');
-      assert.ok(petQuorra, 'Pet Quorra hotspot must exist in Living Room');
-      assert.equal(petQuorra.label, 'Pet Quorra');
+      assert.ok(petQuorra, 'Quorra hotspot must exist in Living Room');
+      assert.equal(petQuorra.label, 'Quorra');
       assert.ok(petQuorra.spokenText.includes('Quorra'), 'Spoken text should reference Quorra');
 
       // Verify Kitchen Hotspots (refrigerator, sink, coffee maker, dining table, water cup)

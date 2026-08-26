@@ -125,12 +125,12 @@ describe('Tier 10: Quorra Companion & Emotional Delight Invariants', () => {
   });
 
   describe('5. Default Living Room Hotspots & Petting Hotspot Integrity', () => {
-    it('should contain Pet Quorra hotspot in Living Room scene', () => {
+    it('should contain Quorra hotspot in Living Room scene', () => {
       const quorraHotspot = DEFAULT_HOTSPOTS.find((hs) => hs.id === 'hs-pet-quorra');
       assert.ok(quorraHotspot, 'hs-pet-quorra must exist in default hotspots');
       assert.equal(quorraHotspot.sceneId, 'scene-livingroom');
-      assert.equal(quorraHotspot.label, 'Pet Quorra');
-      assert.equal(quorraHotspot.labelZh, '摸摸 Quorra 🐕');
+      assert.equal(quorraHotspot.label, 'Quorra');
+      assert.equal(quorraHotspot.labelZh, '狗兒 Quorra 🐕');
       assert.ok(quorraHotspot.spokenText.length > 0);
       assert.ok(quorraHotspot.spokenTextZh.length > 0);
     });

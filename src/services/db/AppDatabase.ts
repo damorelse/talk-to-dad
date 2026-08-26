@@ -136,12 +136,13 @@ export class AppDatabase extends Dexie {
             existing.spokenTextZh = existing.spokenTextZh || hs.spokenTextZh;
             updated = true;
           }
-          // If hs-chair or hs-pet-quorra has legacy coordinates, update to new coordinates so couch and pet quorra don't overlap
+          // If hs-chair or hs-pet-quorra has legacy coordinates or labels, update to new values
           if (existing.id === 'hs-chair' || existing.id === 'hs-pet-quorra') {
             existing.x = hs.x;
             existing.y = hs.y;
             existing.width = hs.width;
             existing.height = hs.height;
+            existing.label = hs.label;
             existing.labelZh = hs.labelZh;
             existing.spokenText = hs.spokenText;
             existing.spokenTextZh = hs.spokenTextZh;
