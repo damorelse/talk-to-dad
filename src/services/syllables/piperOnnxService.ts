@@ -35,9 +35,12 @@ async function getOrt(): Promise<any> {
   }
 }
 
+const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) ? import.meta.env.BASE_URL : './';
+const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+
 // Configure ONNX WebAssembly environment paths for local offline execution
 if (typeof window !== 'undefined' && ortInstance && ortInstance.env && ortInstance.env.wasm) {
-  ortInstance.env.wasm.wasmPaths = '/wasm/';
+  ortInstance.env.wasm.wasmPaths = `${normalizedBase}wasm/`;
   ortInstance.env.wasm.numThreads = 1;
   ortInstance.env.wasm.simd = true;
 }
@@ -68,8 +71,8 @@ class PiperOnnxService {
   private loadError: string | null = null;
   private loadProgress = 0;
   private voiceId = 'en_US-amy-medium';
-  private modelUrl = '/models/piper/en_US-amy-medium.onnx';
-  private configUrl = '/models/piper/en_US-amy-medium.onnx.json';
+  private modelUrl = `${normalizedBase}models/piper/en_US-amy-medium.onnx`;
+  private configUrl = `${normalizedBase}models/piper/en_US-amy-medium.onnx.json`;
   private inMemoryCache = new Map<string, string>();
 
   getVoiceId(): string {
@@ -165,7 +168,7 @@ class PiperOnnxService {
 
       // Configure ONNX environment for WebAssembly
       if (ortRuntime.env && ortRuntime.env.wasm) {
-        ortRuntime.env.wasm.wasmPaths = '/wasm/';
+        ortRuntime.env.wasm.wasmPaths = `${normalizedBase}wasm/`;
         ortRuntime.env.wasm.numThreads = 1;
         ortRuntime.env.wasm.simd = true;
       }
