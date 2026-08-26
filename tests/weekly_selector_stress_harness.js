@@ -410,7 +410,7 @@ async function runWeeklySelectorStressHarness() {
 
   await runStressSection('SmallCategories 5.3: Production card counts across all 9 categories', () => {
     const categoryExpectedSizes = {
-      'cat-needs': { total: 11, expectedWeekly: 2 },
+      'cat-needs': { total: 10, expectedWeekly: 2 },
       'cat-health': { total: 8, expectedWeekly: 2 },
       'cat-food': { total: 22, expectedWeekly: 2 },
       'cat-feelings': { total: 7, expectedWeekly: 2 },
@@ -418,7 +418,7 @@ async function runWeeklySelectorStressHarness() {
       'cat-places': { total: 6, expectedWeekly: 2 },
       'cat-time': { total: 19, expectedWeekly: 2 },
       'cat-numbers': { total: 23, expectedWeekly: 2 },
-      'cat-activities': { total: 7, expectedWeekly: 2 },
+      'cat-activities': { total: 4, expectedWeekly: 2 },
     };
 
     for (const [catId, { total, expectedWeekly }] of Object.entries(categoryExpectedSizes)) {
@@ -474,9 +474,9 @@ async function runWeeklySelectorStressHarness() {
   // ===========================================================================
   console.log('\n--- 7. Custom Count Parameter & Edge Values ---');
 
-  await runStressSection('CustomCount 7.1: Sweep count parameter from 0 to 30 on 11-card deck', () => {
+  await runStressSection('CustomCount 7.1: Sweep count parameter from 0 to 30 on 10-card deck', () => {
     const deck = DEFAULT_CARDS.filter(c => c.categoryId === 'cat-needs');
-    assert.equal(deck.length, 11);
+    assert.equal(deck.length, 10);
 
     // count = 0
     const res0 = getWeeklyCardsForCategory(deck, 'cat-needs', '2026-W35', 0);
@@ -506,13 +506,13 @@ async function runWeeklySelectorStressHarness() {
     assert.equal(res7.length, 7);
     assert.equal(new Set(res7.map(c => c.id)).size, 7);
 
-    // count = 11 (exact match)
-    const res11 = getWeeklyCardsForCategory(deck, 'cat-needs', '2026-W35', 11);
-    assert.equal(res11.length, 11);
+    // count = 10 (exact match)
+    const res10 = getWeeklyCardsForCategory(deck, 'cat-needs', '2026-W35', 10);
+    assert.equal(res10.length, 10);
 
     // count = 30 (exceeds pool)
     const res30 = getWeeklyCardsForCategory(deck, 'cat-needs', '2026-W35', 30);
-    assert.equal(res30.length, 11);
+    assert.equal(res30.length, 10);
   });
 
   // ===========================================================================

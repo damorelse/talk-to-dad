@@ -107,6 +107,15 @@ export class AppDatabase extends Dexie {
           }
         }
       }
+
+      // Purge removed legacy default cards
+      const removedCardIds = ['card-glasses', 'card-read', 'card-newspaper', 'card-reading'];
+      for (const removedId of removedCardIds) {
+        const existing = await this.cards.get(removedId);
+        if (existing) {
+          await this.cards.delete(removedId);
+        }
+      }
     }
 
     const sceneCount = await this.visualScenes.count();
