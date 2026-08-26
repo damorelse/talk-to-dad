@@ -481,6 +481,27 @@ export const CANONICAL_PHONEME_DICTIONARY: Record<string, CanonicalDictionaryEnt
       { text: 'shine', ipa: 'ʃaɪn', stress: 'unstressed', phonemes: ['ʃ', 'aɪ', 'n'] },
     ],
   },
+  'gardening': {
+    canonicalIpa: 'ˈɡɑːɹdnɪŋ',
+    syllables: [
+      { text: 'gar', ipa: 'ˈɡɑːɹ', stress: 'primary', phonemes: ['ɡ', 'ɑː', 'ɹ'] },
+      { text: 'den', ipa: 'dən', stress: 'unstressed', phonemes: ['d', 'ə', 'n'] },
+      { text: 'ing', ipa: 'ɪŋ', stress: 'unstressed', phonemes: ['ɪ', 'ŋ'] },
+    ],
+  },
+  'wash': {
+    canonicalIpa: 'wɑːʃ',
+    syllables: [
+      { text: 'wash', ipa: 'wɑːʃ', stress: 'primary', phonemes: ['w', 'ɑː', 'ʃ'] },
+    ],
+  },
+  'dishes': {
+    canonicalIpa: 'ˈdɪʃɪz',
+    syllables: [
+      { text: 'dish', ipa: 'ˈdɪʃ', stress: 'primary', phonemes: ['d', 'ɪ', 'ʃ'] },
+      { text: 'es', ipa: 'ɪz', stress: 'unstressed', phonemes: ['ɪ', 'z'] },
+    ],
+  },
   'exercise': {
     canonicalIpa: 'ˈɛksəɹsaɪz',
     syllables: [

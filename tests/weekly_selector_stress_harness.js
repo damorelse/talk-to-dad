@@ -418,7 +418,7 @@ async function runWeeklySelectorStressHarness() {
       'cat-places': { total: 6, expectedWeekly: 2 },
       'cat-time': { total: 19, expectedWeekly: 2 },
       'cat-numbers': { total: 23, expectedWeekly: 2 },
-      'cat-activities': { total: 6, expectedWeekly: 2 },
+      'cat-activities': { total: 9, expectedWeekly: 2 },
     };
 
     for (const [catId, { total, expectedWeekly }] of Object.entries(categoryExpectedSizes)) {

@@ -63,6 +63,9 @@ export const AAC_CORE_VOCABULARY: AACVocabularyItem[] = [
   { word: 'Listen', weight: 70 },
   { word: 'Open', weight: 70 },
   { word: 'Close', weight: 70 },
+  { word: 'Wash', weight: 74 },
+  { word: 'Exercise', weight: 75 },
+  { word: 'Gardening', weight: 72 },
 
   // Objects & Daily nouns
   { word: 'Glasses', weight: 78 },

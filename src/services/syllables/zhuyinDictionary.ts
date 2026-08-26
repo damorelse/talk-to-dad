@@ -41,6 +41,8 @@ export const ZHUYIN_DICTIONARY: Record<string, string> = {
   '婦': 'ㄈㄨˋ',
   '妇': 'ㄈㄨˋ',
   '婿': 'ㄒㄩˋ',
+  '藝': 'ㄧˋ',
+  '艺': 'ㄧˋ',
   '肚': 'ㄉㄨˋ',
   '子': '˙ㄗ',
   '餓': 'ㄜˋ',
