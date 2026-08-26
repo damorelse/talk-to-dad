@@ -113,11 +113,13 @@ export const HotspotOverlay: React.FC<HotspotOverlayProps> = ({
             {isQuorra ? (
               <div className="absolute -bottom-3.5 translate-y-full bg-amber-950/90 text-amber-100 border border-amber-400/70 px-2.5 py-0.5 rounded-full text-center shadow-lg flex items-center gap-1.5 whitespace-nowrap z-20 pointer-events-none">
                 <span className="text-xs sm:text-sm font-black text-amber-200">
-                  {hs.labelZh || hs.label}
+                  {hs.label}
                 </span>
-                <span className="text-[10px] sm:text-xs font-bold text-amber-300/80">
-                  ({hs.label})
-                </span>
+                {hs.labelZh && (
+                  <span className="text-[10px] sm:text-xs font-bold text-amber-300/80">
+                    ({hs.labelZh})
+                  </span>
+                )}
               </div>
             ) : (
               <div className="bg-slate-950/90 text-white border border-slate-700 px-2.5 py-1 rounded-lg text-center max-w-full shadow-md flex flex-col items-center justify-center">
