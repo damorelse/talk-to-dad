@@ -99,20 +99,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
     userUsaY = STATE_CENTROIDS[userStateId].y;
   }
 
-  // Determine badge placement to avoid clipping
-  const isBadgeOnLeft = userUsaX > 800;
-  const badgeWidth = 280;
-  const badgeHeight = 56;
-  const badgeYOffset = userUsaY < 50 ? 4 : -28;
-
-  // On-map floating label calculations for user location in World Map
-  const hereLabel = 'YOU ARE HERE · 您在這裡';
-  const pillWidth = 240;
-  const calloutX = Math.max(pillWidth / 2 + 12, Math.min(1000 - pillWidth / 2 - 12, pinX));
-  const isNearTop = pinY < 80;
-  const calloutY = isNearTop ? pinY + 54 : pinY - 48;
-  const pointerOffset = Math.max(-pillWidth / 2 + 12, Math.min(pillWidth / 2 - 12, pinX - calloutX));
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if ((e.key === 'Enter' || e.key === ' ') && onSelectLocation) {
       e.preventDefault();
@@ -228,18 +214,18 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             })}
           </g>
 
-          {/* Major State Code Text Accents (Filtered to avoid badge collisions) */}
+          {/* Major State Code Text Accents */}
           <g fontSize="20" fontWeight="900" pointerEvents="none" textAnchor="middle" opacity="0.85">
             {Object.entries(STATE_CENTROIDS).map(([id, info]) => {
-              // Suppress centroid label for active user state to keep badge area clean
-              if (id === userStateId) return null;
+              const isActive = id === userStateId;
+              const labelColor = isActive ? '#ef4444' : '#64748b';
 
               return (
                 <text
                   key={id}
                   x={info.x}
                   y={info.y}
-                  fill="#64748b"
+                  fill={labelColor}
                   fontSize={id === 'tx' ? '24' : '19'}
                 >
                   {info.label}
@@ -249,10 +235,10 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           </g>
 
           {/* ================================================================= */}
-          {/* USER LOCATION PIN: YOU ARE HERE                                   */}
+          {/* USER LOCATION PIN                                                 */}
           {/* ================================================================= */}
           <g transform={`translate(${userUsaX}, ${userUsaY})`} filter="url(#pinShadow)">
-            {/* Outer Pulsing/Glow Halo Ring */}
+            {/* Outer Glow Halo Ring */}
             <circle
               cx="0"
               cy="0"
@@ -272,73 +258,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             />
             <circle cx="0" cy="-32" r="6.5" fill="#ffffff" />
             <circle cx="0" cy="-32" r="3.2" fill="#dc2626" />
-
-            {/* YOU ARE HERE Callout Pill Badge */}
-            <g pointerEvents="none">
-              {isBadgeOnLeft ? (
-                <>
-                  <polygon
-                    points="-14,0 -28,-10 -28,10"
-                    fill="#ef4444"
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                  />
-                  <rect
-                    x={-badgeWidth - 26}
-                    y={badgeYOffset}
-                    width={badgeWidth}
-                    height={badgeHeight}
-                    rx={badgeHeight / 2}
-                    fill="#ef4444"
-                    stroke="#ffffff"
-                    strokeWidth="3"
-                    filter="url(#regionalGlow)"
-                  />
-                  <text
-                    x={-badgeWidth / 2 - 26}
-                    y={badgeYOffset + 37}
-                    textAnchor="middle"
-                    fill="#ffffff"
-                    fontSize="24"
-                    fontWeight="900"
-                    letterSpacing="0.8"
-                  >
-                    YOU ARE HERE · 您在這裡
-                  </text>
-                </>
-              ) : (
-                <>
-                  <polygon
-                    points="14,0 28,-10 28,10"
-                    fill="#ef4444"
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                  />
-                  <rect
-                    x="26"
-                    y={badgeYOffset}
-                    width={badgeWidth}
-                    height={badgeHeight}
-                    rx={badgeHeight / 2}
-                    fill="#ef4444"
-                    stroke="#ffffff"
-                    strokeWidth="3"
-                    filter="url(#regionalGlow)"
-                  />
-                  <text
-                    x={badgeWidth / 2 + 26}
-                    y={badgeYOffset + 37}
-                    textAnchor="middle"
-                    fill="#ffffff"
-                    fontSize="24"
-                    fontWeight="900"
-                    letterSpacing="0.8"
-                  >
-                    YOU ARE HERE · 您在這裡
-                  </text>
-                </>
-              )}
-            </g>
           </g>
         </svg>
       )}
@@ -513,18 +432,6 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             <circle cx="0" cy="0" r="3.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
           </g>
 
-          {/* Active Callout in World Map */}
-          <g transform={`translate(${calloutX}, ${calloutY})`}>
-            {!isNearTop ? (
-              <polygon points={`${pointerOffset},2 ${pointerOffset - 5},-3 ${pointerOffset + 5},-3`} fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
-            ) : (
-              <polygon points={`${pointerOffset},-26 ${pointerOffset - 5},-21 ${pointerOffset + 5},-21`} fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
-            )}
-            <rect x={-pillWidth / 2} y="-24" width={pillWidth} height="22" rx="11" fill="#ef4444" stroke="#ffffff" strokeWidth="2" filter="url(#pinGlow)" />
-            <text x="0" y="-9" textAnchor="middle" fill="#ffffff" fontSize="11" fontWeight="900" letterSpacing="0.4" pointerEvents="none">
-              {hereLabel}
-            </text>
-          </g>
         </svg>
       )}
 
