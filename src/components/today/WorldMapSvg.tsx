@@ -26,34 +26,29 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
 
   const flag = getCountryFlag(location.country);
 
-  // Key Heritage Hub Coordinates
-  // Seattle: (47.61 N, -122.33 W) -> X ≈ 160.2, Y ≈ 117.8
-  const seaX = 160.2;
-  const seaY = 117.8;
+  // Country detection for focus highlighting
+  const countryLower = (location.country || '').toLowerCase();
+  const isUSA =
+    countryLower.includes('united states') ||
+    countryLower.includes('usa') ||
+    location.country === 'US' ||
+    location.countryZh === '美國';
+  const isTaiwan = countryLower.includes('taiwan') || location.countryZh === '台灣';
+  const isCanada = countryLower.includes('canada') || location.countryZh === '加拿大';
+  const isJapan = countryLower.includes('japan') || location.countryZh === '日本';
+  const isUK = countryLower.includes('united kingdom') || countryLower.includes('uk') || location.countryZh === '英國';
 
-  // San Francisco: (37.77 N, -122.42 W) -> X ≈ 160.0, Y ≈ 145.1
-  const sfX = 160.0;
-  const sfY = 145.1;
+  // Specific coordinates for Seattle and San Francisco
+  const seattleX = (( -122.33 + 180) / 360) * 1000; // ~160.2
+  const seattleY = (( 90 - 47.61) / 180) * 500;    // ~117.8
+  const sfX = (( -122.42 + 180) / 360) * 1000;      // ~160.0
+  const sfY = (( 90 - 37.77) / 180) * 500;         // ~145.1
 
-  // Taipei (Taiwan Island): (25.03 N, 121.56 E) -> X ≈ 815, Y ≈ 225
-  const tpeX = 815;
-  const tpeY = 225;
+  // Check if active user pin matches Seattle or SF (within 15px radius)
+  const isUserAtSeattle = isUSA && Math.hypot(pinX - seattleX, pinY - seattleY) < 15;
+  const isUserAtSF = isUSA && !isUserAtSeattle && Math.hypot(pinX - sfX, pinY - sfY) < 15;
 
-  // Check if current user location is close to any of the 3 hubs
-  const isNearSeattle =
-    location.city?.toLowerCase().includes('seattle') ||
-    (Math.abs(clampedLat - 47.61) < 1.5 && Math.abs(clampedLon - (-122.33)) < 2.0);
-
-  const isNearSF =
-    location.city?.toLowerCase().includes('san francisco') ||
-    (Math.abs(clampedLat - 37.77) < 1.5 && Math.abs(clampedLon - (-122.42)) < 2.0);
-
-  const isNearTaipei =
-    location.city?.toLowerCase().includes('taipei') ||
-    location.country?.toLowerCase().includes('taiwan') ||
-    (Math.abs(clampedLat - 25.03) < 1.5 && Math.abs(clampedLon - 121.56) < 2.0);
-
-  // Floating label calculations for active user pin
+  // On-map floating label calculations for user location
   const cityLabel = location.city || location.country || 'You Are Here';
   const pillWidth = Math.max(90, Math.min(180, cityLabel.length * 8.5 + 30));
   const calloutX = Math.max(pillWidth / 2 + 12, Math.min(1000 - pillWidth / 2 - 12, pinX));
@@ -108,14 +103,13 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             <stop offset="100%" stopColor="#b91c1c" />
           </linearGradient>
 
-          {/* Transpacific Flight Arc Gradient */}
-          <linearGradient id="flightArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#ec4899" />
-            <stop offset="50%" stopColor="#38bdf8" />
-            <stop offset="100%" stopColor="#fbbf24" />
+          {/* Cyan Auxiliary City Pin Gradient for Seattle & San Francisco */}
+          <linearGradient id="cyanPinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#38bdf8" />
+            <stop offset="45%" stopColor="#0284c7" />
+            <stop offset="100%" stopColor="#0369a1" />
           </linearGradient>
 
-          {/* Glow Filters */}
           <filter id="pinGlow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
             <feMerge>
@@ -124,8 +118,8 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             </feMerge>
           </filter>
 
-          <filter id="arcGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
+          <filter id="countryGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -173,7 +167,12 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             L 480 105 Z
           " />
           {/* British Isles */}
-          <path d="M 465 95 L 485 90 L 480 115 L 460 115 Z" />
+          <path
+            d="M 465 95 L 485 90 L 480 115 L 460 115 Z"
+            stroke={isUK ? '#38bdf8' : '#475569'}
+            strokeWidth={isUK ? 2.5 : 1.5}
+            fill={isUK ? 'rgba(56, 189, 248, 0.25)' : 'url(#landGrad)'}
+          />
           <circle cx="450" cy="105" r="4" />
 
           {/* Africa */}
@@ -197,9 +196,21 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           {/* Southeast Asia */}
           <path d="M 750 240 L 790 240 L 810 290 L 775 300 L 760 270 Z" />
           {/* Japan */}
-          <path d="M 890 140 L 910 160 L 895 190 L 880 180 Z" />
-          {/* Taiwan (Highlighted) */}
-          <circle cx="815" cy="225" r="5.5" fill="#ec4899" stroke="#fbcfe8" strokeWidth="1.5" className="animate-pulse" />
+          <path
+            d="M 890 140 L 910 160 L 895 190 L 880 180 Z"
+            stroke={isJapan ? '#38bdf8' : '#475569'}
+            strokeWidth={isJapan ? 2.5 : 1.5}
+            fill={isJapan ? 'rgba(56, 189, 248, 0.3)' : 'url(#landGrad)'}
+          />
+          {/* Taiwan */}
+          <circle
+            cx="815"
+            cy="225"
+            r={isTaiwan ? 6 : 4.5}
+            fill={isTaiwan ? '#38bdf8' : '#60a5fa'}
+            stroke={isTaiwan ? '#ffffff' : '#93c5fd'}
+            strokeWidth={isTaiwan ? 2 : 1}
+          />
 
           {/* Australia & New Zealand */}
           <path d="
@@ -215,212 +226,178 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           " />
         </g>
 
-        {/* ============================================================ */}
-        {/* TRANSPACIFIC HERITAGE FLIGHT ARCS                            */}
-        {/* Connecting Taipei ↔ Seattle & San Francisco across Pacific   */}
-        {/* ============================================================ */}
-        <g filter="url(#arcGlow)" opacity="0.85">
-          {/* Arc 1: Taipei ↔ Seattle (Asia side to Date Line, Date Line to Seattle) */}
-          <path
-            d="M 815 225 Q 915 145, 1000 115"
-            fill="none"
-            stroke="url(#flightArcGrad)"
-            strokeWidth="2.5"
-            strokeDasharray="6 6"
-            strokeLinecap="round"
-            className="quorra-flight-dash"
-          />
-          <path
-            d="M 0 115 Q 75 85, 160.2 117.8"
-            fill="none"
-            stroke="url(#flightArcGrad)"
-            strokeWidth="2.5"
-            strokeDasharray="6 6"
-            strokeLinecap="round"
-            className="quorra-flight-dash"
-          />
-
-          {/* Arc 2: Taipei ↔ San Francisco */}
-          <path
-            d="M 815 225 Q 920 175, 1000 145"
-            fill="none"
-            stroke="#38bdf8"
-            strokeWidth="2"
-            strokeDasharray="4 6"
-            strokeLinecap="round"
-            opacity="0.8"
-            className="quorra-flight-dash"
-          />
-          <path
-            d="M 0 145 Q 80 115, 160.0 145.1"
-            fill="none"
-            stroke="#38bdf8"
-            strokeWidth="2"
-            strokeDasharray="4 6"
-            strokeLinecap="round"
-            opacity="0.8"
-            className="quorra-flight-dash"
-          />
-
-          {/* West Coast Corridor: Seattle ↔ San Francisco */}
-          <path
-            d="M 160.2 117.8 Q 155 131, 160.0 145.1"
-            fill="none"
-            stroke="#f59e0b"
-            strokeWidth="2.5"
-            strokeDasharray="4 4"
-            strokeLinecap="round"
-            className="quorra-flight-dash"
-          />
-        </g>
-
-        {/* ============================================================ */}
-        {/* HIGHLIGHTED HUBS: SEATTLE & SAN FRANCISCO & TAIPEI           */}
-        {/* ============================================================ */}
-
-        {/* 1. SEATTLE HUB (X = 160.2, Y = 117.8) */}
-        <g transform={`translate(${seaX}, ${seaY})`}>
-          {/* Radar Ripple */}
-          <circle
-            cx="0"
-            cy="0"
-            r="16"
-            fill="none"
-            stroke="#38bdf8"
-            strokeWidth="1.8"
-            className="animate-ping origin-center opacity-60"
-            style={{ animationDuration: '2.5s' }}
-          />
-          {/* Core Hub Dot */}
-          <circle cx="0" cy="0" r="5" fill="#0284c7" stroke="#ffffff" strokeWidth="1.8" />
-          <circle cx="0" cy="0" r="2.2" fill="#38bdf8" />
-
-          {/* Seattle Floating Label Badge (Positioned Above-Right) */}
-          <g transform="translate(14, -8)">
-            <rect
-              x="0"
-              y="-12"
-              width="112"
-              height="20"
-              rx="10"
-              fill="#0f172a"
+        {/* Focus Highlight: USA Landmass Glow Overlay when user is in the USA */}
+        {isUSA && (
+          <g filter="url(#countryGlow)">
+            {/* Illuminated USA Mainland & Alaska contour */}
+            <path
+              d="
+                M 140 115
+                L 190 110 L 250 115 L 260 140 L 250 180 L 230 185 L 210 160 L 195 210
+                L 210 245 L 200 240 L 170 180 L 140 150 Z
+              "
+              fill="rgba(56, 189, 248, 0.14)"
               stroke="#38bdf8"
-              strokeWidth="1.5"
-              opacity="0.95"
-              filter="url(#pinShadow)"
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+              strokeDasharray="6 3"
+              className="animate-pulse"
             />
-            <text
-              x="56"
-              y="2"
-              textAnchor="middle"
-              fill="#e0f2fe"
-              fontSize="10"
-              fontWeight="900"
-              letterSpacing="0.3"
-              pointerEvents="none"
-            >
-              🌲 Seattle · 西雅圖
-            </text>
           </g>
-        </g>
+        )}
 
-        {/* 2. SAN FRANCISCO HUB (X = 160.0, Y = 145.1) */}
-        <g transform={`translate(${sfX}, ${sfY})`}>
-          {/* Radar Ripple */}
+        {/* Focus Highlight: Taiwan Glowing Beacon Ring */}
+        {isTaiwan && (
           <circle
-            cx="0"
-            cy="0"
+            cx="815"
+            cy="225"
             r="16"
             fill="none"
-            stroke="#f59e0b"
-            strokeWidth="1.8"
-            className="animate-ping origin-center opacity-60"
-            style={{ animationDuration: '2.2s' }}
-          />
-          {/* Core Hub Dot */}
-          <circle cx="0" cy="0" r="5" fill="#d97706" stroke="#ffffff" strokeWidth="1.8" />
-          <circle cx="0" cy="0" r="2.2" fill="#fbbf24" />
-
-          {/* San Francisco Floating Label Badge (Positioned Below-Right) */}
-          <g transform="translate(14, 14)">
-            <rect
-              x="0"
-              y="-12"
-              width="132"
-              height="20"
-              rx="10"
-              fill="#0f172a"
-              stroke="#f59e0b"
-              strokeWidth="1.5"
-              opacity="0.95"
-              filter="url(#pinShadow)"
-            />
-            <text
-              x="66"
-              y="2"
-              textAnchor="middle"
-              fill="#fef3c7"
-              fontSize="10"
-              fontWeight="900"
-              letterSpacing="0.3"
-              pointerEvents="none"
-            >
-              🌉 San Francisco · 舊金山
-            </text>
-          </g>
-        </g>
-
-        {/* 3. TAIPEI HERITAGE HUB (X = 815, Y = 225) */}
-        <g transform={`translate(${tpeX}, ${tpeY})`}>
-          {/* Radar Ripple */}
-          <circle
-            cx="0"
-            cy="0"
-            r="18"
-            fill="none"
-            stroke="#ec4899"
+            stroke="#38bdf8"
             strokeWidth="2"
-            className="animate-ping origin-center opacity-70"
-            style={{ animationDuration: '2s' }}
+            className="animate-ping origin-center opacity-75"
           />
-          {/* Core Hub Dot */}
-          <circle cx="0" cy="0" r="5.5" fill="#db2777" stroke="#ffffff" strokeWidth="1.8" />
-          <circle cx="0" cy="0" r="2.5" fill="#fbcfe8" />
-
-          {/* Taipei Floating Label Badge (Positioned Right) */}
-          <g transform="translate(14, 0)">
-            <rect
-              x="0"
-              y="-12"
-              width="106"
-              height="20"
-              rx="10"
-              fill="#0f172a"
-              stroke="#ec4899"
-              strokeWidth="1.5"
-              opacity="0.95"
-              filter="url(#pinShadow)"
-            />
-            <text
-              x="53"
-              y="2"
-              textAnchor="middle"
-              fill="#fdf2f8"
-              fontSize="10"
-              fontWeight="900"
-              letterSpacing="0.3"
-              pointerEvents="none"
-            >
-              🏮 Taipei · 台北 🇹🇼
-            </text>
-          </g>
-        </g>
+        )}
 
         {/* ============================================================ */}
-        {/* ACTIVE USER LOCATION: 3D RED PIN & CALLOUT                   */}
+        {/* USA SPECIAL REGIONAL PINS: SEATTLE & SAN FRANCISCO           */}
+        {/* ============================================================ */}
+
+        {/* 1. SEATTLE AUXILIARY PIN (Rendered if user is in USA and not already pinned exactly at Seattle) */}
+        {isUSA && !isUserAtSeattle && (
+          <g>
+            {/* Seattle Beacon Pin */}
+            <g transform={`translate(${seattleX}, ${seattleY})`} filter="url(#pinShadow)">
+              {/* Soft Pulsing Beacon Ring */}
+              <circle
+                cx="0"
+                cy="0"
+                r="10"
+                fill="none"
+                stroke="#38bdf8"
+                strokeWidth="1.8"
+                className="animate-pulse opacity-60"
+              />
+              <ellipse cx="0" cy="1" rx="6" ry="2.2" fill="#000000" opacity="0.4" />
+              {/* Sleek Cyan Teardrop Pin */}
+              <path
+                d="M 0 0 C -2.5 -4, -8 -10, -8 -18 A 8 8 0 1 1 8 -18 C 8 -10, 2.5 -4, 0 0 Z"
+                fill="url(#cyanPinGrad)"
+                stroke="#ffffff"
+                strokeWidth="1.6"
+                strokeLinejoin="round"
+              />
+              <circle cx="0" cy="-18" r="3" fill="#ffffff" />
+              <circle cx="0" cy="-18" r="1.4" fill="#0284c7" />
+            </g>
+
+            {/* Seattle Callout Pill (Positioned above Seattle at y=94 so zero overlap with SF) */}
+            <g transform={`translate(${seattleX}, 94)`}>
+              {/* Pointer Triangle pointing DOWN to Seattle pin */}
+              <polygon
+                points="0,2 -4,-3 4,-3"
+                fill="#0284c7"
+                stroke="#ffffff"
+                strokeWidth="1.2"
+              />
+              {/* Callout Pill */}
+              <rect
+                x="-48"
+                y="-21"
+                width="96"
+                height="19"
+                rx="9.5"
+                fill="#0284c7"
+                stroke="#38bdf8"
+                strokeWidth="1.6"
+                filter="url(#pinGlow)"
+              />
+              <text
+                x="0"
+                y="-8"
+                textAnchor="middle"
+                fill="#ffffff"
+                fontSize="9.5"
+                fontWeight="800"
+                letterSpacing="0.3"
+                pointerEvents="none"
+              >
+                Seattle · 西雅圖
+              </text>
+            </g>
+          </g>
+        )}
+
+        {/* 2. SAN FRANCISCO AUXILIARY PIN (Rendered if user is in USA and not already pinned exactly at SF) */}
+        {isUSA && !isUserAtSF && (
+          <g>
+            {/* San Francisco Beacon Pin */}
+            <g transform={`translate(${sfX}, ${sfY})`} filter="url(#pinShadow)">
+              {/* Soft Pulsing Beacon Ring */}
+              <circle
+                cx="0"
+                cy="0"
+                r="10"
+                fill="none"
+                stroke="#38bdf8"
+                strokeWidth="1.8"
+                className="animate-pulse opacity-60"
+              />
+              <ellipse cx="0" cy="1" rx="6" ry="2.2" fill="#000000" opacity="0.4" />
+              {/* Sleek Cyan Teardrop Pin */}
+              <path
+                d="M 0 0 C -2.5 -4, -8 -10, -8 -18 A 8 8 0 1 1 8 -18 C 8 -10, 2.5 -4, 0 0 Z"
+                fill="url(#cyanPinGrad)"
+                stroke="#ffffff"
+                strokeWidth="1.6"
+                strokeLinejoin="round"
+              />
+              <circle cx="0" cy="-18" r="3" fill="#ffffff" />
+              <circle cx="0" cy="-18" r="1.4" fill="#0284c7" />
+            </g>
+
+            {/* San Francisco Callout Pill (Positioned below SF at y=168 so zero overlap with Seattle) */}
+            <g transform={`translate(${sfX}, 168)`}>
+              {/* Pointer Triangle pointing UP to SF pin */}
+              <polygon
+                points="0,-21 -4,-16 4,-16"
+                fill="#0284c7"
+                stroke="#ffffff"
+                strokeWidth="1.2"
+              />
+              {/* Callout Pill */}
+              <rect
+                x="-64"
+                y="-19"
+                width="128"
+                height="19"
+                rx="9.5"
+                fill="#0284c7"
+                stroke="#38bdf8"
+                strokeWidth="1.6"
+                filter="url(#pinGlow)"
+              />
+              <text
+                x="0"
+                y="-6"
+                textAnchor="middle"
+                fill="#ffffff"
+                fontSize="9.5"
+                fontWeight="800"
+                letterSpacing="0.3"
+                pointerEvents="none"
+              >
+                San Francisco · 舊金山
+              </text>
+            </g>
+          </g>
+        )}
+
+        {/* ============================================================ */}
+        {/* PRIMARY ACTIVE USER LOCATION PIN & RADAR SONAR RIPPLES       */}
         {/* ============================================================ */}
         <g transform={`translate(${pinX}, ${pinY})`} filter="url(#pinShadow)">
-          {/* Animated Expanding Sonar Ripple */}
+          {/* Animated Expanding Sonar Ripple 1 */}
           <circle
             cx="0"
             cy="0"
@@ -474,59 +451,56 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
           <circle cx="0" cy="0" r="3.5" fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
         </g>
 
-        {/* Active Location Floating Callout Pill (if not exactly covering a known hub badge) */}
-        {!isNearSeattle && !isNearSF && !isNearTaipei && (
-          <g transform={`translate(${calloutX}, ${calloutY})`}>
-            {/* Callout Pointer Triangle */}
-            {!isNearTop ? (
-              <polygon
-                points={`${pointerOffset},2 ${pointerOffset - 5},-3 ${pointerOffset + 5},-3`}
-                fill="#ef4444"
-                stroke="#ffffff"
-                strokeWidth="1.5"
-              />
-            ) : (
-              <polygon
-                points={`${pointerOffset},-26 ${pointerOffset - 5},-21 ${pointerOffset + 5},-21`}
-                fill="#ef4444"
-                stroke="#ffffff"
-                strokeWidth="1.5"
-              />
-            )}
-
-            {/* Callout Pill */}
-            <rect
-              x={-pillWidth / 2}
-              y="-24"
-              width={pillWidth}
-              height="22"
-              rx="11"
+        {/* On-Map Floating Location Name Callout for Active User Pin */}
+        <g transform={`translate(${calloutX}, ${calloutY})`}>
+          {/* Callout Pointer Triangle */}
+          {!isNearTop ? (
+            <polygon
+              points={`${pointerOffset},2 ${pointerOffset - 5},-3 ${pointerOffset + 5},-3`}
               fill="#ef4444"
               stroke="#ffffff"
-              strokeWidth="2"
-              filter="url(#pinGlow)"
+              strokeWidth="1.5"
             />
+          ) : (
+            <polygon
+              points={`${pointerOffset},-26 ${pointerOffset - 5},-21 ${pointerOffset + 5},-21`}
+              fill="#ef4444"
+              stroke="#ffffff"
+              strokeWidth="1.5"
+            />
+          )}
 
-            {/* Callout Text */}
-            <text
-              x="0"
-              y="-9"
-              textAnchor="middle"
-              fill="#ffffff"
-              fontSize="11"
-              fontWeight="900"
-              letterSpacing="0.4"
-              pointerEvents="none"
-            >
-              {cityLabel}
-            </text>
-          </g>
-        )}
+          {/* Callout Pill */}
+          <rect
+            x={-pillWidth / 2}
+            y="-24"
+            width={pillWidth}
+            height="22"
+            rx="11"
+            fill="#ef4444"
+            stroke="#ffffff"
+            strokeWidth="2"
+            filter="url(#pinGlow)"
+          />
+
+          {/* Callout Text */}
+          <text
+            x="0"
+            y="-9"
+            textAnchor="middle"
+            fill="#ffffff"
+            fontSize="11"
+            fontWeight="900"
+            letterSpacing="0.4"
+            pointerEvents="none"
+          >
+            {cityLabel}
+          </text>
+        </g>
       </svg>
 
-      {/* Floating Badge Over Map with Active Location & Transpacific Corridor Info */}
-      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-rose-500/30 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center justify-between shadow-xl text-white">
-        {/* Left: Detected Location */}
+      {/* Clean Floating Badge Over Map */}
+      <div className="absolute bottom-2 left-2 right-2 bg-slate-900/95 backdrop-blur-md border border-rose-500/30 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 flex items-center shadow-xl text-white">
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="text-xl sm:text-2xl shrink-0 drop-shadow">
             {flag}
@@ -540,29 +514,7 @@ export const WorldMapSvg: React.FC<WorldMapSvgProps> = ({
             </span>
           </div>
         </div>
-
-        {/* Right: Transpacific Heritage Connection Chip */}
-        <div className="hidden sm:flex items-center gap-1.5 bg-slate-800/80 border border-amber-400/40 px-2.5 py-1 rounded-lg text-xs font-bold text-amber-200 shrink-0 shadow-xs">
-          <span>🇹🇼 台北</span>
-          <span className="text-sky-400 font-extrabold animate-pulse">✈️</span>
-          <span>🇺🇸 舊金山 · 西雅圖</span>
-        </div>
       </div>
-
-      {/* Embedded CSS for Flight Path Dashed Animation */}
-      <style>{`
-        @keyframes quorraFlightDash {
-          from {
-            stroke-dashoffset: 40;
-          }
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-        .quorra-flight-dash {
-          animation: quorraFlightDash 3s linear infinite;
-        }
-      `}</style>
     </div>
   );
 };
