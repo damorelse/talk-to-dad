@@ -93,15 +93,22 @@ export function useAudio() {
           });
         } else if (mode === 'en-then-zh' || mode === 'both') {
           // English first, then Chinese
+          const { onEnd, onError, ...firstUtteranceOptions } = customOptions || {};
           await audioService.speakCardOrText(enText, audioBlobId, {
             rate: settings.speechRate,
             pitch: settings.speechPitch,
             voiceURI: enVoice,
             locale: 'en-US',
-            ...customOptions,
+            ...firstUtteranceOptions,
             onStart: () => {
               setIsSpeaking(true);
               customOptions?.onStart?.();
+            },
+            onError: (e) => {
+              if (!zhText) {
+                setIsSpeaking(false);
+                onError?.(e);
+              }
             },
           });
 
@@ -114,32 +121,39 @@ export function useAudio() {
               locale: 'zh-TW',
               onEnd: () => {
                 setIsSpeaking(false);
-                customOptions?.onEnd?.();
+                onEnd?.();
               },
               onError: (e) => {
                 setIsSpeaking(false);
-                customOptions?.onError?.(e);
+                onError?.(e);
               },
             });
           } else {
             setIsSpeaking(false);
-            customOptions?.onEnd?.();
+            onEnd?.();
           }
         } else if (mode === 'zh-then-en') {
           // Chinese first, then English
           const firstText = zhText || enText;
           const firstVoice = zhText ? zhVoice : enVoice;
           const firstLocale: 'en-US' | 'zh-TW' = zhText ? 'zh-TW' : 'en-US';
+          const { onEnd, onError, ...firstUtteranceOptions } = customOptions || {};
 
           await audioService.speakCardOrText(firstText, undefined, {
             rate: settings.speechRate,
             pitch: settings.speechPitch,
             voiceURI: firstVoice,
             locale: firstLocale,
-            ...customOptions,
+            ...firstUtteranceOptions,
             onStart: () => {
               setIsSpeaking(true);
               customOptions?.onStart?.();
+            },
+            onError: (e) => {
+              if (!zhText || !enText) {
+                setIsSpeaking(false);
+                onError?.(e);
+              }
             },
           });
 
@@ -152,16 +166,16 @@ export function useAudio() {
               locale: 'en-US',
               onEnd: () => {
                 setIsSpeaking(false);
-                customOptions?.onEnd?.();
+                onEnd?.();
               },
               onError: (e) => {
                 setIsSpeaking(false);
-                customOptions?.onError?.(e);
+                onError?.(e);
               },
             });
           } else {
             setIsSpeaking(false);
-            customOptions?.onEnd?.();
+            onEnd?.();
           }
         } else {
           // English only (default)

@@ -20,6 +20,7 @@ export function isChineseText(text: string): boolean {
 
 export class WebSpeechEngine {
   private voices: SpeechSynthesisVoice[] = [];
+  private activeUtterances: Set<SpeechSynthesisUtterance> = new Set();
 
   constructor() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -127,9 +128,9 @@ export class WebSpeechEngine {
   /**
    * Synthesizes text with optional word boundary synchronization.
    */
-  speak(text: string, options: SpeechOptions = {}): Promise<void> {
+  async speak(text: string, options: SpeechOptions = {}): Promise<void> {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
-      return Promise.resolve();
+      return;
     }
 
     iosAudioUnlock.ensureUnlockedAndResumed();
@@ -139,11 +140,19 @@ export class WebSpeechEngine {
       window.speechSynthesis.resume();
     }
 
-    // Cancel any ongoing speech before starting new speech
-    this.cancel();
+    // Cancel any ongoing or pending speech before starting new speech.
+    // In Chromium, yield an event loop micro-tick after cancel() so the browser's
+    // speech dispatcher finishes clearing the internal queue before the next speak() call.
+    if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+      this.cancel();
+      await new Promise((r) => setTimeout(r, 20));
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    }
 
     if (!text || text.trim().length === 0) {
-      return Promise.resolve();
+      return;
     }
 
     return new Promise((resolve) => {
@@ -160,6 +169,9 @@ export class WebSpeechEngine {
         utterance.lang = targetLocale;
       }
 
+      // Retain reference to prevent premature Chromium garbage collection
+      this.activeUtterances.add(utterance);
+
       utterance.onstart = () => {
         options.onStart?.();
       };
@@ -169,11 +181,13 @@ export class WebSpeechEngine {
       };
 
       utterance.onend = () => {
+        this.activeUtterances.delete(utterance);
         options.onEnd?.();
         resolve();
       };
 
       utterance.onerror = (e) => {
+        this.activeUtterances.delete(utterance);
         // 'interrupted' or 'canceled' are expected when user taps another card
         if (e.error === 'interrupted' || e.error === 'canceled') {
           resolve();
@@ -189,7 +203,11 @@ export class WebSpeechEngine {
 
   cancel(): void {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      this.activeUtterances.clear();
       window.speechSynthesis.cancel();
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
     }
   }
 

@@ -88,11 +88,6 @@ class IOSAudioUnlock {
         if (window.speechSynthesis.paused) {
           window.speechSynthesis.resume();
         }
-        if (!this.unlocked) {
-          const silentUtterance = new SpeechSynthesisUtterance('');
-          silentUtterance.volume = 0;
-          window.speechSynthesis.speak(silentUtterance);
-        }
       }
 
       this.unlocked = true;
