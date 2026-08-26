@@ -18,7 +18,7 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
   const weekDays = getWeekDates(currentDate);
 
   return (
-    <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5 w-full select-none pt-1">
+    <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5 w-full select-none">
       {weekDays.map(({ weekday, dayOfMonth, isToday }) => {
         const isGlowSpeaking = activeGlowDayIndex === weekday.index;
 

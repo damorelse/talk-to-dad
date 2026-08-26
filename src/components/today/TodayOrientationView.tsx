@@ -276,7 +276,7 @@ export const TodayOrientationView: React.FC = () => {
           <div
             onClick={() => handleSpeakWeekday()}
             className={`
-              bg-slate-900 border-2 rounded-2xl p-3 sm:p-3.5 lg:p-4 flex-[1.35] flex flex-col justify-between shadow-lg gap-1.5 transition-all duration-200 cursor-pointer group min-h-[125px]
+              bg-slate-900 border-2 rounded-2xl px-3 py-2 sm:px-3.5 sm:py-2.5 lg:px-4 lg:py-2.5 flex-[1.35] flex flex-col justify-between shadow-lg gap-1 transition-all duration-200 cursor-pointer group min-h-[110px]
               ${
                 isWeekdayActive
                   ? 'border-amber-400 ring-4 ring-amber-400/40 shadow-amber-950/60'
@@ -307,9 +307,9 @@ export const TodayOrientationView: React.FC = () => {
               </div>
             </div>
 
-            {/* Visual 7-Day Weekday Tracker */}
+            {/* Visual 7-Day Weekday Tracker - Centered with compact vertical spacing */}
             <div
-              className="my-auto py-1"
+              className="my-auto py-0.5"
               onClick={(e) => e.stopPropagation()}
             >
               <WeekdayBar
