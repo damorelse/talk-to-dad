@@ -255,6 +255,10 @@ export function useAudio() {
     audioService.playPuppyBark();
   }, []);
 
+  const playQuorraPetTone = useCallback(() => {
+    audioService.playQuorraPetTone();
+  }, []);
+
   const stopAll = useCallback(() => {
     audioService.stopAll();
     setIsSpeaking(false);
@@ -272,6 +276,7 @@ export function useAudio() {
     playAlert,
     playError,
     playPuppyBark,
+    playQuorraPetTone,
     stopAll,
   };
 }

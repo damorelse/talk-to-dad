@@ -106,7 +106,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
 }) => {
   const [isPetted, setIsPetted] = useState(false);
   const [petHearts, setPetHearts] = useState<{ id: number; x: number; y: number }[]>([]);
-  const { playPuppyBark } = useAudio();
+  const { playPuppyBark, playQuorraPetTone } = useAudio();
   const onCompleteRef = React.useRef(onComplete);
   onCompleteRef.current = onComplete;
 
@@ -160,7 +160,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
     (e: React.MouseEvent | React.TouchEvent) => {
       e.stopPropagation();
       setIsPetted(true);
-      playPuppyBark();
+      playQuorraPetTone();
       lastBarkTimeRef.current = Date.now();
 
       const newHeart = {

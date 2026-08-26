@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { VisualScene, VisualSceneHotspot } from '../../types';
 import { HotspotOverlay } from './HotspotOverlay';
 import { DebouncedTouchable } from '../common/DebouncedTouchable';
+import { getQuorraCouchPose } from '../../services/quorra/quorraMessages';
 
 interface VisualSceneViewerProps {
   scenes: VisualScene[];
@@ -16,6 +17,34 @@ export const VisualSceneViewer: React.FC<VisualSceneViewerProps> = ({
 }) => {
   const [selectedSceneId, setSelectedSceneId] = useState<string>(scenes[0]?.id || '');
   const [lastSpokenHotspot, setLastSpokenHotspot] = useState<string>('');
+  const [isQuorraPetted, setIsQuorraPetted] = useState(false);
+  const [couchPose, setCouchPose] = useState(() => getQuorraCouchPose());
+  const petTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Keep couch pose updated every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCouchPose(getQuorraCouchPose());
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleHotspotTrigger = (hs: VisualSceneHotspot) => {
+    setLastSpokenHotspot(hs.spokenText || hs.label);
+
+    const isQuorra =
+      hs.id === 'hs-pet-quorra' ||
+      hs.id.toLowerCase().includes('quorra') ||
+      hs.label.toLowerCase().includes('quorra');
+
+    if (isQuorra) {
+      setIsQuorraPetted(true);
+      if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
+      petTimeoutRef.current = setTimeout(() => {
+        setIsQuorraPetted(false);
+      }, 3500);
+    }
+  };
 
   const currentScene = scenes.find((s) => s.id === selectedSceneId) || scenes[0];
   const sceneHotspots = hotspots.filter((hs) => hs.sceneId === currentScene?.id);
@@ -117,56 +146,145 @@ export const VisualSceneViewer: React.FC<VisualSceneViewerProps> = ({
                 <rect x="120" y="260" width="45" height="40" rx="10" fill="#f43f5e" stroke="#e11d48" strokeWidth="2" />
 
                 {/* ============================================================== */}
-                {/* QUORRA THE GOLDEN RETRIEVER SLEEPING ON THE COUCH             */}
+                {/* QUORRA THE GOLDEN RETRIEVER ON THE COUCH (DYNAMIC POSES)       */}
                 {/* ============================================================== */}
                 <g id="quorra-sleeping-couch">
+                  {/* Sunbeam in Morning Mode */}
+                  {!isQuorraPetted && couchPose === 'morning-sun' && (
+                    <polygon points="120,70 180,70 320,380 200,380" fill="#fef08a" fillOpacity="0.08" />
+                  )}
+
                   {/* Curled Golden Body */}
                   <ellipse cx="255" cy="315" rx="55" ry="32" fill="url(#goldFurSleep)" />
 
-                  {/* Curled Fluffy Tail Tucked Around */}
-                  <path
-                    d="M 305 315 Q 328 332 300 344 Q 275 348 260 338"
-                    fill="none"
-                    stroke="url(#goldFurSleep)"
-                    strokeWidth="14"
-                    strokeLinecap="round"
-                  />
+                  {/* Tail: Wags rapidly when petted, curled when resting */}
+                  {isQuorraPetted ? (
+                    <path
+                      d="M 305 315 Q 338 310 320 280 Q 295 285 295 315"
+                      fill="url(#goldFurSleep)"
+                      className="animate-tail-wag"
+                    />
+                  ) : (
+                    <path
+                      d="M 305 315 Q 328 332 300 344 Q 275 348 260 338"
+                      fill="none"
+                      stroke="url(#goldFurSleep)"
+                      strokeWidth="14"
+                      strokeLinecap="round"
+                    />
+                  )}
 
-                  {/* Tucked Front Paws */}
+                  {/* Evening Blanket Draped Over Back */}
+                  {!isQuorraPetted && couchPose === 'evening-blanket' && (
+                    <g id="quorra-cozy-blanket">
+                      <path
+                        d="M 215 292 Q 260 280 295 300 Q 308 335 255 342 Q 215 340 215 292 Z"
+                        fill="#dc2626"
+                        stroke="#b91c1c"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M 220 296 Q 260 285 290 304"
+                        stroke="#ffffff"
+                        strokeWidth="2.5"
+                        strokeDasharray="5,4"
+                        fill="none"
+                      />
+                    </g>
+                  )}
+
+                  {/* Paws */}
                   <ellipse cx="205" cy="336" rx="9" ry="6" fill="#d97706" />
                   <ellipse cx="225" cy="338" rx="9" ry="6" fill="#d97706" />
 
-                  {/* Golden Head Resting Peacefully */}
-                  <circle cx="198" cy="304" r="26" fill="url(#goldFurSleep)" />
+                  {/* Golden Head */}
+                  <circle cx="198" cy={isQuorraPetted ? 296 : 304} r="26" fill="url(#goldFurSleep)" />
 
                   {/* Floppy Golden Ears */}
-                  <path d="M 180 290 Q 166 308 174 322 Q 186 318 184 298 Z" fill="url(#earFurSleep)" />
-                  <path d="M 216 290 Q 230 308 222 322 Q 210 318 212 298 Z" fill="url(#earFurSleep)" />
+                  <path
+                    d={
+                      isQuorraPetted
+                        ? 'M 174 278 Q 158 296 168 312 Q 180 306 178 286 Z'
+                        : 'M 180 290 Q 166 308 174 322 Q 186 318 184 298 Z'
+                    }
+                    fill="url(#earFurSleep)"
+                  />
+                  <path
+                    d={
+                      isQuorraPetted
+                        ? 'M 220 278 Q 236 296 226 312 Q 214 306 216 286 Z'
+                        : 'M 216 290 Q 230 308 222 322 Q 210 318 212 298 Z'
+                    }
+                    fill="url(#earFurSleep)"
+                  />
 
-                  {/* Soft Muzzle & Cute Black Nose */}
-                  <ellipse cx="196" cy="313" rx="12" ry="9" fill="#fef3c7" />
-                  <polygon points="196,309 190,304 202,304" fill="#0f172a" />
-                  <path d="M 196 309 Q 196 316 192 318 M 196 309 Q 196 316 200 318" stroke="#0f172a" strokeWidth="1.5" fill="none" />
+                  {/* Soft Muzzle & Nose */}
+                  <ellipse cx="196" cy={isQuorraPetted ? 307 : 313} rx="12" ry="9" fill="#fef3c7" />
+                  <polygon points={isQuorraPetted ? '196,303 190,298 202,298' : '196,309 190,304 202,304'} fill="#0f172a" />
+                  <path
+                    d={isQuorraPetted ? 'M 196 303 Q 196 310 192 312 M 196 303 Q 196 310 200 312' : 'M 196 309 Q 196 316 192 318 M 196 309 Q 196 316 200 318'}
+                    stroke="#0f172a"
+                    strokeWidth="1.5"
+                    fill="none"
+                  />
 
-                  {/* Peaceful Sleeping Eyelids */}
-                  <path d="M 184 301 Q 189 306 194 301" stroke="#0f172a" strokeWidth="2" fill="none" strokeLinecap="round" />
-                  <path d="M 202 301 Q 207 306 212 301" stroke="#0f172a" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  {/* Smiling Tongue when Petted */}
+                  {isQuorraPetted && (
+                    <path d="M 193 310 Q 196 318 199 310" fill="#f43f5e" stroke="#0f172a" strokeWidth="1" />
+                  )}
+
+                  {/* Eyes: Happy bright open when petted or morning; closed when napping */}
+                  {isQuorraPetted || couchPose === 'morning-sun' ? (
+                    <>
+                      <circle cx="187" cy={isQuorraPetted ? 293 : 299} r="3.2" fill="#0f172a" />
+                      <circle cx="188" cy={isQuorraPetted ? 292 : 298} r="1" fill="#ffffff" />
+                      <circle cx="205" cy={isQuorraPetted ? 293 : 299} r="3.2" fill="#0f172a" />
+                      <circle cx="206" cy={isQuorraPetted ? 292 : 298} r="1" fill="#ffffff" />
+                    </>
+                  ) : (
+                    <>
+                      <path d="M 184 301 Q 189 306 194 301" stroke="#0f172a" strokeWidth="2" fill="none" strokeLinecap="round" />
+                      <path d="M 202 301 Q 207 306 212 301" stroke="#0f172a" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    </>
+                  )}
 
                   {/* Red Collar with Shiny Gold Tag */}
-                  <path d="M 180 326 Q 198 332 216 326" stroke="#ef4444" strokeWidth="3.5" strokeLinecap="round" fill="none" />
-                  <circle cx="198" cy="330" r="3.2" fill="#facc15" />
+                  <path d={isQuorraPetted ? 'M 180 320 Q 198 326 216 320' : 'M 180 326 Q 198 332 216 326'} stroke="#ef4444" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+                  <circle cx="198" cy={isQuorraPetted ? 324 : 330} r="3.2" fill="#facc15" />
 
-                  {/* Floating 'Zzz' Dream Cloud */}
-                  <g className="animate-pulse" opacity="0.95">
-                    <circle cx="178" cy="275" r="3.5" fill="#93c5fd" />
-                    <circle cx="168" cy="260" r="5.5" fill="#93c5fd" />
-                    <circle cx="154" cy="240" r="10" fill="#60a5fa" />
-                    <text x="154" y="244" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="900">Zzz</text>
-                  </g>
+                  {/* Speech Bubble / Floating Dream Cloud */}
+                  {isQuorraPetted ? (
+                    <g className="animate-bounce">
+                      <rect x="180" y="240" width="85" height="26" rx="8" fill="#facc15" stroke="#ffffff" strokeWidth="2" />
+                      <text x="222" y="257" textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="900">Woof! 💖</text>
+                    </g>
+                  ) : couchPose === 'evening-blanket' ? (
+                    <g className="animate-pulse" opacity="0.95">
+                      <circle cx="178" cy="275" r="3.5" fill="#93c5fd" />
+                      <circle cx="168" cy="260" r="5.5" fill="#93c5fd" />
+                      <circle cx="154" cy="240" r="10" fill="#60a5fa" />
+                      <text x="154" y="244" textAnchor="middle" fill="#ffffff" fontSize="9">🌙</text>
+                    </g>
+                  ) : (
+                    <g className="animate-pulse" opacity="0.95">
+                      <circle cx="178" cy="275" r="3.5" fill="#93c5fd" />
+                      <circle cx="168" cy="260" r="5.5" fill="#93c5fd" />
+                      <circle cx="154" cy="240" r="10" fill="#60a5fa" />
+                      <text x="154" y="244" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="900">Zzz</text>
+                    </g>
+                  )}
                 </g>
 
                 {/* Couch Label */}
-                <text x="240" y="388" textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="bold">🛋️ Couch · Quorra 🐕💤</text>
+                <text x="240" y="388" textAnchor="middle" fill="#ffffff" fontSize="18" fontWeight="bold">
+                  {isQuorraPetted
+                    ? '🛋️ Couch · Happy Quorra 🐕💖'
+                    : couchPose === 'morning-sun'
+                    ? '🛋️ Couch · Quorra Morning Sun 🐕☀️'
+                    : couchPose === 'evening-blanket'
+                    ? '🛋️ Couch · Quorra Sweet Dreams 🐕🌙'
+                    : '🛋️ Couch · Quorra Afternoon Nap 🐕💤'}
+                </text>
 
                 {/* TV Table & Screen */}
                 <rect x="420" y="180" width="180" height="130" rx="10" fill="#1e1e2e" stroke="#475569" strokeWidth="5" />
@@ -443,7 +561,7 @@ export const VisualSceneViewer: React.FC<VisualSceneViewerProps> = ({
             <HotspotOverlay
               hotspots={sceneHotspots}
               debounceMs={debounceMs}
-              onHotspotTrigger={(hs) => setLastSpokenHotspot(hs.spokenText || hs.label)}
+              onHotspotTrigger={handleHotspotTrigger}
             />
           </div>
         ) : (

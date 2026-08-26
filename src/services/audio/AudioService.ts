@@ -38,6 +38,14 @@ export class AudioService {
   }
 
   /**
+   * Plays warm acoustic petting chime for Quorra companion interactions.
+   */
+  playQuorraPetTone(): void {
+    iosAudioUnlock.ensureUnlockedAndResumed();
+    toneEngine.playQuorraPetTone();
+  }
+
+  /**
    * Stops all active audio outputs (speech synthesis, recorded audio, etc.).
    */
   stopAll(): void {

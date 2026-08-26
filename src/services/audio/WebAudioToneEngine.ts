@@ -160,6 +160,66 @@ export class WebAudioToneEngine {
   }
 
   /**
+   * Warm acoustic petting chime for Quorra (double soft resonant thuds + gentle pentatonic C5-E5 chord).
+   */
+  playQuorraPetTone(): void {
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const now = ctx.currentTime;
+
+      // Soft carpet/cushion tail thump 1
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(130, now);
+      osc1.frequency.exponentialRampToValueAtTime(70, now + 0.08);
+      gain1.gain.setValueAtTime(0.22, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.08);
+
+      // Soft tail thump 2
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(140, now + 0.1);
+      osc2.frequency.exponentialRampToValueAtTime(75, now + 0.18);
+      gain2.gain.setValueAtTime(0.25, now + 0.1);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.1);
+      osc2.stop(now + 0.18);
+
+      // Sweet pentatonic chime notes (C5: 523.25Hz, E5: 659.25Hz, G5: 783.99Hz)
+      const chimes = [
+        { freq: 523.25, time: 0.16, dur: 0.22, gain: 0.15 },
+        { freq: 659.25, time: 0.22, dur: 0.28, gain: 0.18 },
+        { freq: 783.99, time: 0.28, dur: 0.35, gain: 0.14 },
+      ];
+
+      chimes.forEach(({ freq, time, dur, gain }) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + time);
+        g.gain.setValueAtTime(gain, now + time);
+        g.gain.exponentialRampToValueAtTime(0.001, now + time + dur);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(now + time);
+        osc.stop(now + time + dur);
+      });
+    } catch {
+      // AudioContext unavailable
+    }
+  }
+
+  /**
    * Low 220Hz buzz for PIN errors or invalid actions.
    */
   playErrorBuzz(): void {

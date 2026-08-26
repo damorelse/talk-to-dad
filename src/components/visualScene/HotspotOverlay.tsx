@@ -22,14 +22,14 @@ export const HotspotOverlay: React.FC<HotspotOverlayProps> = ({
   onHotspotTrigger,
   debounceMs = 300,
 }) => {
-  const { speakHotspot, playPuppyBark } = useAudio();
+  const { speakHotspot, playQuorraPetTone } = useAudio();
   const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
   const [hearts, setHearts] = useState<HeartParticle[]>([]);
 
   const handleHotspotClick = useMotorDebounce((hotspot: VisualSceneHotspot) => {
     setActiveHotspotId(hotspot.id);
 
-    // If tapping Quorra mascot pet hotspot, play cheerful puppy bark and trigger floating hearts
+    // If tapping Quorra mascot pet hotspot, play acoustic tail-thump chime and trigger floating hearts
     const isQuorraHotspot =
       hotspot.id === 'hs-pet-quorra' ||
       hotspot.id.toLowerCase().includes('quorra') ||
@@ -37,23 +37,24 @@ export const HotspotOverlay: React.FC<HotspotOverlayProps> = ({
 
     if (isQuorraHotspot) {
       try {
-        playPuppyBark();
+        playQuorraPetTone();
       } catch (err) {
-        console.warn('Unable to play puppy bark sound:', err);
+        console.warn('Unable to play Quorra pet tone:', err);
       }
 
       const now = Date.now();
       const newHearts: HeartParticle[] = [
-        { id: now + 1, x: hotspot.x + hotspot.width * 0.25, y: hotspot.y + hotspot.height * 0.1, emoji: '💖', delayMs: 0 },
-        { id: now + 2, x: hotspot.x + hotspot.width * 0.55, y: hotspot.y + hotspot.height * 0.05, emoji: '🐾', delayMs: 120 },
-        { id: now + 3, x: hotspot.x + hotspot.width * 0.38, y: hotspot.y + hotspot.height * 0.35, emoji: '✨', delayMs: 240 },
-        { id: now + 4, x: hotspot.x + hotspot.width * 0.68, y: hotspot.y + hotspot.height * 0.22, emoji: '❤️', delayMs: 360 },
+        { id: now + 1, x: hotspot.x + hotspot.width * 0.25, y: hotspot.y + hotspot.height * 0.05, emoji: '💖', delayMs: 0 },
+        { id: now + 2, x: hotspot.x + hotspot.width * 0.55, y: hotspot.y + hotspot.height * 0.02, emoji: '🐾', delayMs: 100 },
+        { id: now + 3, x: hotspot.x + hotspot.width * 0.38, y: hotspot.y + hotspot.height * 0.25, emoji: '✨', delayMs: 200 },
+        { id: now + 4, x: hotspot.x + hotspot.width * 0.68, y: hotspot.y + hotspot.height * 0.15, emoji: '❤️', delayMs: 300 },
+        { id: now + 5, x: hotspot.x + hotspot.width * 0.45, y: hotspot.y + hotspot.height * 0.10, emoji: '⭐', delayMs: 400 },
       ];
       setHearts((prev) => [...prev, ...newHearts]);
 
       setTimeout(() => {
         setHearts((prev) => prev.filter((h) => !newHearts.some((nh) => nh.id === h.id)));
-      }, 1600);
+      }, 1800);
     }
 
     // Speak hotspot text using global speech language setting

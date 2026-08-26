@@ -82,8 +82,21 @@
   animation: floatHeart 1.4s ease-out forwards;
 }
 
+/* Quick playful tail wag for Quorra petting */
+@keyframes quorraTailWag {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-16deg); }
+  75% { transform: rotate(16deg); }
+}
+
+.animate-tail-wag {
+  animation: quorraTailWag 0.22s ease-in-out infinite;
+  transform-origin: 295px 330px;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .animate-float-heart {
+  .animate-float-heart,
+  .animate-tail-wag {
     animation: none;
     opacity: 1;
   }

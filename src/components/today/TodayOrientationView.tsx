@@ -15,6 +15,8 @@ import {
 } from '../../services/location/locationService';
 import { WeekdayBar } from './WeekdayBar';
 import { WorldMapSvg } from './WorldMapSvg';
+import { QuorraDailyPostcard } from './QuorraDailyPostcard';
+import { getQuorraDailyGreeting } from '../../services/quorra/quorraMessages';
 import { DebouncedTouchable } from '../common/DebouncedTouchable';
 import { useAudio } from '../../hooks/useAudio';
 import {
@@ -28,7 +30,7 @@ import {
 export const TodayOrientationView: React.FC = () => {
   const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
   const [location, setLocation] = useState<UserLocationInfo>(() => getFallbackLocationFromTimezone());
-  const [activeSpeechType, setActiveSpeechType] = useState<'all' | 'weekday' | 'date' | 'time' | 'location' | null>(null);
+  const [activeSpeechType, setActiveSpeechType] = useState<'all' | 'weekday' | 'date' | 'time' | 'location' | 'postcard' | null>(null);
 
   const { speakBilingual, stopAll, isSpeaking } = useAudio();
 
@@ -141,6 +143,18 @@ export const TodayOrientationView: React.FC = () => {
     });
   };
 
+  const handleSpeakPostcard = async (spokenEn?: string, spokenZh?: string) => {
+    abortSpeakAllRef.current = true;
+    setActiveSpeechType('postcard');
+    const greeting = getQuorraDailyGreeting(currentDate);
+    const en = spokenEn || greeting.spokenEn;
+    const zh = spokenZh || greeting.spokenZh;
+    await speakBilingual(en, zh, undefined, {
+      onEnd: () => setActiveSpeechType(null),
+      onError: () => setActiveSpeechType(null),
+    });
+  };
+
   // Date/Time Display Helpers
   const currentWeekday = WEEKDAYS[currentDate.getDay()];
   const monthsEn = [
@@ -170,6 +184,7 @@ export const TodayOrientationView: React.FC = () => {
   const isDateActive = isSpeaking && (activeSpeechType === 'date' || activeSpeechType === 'all');
   const isTimeActive = isSpeaking && (activeSpeechType === 'time' || activeSpeechType === 'all');
   const isLocationActive = isSpeaking && (activeSpeechType === 'location' || activeSpeechType === 'all');
+  const isPostcardActive = isSpeaking && activeSpeechType === 'postcard';
 
   return (
     <div className="w-full h-full flex flex-col gap-3 overflow-y-auto p-1 select-none scrollbar-thin">
@@ -375,12 +390,13 @@ export const TodayOrientationView: React.FC = () => {
           </DebouncedTouchable>
         </div>
 
-        {/* RIGHT COLUMN: LOCATION & BIG WORLD MAP */}
-        <div className="flex flex-col">
+        {/* RIGHT COLUMN: LOCATION & BIG WORLD MAP + QUORRA'S DAILY POSTCARD */}
+        <div className="flex flex-col gap-2.5 sm:gap-3 h-full">
+          {/* Card 4: Location */}
           <div
             onClick={handleSpeakLocation}
             className={`
-              bg-slate-900 border-2 rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 flex flex-col justify-between gap-2 shadow-lg h-full transition-all duration-200 cursor-pointer group
+              bg-slate-900 border-2 rounded-2xl px-3.5 sm:px-4 py-2 sm:py-2.5 flex flex-col justify-between gap-2 shadow-lg flex-1 transition-all duration-200 cursor-pointer group min-h-[160px] sm:min-h-[180px]
               ${
                 isLocationActive
                   ? 'border-rose-400 ring-4 ring-rose-400/40 shadow-rose-950/60'
@@ -414,7 +430,7 @@ export const TodayOrientationView: React.FC = () => {
             </div>
 
             {/* High-Contrast SVG World Map */}
-            <div className="flex-1 flex flex-col justify-center min-h-[160px] sm:min-h-[200px]">
+            <div className="flex-1 flex flex-col justify-center min-h-[140px] sm:min-h-[160px]">
               <WorldMapSvg
                 location={location}
                 onSelectLocation={handleSpeakLocation}
@@ -422,6 +438,13 @@ export const TodayOrientationView: React.FC = () => {
               />
             </div>
           </div>
+
+          {/* Card 5: Quorra's Daily Postcard */}
+          <QuorraDailyPostcard
+            currentDate={currentDate}
+            onSelectSpeech={handleSpeakPostcard}
+            isSpeakingPostcard={isPostcardActive}
+          />
         </div>
       </div>
     </div>
