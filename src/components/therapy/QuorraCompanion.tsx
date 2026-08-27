@@ -89,10 +89,21 @@ export const ALL_CROSSING_ANIMATIONS: CrossingAnimationType[] = [
   "cross-rainbow-trail",
 ];
 
-interface QuorraCompanionProps {
-  animationType: QuorraAnimationType | null;
+export interface QuorraCompanionProps {
+  // Legacy single animation prop fallback
+  animationType?: QuorraAnimationType | null;
   animationKey?: number | string;
   onComplete?: () => void;
+
+  // Decoupled dual props
+  crossingAnimation?: CrossingAnimationType | null;
+  crossingKey?: number | string;
+  onCrossingComplete?: () => void;
+
+  cornerAnimation?: CornerAnimationType | null;
+  cornerKey?: number | string;
+  onCornerComplete?: () => void;
+
   categoryName?: string;
   categoryNameZh?: string;
 }
@@ -101,21 +112,32 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
   animationType,
   animationKey,
   onComplete,
+  crossingAnimation,
+  crossingKey,
+  onCrossingComplete,
+  cornerAnimation,
+  cornerKey,
+  onCornerComplete,
   categoryName,
   categoryNameZh,
 }) => {
   const [isPetted, setIsPetted] = useState(false);
   const [petHearts, setPetHearts] = useState<{ id: number; x: number; y: number }[]>([]);
   const { playPuppyBark, playQuorraPetTone } = useAudio();
-  const onCompleteRef = React.useRef(onComplete);
-  onCompleteRef.current = onComplete;
 
-  const dismissTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onCrossingCompleteRef = React.useRef(onCrossingComplete || onComplete);
+  onCrossingCompleteRef.current = onCrossingComplete || onComplete;
+
+  const onCornerCompleteRef = React.useRef(onCornerComplete || onComplete);
+  onCornerCompleteRef.current = onCornerComplete || onComplete;
+
+  const crossingDismissTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cornerDismissTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const petTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastBarkTimeRef = React.useRef<number>(0);
 
   // Normalize legacy aliases
-  const resolvedType = React.useMemo<CornerAnimationType | CrossingAnimationType | null>(() => {
+  const legacyResolved = React.useMemo<CornerAnimationType | CrossingAnimationType | null>(() => {
     if (!animationType) return null;
     if (animationType === "category-transition") return "cross-trot-banner";
     if (animationType === "corner-peek") return "corner-paw-wave";
@@ -124,39 +146,70 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
     return animationType as CornerAnimationType | CrossingAnimationType;
   }, [animationType]);
 
-  const isCrossing = resolvedType && resolvedType.startsWith("cross-");
+  const effectiveCrossing: CrossingAnimationType | null =
+    crossingAnimation !== undefined
+      ? crossingAnimation
+      : legacyResolved && legacyResolved.startsWith("cross-")
+      ? (legacyResolved as CrossingAnimationType)
+      : null;
 
-  // Play audio on initial entrance (throttled to 20s cooldown) & handle auto-dismiss (14.0s for corner, 6.0s for crossing)
+  const effectiveCorner: CornerAnimationType | null =
+    cornerAnimation !== undefined
+      ? cornerAnimation
+      : legacyResolved && !legacyResolved.startsWith("cross-")
+      ? (legacyResolved as CornerAnimationType)
+      : null;
+
+  // Manage Crossing Animation Lifecycle (6.0s duration)
   useEffect(() => {
-    if (resolvedType) {
-      setIsPetted(false);
-      setPetHearts([]);
-
-      // Throttle entrance audio bark to avoid sound fatigue on rapid category switching
+    if (effectiveCrossing) {
       const now = Date.now();
       if (now - lastBarkTimeRef.current > 20000) {
         playPuppyBark();
         lastBarkTimeRef.current = now;
       }
 
-      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-      if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
+      if (crossingDismissTimerRef.current) clearTimeout(crossingDismissTimerRef.current);
 
-      // Crossing animations take 5.8s (gentle stroke-friendly pace), corner animations stay for 14.0s
-      const durationMs = isCrossing ? 6000 : 14000;
-      dismissTimerRef.current = setTimeout(() => {
-        onCompleteRef.current?.();
-      }, durationMs);
+      crossingDismissTimerRef.current = setTimeout(() => {
+        onCrossingCompleteRef.current?.();
+      }, 6000);
 
       return () => {
-        if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
+        if (crossingDismissTimerRef.current) clearTimeout(crossingDismissTimerRef.current);
+      };
+    }
+  }, [effectiveCrossing, crossingKey, animationKey, playPuppyBark]);
+
+  // Manage Corner Mascot Animation Lifecycle (14.0s duration)
+  useEffect(() => {
+    if (effectiveCorner) {
+      setIsPetted(false);
+      setPetHearts([]);
+
+      const now = Date.now();
+      if (now - lastBarkTimeRef.current > 20000) {
+        playPuppyBark();
+        lastBarkTimeRef.current = now;
+      }
+
+      if (cornerDismissTimerRef.current) clearTimeout(cornerDismissTimerRef.current);
+      if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
+
+      // Corner animations stay for a full 14.0s
+      cornerDismissTimerRef.current = setTimeout(() => {
+        onCornerCompleteRef.current?.();
+      }, 14000);
+
+      return () => {
+        if (cornerDismissTimerRef.current) clearTimeout(cornerDismissTimerRef.current);
         if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
       };
     }
-  }, [resolvedType, animationKey, isCrossing, playPuppyBark]);
+  }, [effectiveCorner, cornerKey, animationKey, playPuppyBark]);
 
-  // Handle tap-to-pet interaction: extends stay on every pet
-  const handlePet = useCallback(
+  // Handle tap-to-pet interaction for corner mascot: extends stay on every pet
+  const handlePetCorner = useCallback(
     (e: React.MouseEvent | React.TouchEvent) => {
       e.stopPropagation();
       setIsPetted(true);
@@ -177,21 +230,19 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       }, 2500);
 
       // In corner mode: extend the overall stay by an additional 8.0s from each tap
-      if (!isCrossing) {
-        if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-        dismissTimerRef.current = setTimeout(() => {
-          onCompleteRef.current?.();
-        }, 8000);
-      }
+      if (cornerDismissTimerRef.current) clearTimeout(cornerDismissTimerRef.current);
+      cornerDismissTimerRef.current = setTimeout(() => {
+        onCornerCompleteRef.current?.();
+      }, 8000);
     },
-    [isCrossing, playQuorraPetTone]
+    [playQuorraPetTone]
   );
 
-  if (!resolvedType) return null;
+  if (!effectiveCrossing && !effectiveCorner) return null;
 
   // Render Corner Animation Accessory Overlay
   const renderCornerAccessory = () => {
-    switch (resolvedType) {
+    switch (effectiveCorner) {
       case "corner-golden-bone":
         return (
           <g transform="translate(50, 56)">
@@ -404,7 +455,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
   // Get bubble label text for Corner animation
   const getCornerBubbleText = () => {
     if (isPetted) return "Woof! Love you, Dad! 💖";
-    switch (resolvedType) {
+    switch (effectiveCorner) {
       case "corner-golden-bone": return "Golden Bone! 🦴";
       case "corner-tennis-ball": return "Play Ball! 🎾";
       case "corner-sunglasses": return "Cool Dad! 😎";
@@ -457,33 +508,17 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       {/* ============================================================ */}
       {/* 1. TOP CROSSING ANIMATIONS (5.8s, Stroke-Friendly Pacing)    */}
       {/* ============================================================ */}
-      {isCrossing && (
+      {effectiveCrossing && (
         <div className="absolute top-0 left-0 right-0 h-22 sm:h-24 z-30 pointer-events-none flex items-center overflow-hidden">
           <div
-            key={animationKey ?? resolvedType}
-            onClick={handlePet}
-            className="quorra-crossing-item relative flex items-center gap-3 cursor-pointer select-none pointer-events-auto hover:scale-105 transition-transform py-1 px-3 rounded-full"
+            key={crossingKey ?? animationKey ?? effectiveCrossing}
+            className="quorra-crossing-item relative flex items-center gap-3 select-none pointer-events-auto hover:scale-105 transition-transform py-1 px-3 rounded-full"
             style={{
               animation: "quorraCrossSmooth 5.8s cubic-bezier(0.25, 1, 0.5, 1) forwards",
             }}
           >
-            {/* Tap-to-Pet Floating Hearts */}
-            {petHearts.map((h) => (
-              <span
-                key={h.id}
-                className="absolute text-2xl pointer-events-none animate-ping z-40"
-                style={{
-                  left: "40px",
-                  top: "10px",
-                  transform: `translate(calc(-50% + ${h.x}px), ${h.y}px)`,
-                }}
-              >
-                💖
-              </span>
-            ))}
-
             {/* Custom High-Legibility Golden Retriever Crossing SVGs */}
-            {resolvedType === "cross-skateboard" ? (
+            {effectiveCrossing === "cross-skateboard" ? (
               /* Skater Quorra: Goggles up on forehead, big smiling eyes, clear breed silhouette */
               <div className="relative w-22 h-22 sm:w-24 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 120 100" className="w-full h-full">
@@ -553,7 +588,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 72 27 Q 60 30 52 40" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
-            ) : resolvedType === "cross-tennis-chase" ? (
+            ) : effectiveCrossing === "cross-tennis-chase" ? (
               /* Tennis Chase: High-energy bounding Golden Retriever chasing tennis ball */
               <div className="relative w-26 h-22 sm:w-28 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 140 100" className="w-full h-full">
@@ -620,7 +655,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 68 25 Q 56 28 48 38" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
-            ) : resolvedType === "cross-butterfly-follow" ? (
+            ) : effectiveCrossing === "cross-butterfly-follow" ? (
               /* Butterfly Follow: Curious gentle Golden Retriever watching a glowing blue butterfly */
               <div className="relative w-26 h-22 sm:w-28 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 130 100" className="w-full h-full">
@@ -686,7 +721,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 67 25 Q 73 27 71 36" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
-            ) : resolvedType === "cross-wagon" ? (
+            ) : effectiveCrossing === "cross-wagon" ? (
               /* Wagon Parade: Quorra is the 75%+ hero inside a low-profile red wagon, waving happily */
               <div className="relative w-28 h-22 sm:w-32 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 140 100" className="w-full h-full">
@@ -758,7 +793,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="70.5" cy="25.5" r="1.4" fill="#ffffff" />
                 </svg>
               </div>
-            ) : resolvedType === "cross-flying-cape" ? (
+            ) : effectiveCrossing === "cross-flying-cape" ? (
               /* Super Quorra: Flying superhero pose with fluttering red cape */
               <div className="relative w-26 h-22 sm:w-28 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 130 100" className="w-full h-full">
@@ -817,7 +852,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 74 23 Q 62 26 54 36" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
-            ) : resolvedType === "cross-bicycle" ? (
+            ) : effectiveCrossing === "cross-bicycle" ? (
               /* Bicycle Ride: Retro blue bike with flower basket, Quorra steering with full clear head & chest */
               <div className="relative w-26 h-22 sm:w-28 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 130 100" className="w-full h-full">
@@ -891,7 +926,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="75" cy="23" r="1.2" fill="#ffffff" />
                 </svg>
               </div>
-            ) : resolvedType === "cross-balloon-float" ? (
+            ) : effectiveCrossing === "cross-balloon-float" ? (
               /* Balloon Float: 3 vibrant balloons overhead, Quorra suspended in harness paddling paws */
               <div className="relative w-24 h-22 sm:w-26 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 120 110" className="w-full h-full">
@@ -963,7 +998,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="66" cy="43" r="1.2" fill="#ffffff" />
                 </svg>
               </div>
-            ) : resolvedType === "cross-duckling-parade" ? (
+            ) : effectiveCrossing === "cross-duckling-parade" ? (
               /* Duckling Parade: Proud big Golden Retriever leading 2 cute yellow ducklings */
               <div className="relative w-30 h-22 sm:w-34 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 150 100" className="w-full h-full">
@@ -1033,7 +1068,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <path d="M 113 23 Q 119 25 117 34" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
                 </svg>
               </div>
-            ) : resolvedType === "cross-rainbow-trail" ? (
+            ) : effectiveCrossing === "cross-rainbow-trail" ? (
               /* Rainbow Sprint: Dynamic running Golden Retriever with colorful trailing rainbow stream */
               <div className="relative w-28 h-22 sm:w-32 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 140 100" className="w-full h-full">
@@ -1169,23 +1204,23 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                 <span>
                   {categoryName} {categoryNameZh ? `· ${categoryNameZh}` : ""}
                 </span>
-              ) : resolvedType === "cross-skateboard" ? (
+              ) : effectiveCrossing === "cross-skateboard" ? (
                 <span>Cruising Along! 🛹 帥氣溜板</span>
-              ) : resolvedType === "cross-tennis-chase" ? (
+              ) : effectiveCrossing === "cross-tennis-chase" ? (
                 <span>Great Fetch! 🎾 接球高手</span>
-              ) : resolvedType === "cross-butterfly-follow" ? (
+              ) : effectiveCrossing === "cross-butterfly-follow" ? (
                 <span>Butterfly Chase! 🦋 漫步追蝶</span>
-              ) : resolvedType === "cross-wagon" ? (
+              ) : effectiveCrossing === "cross-wagon" ? (
                 <span>Rolling Wagon! 🛒 歡樂小車</span>
-              ) : resolvedType === "cross-flying-cape" ? (
+              ) : effectiveCrossing === "cross-flying-cape" ? (
                 <span>Super Quorra! 🦸‍♀️ 超級狗狗</span>
-              ) : resolvedType === "cross-bicycle" ? (
+              ) : effectiveCrossing === "cross-bicycle" ? (
                 <span>Bicycle Ride! 🚲 單車微風</span>
-              ) : resolvedType === "cross-balloon-float" ? (
+              ) : effectiveCrossing === "cross-balloon-float" ? (
                 <span>Up and Away! 🎈 氣球起飛</span>
-              ) : resolvedType === "cross-duckling-parade" ? (
+              ) : effectiveCrossing === "cross-duckling-parade" ? (
                 <span>Duckling Parade! 🦆 鴨鴨隊伍</span>
-              ) : resolvedType === "cross-rainbow-trail" ? (
+              ) : effectiveCrossing === "cross-rainbow-trail" ? (
                 <span>Rainbow Sprint! 🌈 彩虹奔馳</span>
               ) : (
                 <span>Keep Going, Dad! 🐾 爸爸加油！</span>
@@ -1198,7 +1233,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       {/* ============================================================ */}
       {/* 2. BOTTOM-LEFT CORNER ANIMATIONS (25 Unique Types)          */}
       {/* ============================================================ */}
-      {!isCrossing && (
+      {effectiveCorner && (
         <div
           className="absolute -bottom-1 z-30 pointer-events-auto cursor-pointer select-none group"
           style={{
@@ -1207,8 +1242,8 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           }}
         >
           <div
-            key={animationKey ?? resolvedType}
-            onClick={handlePet}
+            key={cornerKey ?? animationKey ?? effectiveCorner}
+            onClick={handlePetCorner}
             className="quorra-corner-item"
             style={{
               animation: isPetted

@@ -8,7 +8,8 @@ import { useSettings } from "../../hooks/useSettings";
 import { selectWeeklyCards } from "../../services/therapy/weeklyCardSelector";
 import {
   QuorraCompanion,
-  QuorraAnimationType,
+  CornerAnimationType,
+  CrossingAnimationType,
   ALL_CORNER_ANIMATIONS,
   ALL_CROSSING_ANIMATIONS,
 } from "./QuorraCompanion";
@@ -38,9 +39,11 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
   const [celebrationActive, setCelebrationActive] = useState<boolean>(false);
   const [isSessionComplete, setIsSessionComplete] = useState<boolean>(false);
 
-  // Quorra Mascot Companion State
-  const [quorraAnim, setQuorraAnim] = useState<QuorraAnimationType | null>(null);
-  const [quorraAnimKey, setQuorraAnimKey] = useState<number>(0);
+  // Quorra Mascot Companion State (Decoupled crossing banner and corner peek lifecycles)
+  const [crossingAnim, setCrossingAnim] = useState<CrossingAnimationType | null>(null);
+  const [crossingAnimKey, setCrossingAnimKey] = useState<number>(0);
+  const [cornerAnim, setCornerAnim] = useState<CornerAnimationType | null>(null);
+  const [cornerAnimKey, setCornerAnimKey] = useState<number>(0);
   const [quorraCategory, setQuorraCategory] = useState<{ name: string; nameZh?: string }>({
     name: "Daily Needs",
     nameZh: "日常需求",
@@ -71,23 +74,27 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
   const currentCategoryId = currentItem?.category?.id;
   const prevCategoryIdRef = React.useRef<string | null>(null);
 
-  // Trigger 5s top crossing animation on category changes
+  // Trigger 5.8s top crossing animation on category changes
   const triggerCrossingAnimation = useCallback((name: string, nameZh?: string) => {
     setQuorraCategory({ name, nameZh });
     const randomCrossing = ALL_CROSSING_ANIMATIONS[Math.floor(Math.random() * ALL_CROSSING_ANIMATIONS.length)];
-    setQuorraAnim(randomCrossing);
-    setQuorraAnimKey((k) => k + 1);
+    setCrossingAnim(randomCrossing);
+    setCrossingAnimKey((k) => k + 1);
   }, []);
 
-  // Milestone animations on multiples of 3 randomly picked from the 25 corner animations
+  // Milestone animations on multiples of 3 randomly picked from the 25 corner animations (stays 14.0s)
   const triggerMilestoneAnimation = useCallback(() => {
     const randomAnim = ALL_CORNER_ANIMATIONS[Math.floor(Math.random() * ALL_CORNER_ANIMATIONS.length)];
-    setQuorraAnim(randomAnim);
-    setQuorraAnimKey((k) => k + 1);
+    setCornerAnim(randomAnim);
+    setCornerAnimKey((k) => k + 1);
   }, []);
 
-  const handleCompleteAnimation = useCallback(() => {
-    setQuorraAnim(null);
+  const handleCrossingComplete = useCallback(() => {
+    setCrossingAnim(null);
+  }, []);
+
+  const handleCornerComplete = useCallback(() => {
+    setCornerAnim(null);
   }, []);
 
   // Synchronize category transitions whenever the active card enters a new category
@@ -192,7 +199,8 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
     setIsFlipped(false);
     setCorrectCount(0);
     setIsSessionComplete(false);
-    setQuorraAnim(null);
+    setCrossingAnim(null);
+    setCornerAnim(null);
     if (allWeeklyCards.length > 0) {
       setSelectedCategoryId(allWeeklyCards[0].category.id);
       prevCategoryIdRef.current = allWeeklyCards[0].category.id;
@@ -229,9 +237,12 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
       <div className="flex-1 min-h-0 bg-transparent border-0 p-0 flex flex-col items-center justify-between relative overflow-hidden">
         {/* Quorra the Golden Retriever Therapy Companion Mascot */}
         <QuorraCompanion
-          animationType={quorraAnim}
-          animationKey={quorraAnimKey}
-          onComplete={handleCompleteAnimation}
+          crossingAnimation={crossingAnim}
+          crossingKey={crossingAnimKey}
+          onCrossingComplete={handleCrossingComplete}
+          cornerAnimation={cornerAnim}
+          cornerKey={cornerAnimKey}
+          onCornerComplete={handleCornerComplete}
           categoryName={quorraCategory.name}
           categoryNameZh={quorraCategory.nameZh}
         />
