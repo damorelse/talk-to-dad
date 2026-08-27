@@ -174,7 +174,7 @@ function decodeQRMatrixToText(matrix) {
   return new TextDecoder().decode(new Uint8Array(textBytes));
 }
 
-describe("Tier 11: App QR Code, Quorra Mascot & Botanical Flower Garden", () => {
+describe("Tier 11: App QR Code Tab & Mascot Companion", () => {
   const TARGET_URL = "https://damorelse.github.io/talk-to-dad/";
 
   describe("1. Deterministic Offline QR Code Matrix Generator", () => {
