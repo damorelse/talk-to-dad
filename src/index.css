@@ -91,14 +91,63 @@
 
 .animate-tail-wag {
   animation: quorraTailWag 0.22s ease-in-out infinite;
-  transform-origin: 295px 330px;
+  transform-origin: 24px 74px;
+}
+
+/* Quorra gentle breathing & wagging animations */
+@keyframes quorraBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025) translateY(-1.5px); }
+}
+
+@keyframes quorraWagGentle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+
+@keyframes quorraWagExcited {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-22deg); }
+  40% { transform: rotate(20deg); }
+  60% { transform: rotate(-20deg); }
+  80% { transform: rotate(18deg); }
+}
+
+@keyframes quorraEarBob {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(6deg); }
+}
+
+.animate-quorra-breathe {
+  animation: quorraBreathe 3.2s ease-in-out infinite;
+}
+
+.animate-quorra-wag-gentle {
+  animation: quorraWagGentle 1.6s ease-in-out infinite;
+  transform-origin: 24px 74px;
+}
+
+.animate-quorra-wag-excited {
+  animation: quorraWagExcited 0.2s ease-in-out infinite;
+  transform-origin: 24px 74px;
+}
+
+.animate-quorra-ear-bob {
+  animation: quorraEarBob 2.4s ease-in-out infinite;
+  transform-origin: 50% 30%;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-float-heart,
-  .animate-tail-wag {
+  .animate-tail-wag,
+  .animate-quorra-breathe,
+  .animate-quorra-wag-gentle,
+  .animate-quorra-wag-excited,
+  .animate-quorra-ear-bob {
     animation: none;
     opacity: 1;
   }
 }
+
 

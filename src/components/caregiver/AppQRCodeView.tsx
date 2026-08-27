@@ -11,6 +11,9 @@ import {
   Smartphone,
   Heart,
   Share2,
+  Camera,
+  Globe,
+  Sparkles,
 } from "lucide-react";
 
 export interface AppQRCodeViewProps {
@@ -40,16 +43,16 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
     return generateQRMatrix(appUrl, ecLevel);
   }, [appUrl, ecLevel]);
 
-  // Trigger burst of floating hearts
-  const triggerBurst = useCallback((emojis = ["💖", "🐾", "✨", "❤️"]) => {
+  // Trigger burst of floating hearts & sparkles
+  const triggerBurst = useCallback((emojis = ["💖", "🐾", "✨", "❤️", "⭐"]) => {
     const now = Date.now();
     const newParticles: FloatingParticle[] = emojis.map((emoji, index) => ({
       id: now + index,
-      x: (Math.random() - 0.5) * 80,
-      y: -20 - Math.random() * 35,
+      x: (Math.random() - 0.5) * 88,
+      y: -24 - Math.random() * 38,
       emoji,
     }));
-    setParticles((prev) => [...prev.slice(-8), ...newParticles]);
+    setParticles((prev) => [...prev.slice(-10), ...newParticles]);
 
     setTimeout(() => {
       setParticles((prev) =>
@@ -63,7 +66,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
     setIsQuorraPet(true);
     playPuppyBark();
     playQuorraPetTone();
-    triggerBurst(["💖", "🐾", "✨", "❤️"]);
+    triggerBurst(["💖", "🐾", "✨", "❤️", "🐶"]);
 
     setTimeout(() => {
       setIsQuorraPet(false);
@@ -134,17 +137,17 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-5 overflow-y-auto scrollbar-thin pb-8 max-w-4xl mx-auto">
+    <div className="w-full flex flex-col gap-6 overflow-y-auto scrollbar-thin pb-8 max-w-4xl mx-auto">
       {/* Hero Header Card: Quorra Mascot & Quick Actions */}
       <div className="w-full relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-100 via-rose-50 to-amber-50 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/40 border-2 border-amber-300 dark:border-slate-700 p-5 sm:p-6 shadow-lg">
         {/* Floating Hearts Particles */}
         {particles.map((p) => (
           <span
             key={p.id}
-            className="absolute text-2xl pointer-events-none animate-ping z-30 select-none"
+            className="absolute text-2xl pointer-events-none animate-float-heart z-30 select-none"
             style={{
               left: "50%",
-              top: "30%",
+              top: "35%",
               transform: `translate(calc(-50% + ${p.x}px), ${p.y}px)`,
             }}
           >
@@ -177,7 +180,12 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                 }
               >
                 <div className="w-full h-full rounded-3xl bg-amber-50 dark:bg-slate-900 flex items-center justify-center overflow-hidden relative">
-                  <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
+                  <svg
+                    viewBox="0 0 100 100"
+                    className={`w-full h-full drop-shadow-sm transition-transform duration-300 ${
+                      isQuorraPet ? "scale-105" : "animate-quorra-breathe"
+                    }`}
+                  >
                     <defs>
                       <linearGradient id="qrGoldFur2" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#fbbf24" />
@@ -197,50 +205,70 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                     <ellipse cx="50" cy="78" rx="28" ry="18" fill="url(#qrGoldFur2)" />
                     <ellipse cx="50" cy="74" rx="16" ry="11" fill="#fef3c7" />
 
-                    {/* Wagging Tail */}
+                    {/* Animated Wagging Tail */}
                     <path
-                      d="M24 74 Q12 60 16 48 Q20 56 26 70 Z"
+                      d="M24 74 Q10 58 14 46 Q20 54 26 70 Z"
                       fill="url(#qrGoldFur2)"
-                      className={isQuorraPet ? "animate-pulse" : ""}
+                      className={isQuorraPet ? "animate-quorra-wag-excited" : "animate-quorra-wag-gentle"}
                     />
 
-                    {/* Ears */}
-                    <ellipse cx="30" cy="46" rx="8" ry="16" transform="rotate(-15 30 46)" fill="url(#qrEarFur2)" />
-                    <ellipse cx="70" cy="46" rx="8" ry="16" transform="rotate(15 70 46)" fill="url(#qrEarFur2)" />
+                    {/* Fluffy Golden Retriever Floppy Ears */}
+                    <g className={isQuorraPet ? "animate-bounce" : "animate-quorra-ear-bob"}>
+                      <ellipse cx="28" cy="46" rx="8.5" ry="17" transform="rotate(-18 28 46)" fill="url(#qrEarFur2)" />
+                      <ellipse cx="72" cy="46" rx="8.5" ry="17" transform="rotate(18 72 46)" fill="url(#qrEarFur2)" />
+                    </g>
 
-                    {/* Head */}
-                    <circle cx="50" cy="45" r="22" fill="url(#qrGoldFur2)" />
+                    {/* Dog Head */}
+                    <circle cx="50" cy="44" r="23" fill="url(#qrGoldFur2)" />
+
+                    {/* Rosy Cheeks */}
+                    <ellipse cx="34" cy="48" rx="4.5" ry="3" fill="#f43f5e" opacity="0.45" />
+                    <ellipse cx="66" cy="48" rx="4.5" ry="3" fill="#f43f5e" opacity="0.45" />
 
                     {/* Eyes */}
                     {isQuorraPet ? (
+                      /* Happy squinting smiling eyes (^ ^) with playful sparkles */
                       <>
-                        <path d="M40 42 Q44 38 48 42" stroke="#451a03" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                        <path d="M52 42 Q56 38 60 42" stroke="#451a03" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                        <path d="M38 42 Q43 36 48 42" stroke="#451a03" strokeWidth="2.8" strokeLinecap="round" fill="none" />
+                        <path d="M52 42 Q57 36 62 42" stroke="#451a03" strokeWidth="2.8" strokeLinecap="round" fill="none" />
+                        {/* Sparkle stars above eyes */}
+                        <circle cx="43" cy="34" r="1" fill="#f59e0b" />
+                        <circle cx="57" cy="34" r="1" fill="#f59e0b" />
                       </>
                     ) : (
+                      /* Big friendly golden retriever eyes with light reflections */
                       <>
-                        <circle cx="43" cy="42" r="3.4" fill="#451a03" />
-                        <circle cx="57" cy="42" r="3.4" fill="#451a03" />
-                        <circle cx="44.2" cy="40.8" r="1.2" fill="#ffffff" />
-                        <circle cx="58.2" cy="40.8" r="1.2" fill="#ffffff" />
+                        <circle cx="43" cy="41" r="3.6" fill="#291305" />
+                        <circle cx="57" cy="41" r="3.6" fill="#291305" />
+                        <circle cx="44.2" cy="39.8" r="1.3" fill="#ffffff" />
+                        <circle cx="58.2" cy="39.8" r="1.3" fill="#ffffff" />
+                        <circle cx="42.2" cy="42.2" r="0.6" fill="#ffffff" />
+                        <circle cx="56.2" cy="42.2" r="0.6" fill="#ffffff" />
                       </>
                     )}
 
-                    {/* Cheeks */}
-                    <ellipse cx="36" cy="48" rx="4" ry="2.5" fill="#f43f5e" opacity="0.4" />
-                    <ellipse cx="64" cy="48" rx="4" ry="2.5" fill="#f43f5e" opacity="0.4" />
+                    {/* Snout & Shiny Button Nose */}
+                    <ellipse cx="50" cy="53" rx="10.5" ry="7.5" fill="url(#qrSnout2)" />
+                    <ellipse cx="50" cy="49" rx="3.8" ry="2.6" fill="#1e293b" />
+                    <circle cx="48.8" cy="48.2" r="0.9" fill="#ffffff" opacity="0.95" />
 
-                    {/* Snout & Nose */}
-                    <ellipse cx="50" cy="52" rx="9" ry="6.5" fill="url(#qrSnout2)" />
-                    <ellipse cx="50" cy="48.5" rx="3.5" ry="2.5" fill="#1e293b" />
-                    <circle cx="49" cy="47.8" r="0.9" fill="#ffffff" opacity="0.9" />
-
-                    {/* Mouth */}
+                    {/* Mouth & Tongue */}
                     {isQuorraPet ? (
-                      <path d="M46 53 Q50 59 54 53" fill="#dc2626" stroke="#451a03" strokeWidth="1.5" />
+                      /* Joyful open mouth with pink tongue */
+                      <path d="M45 54 Q50 63 55 54" fill="#f43f5e" stroke="#451a03" strokeWidth="1.6" strokeLinecap="round" />
                     ) : (
-                      <path d="M47 52 Q50 55 53 52" stroke="#451a03" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+                      /* Sweet happy smile curve */
+                      <path d="M46 53 Q50 56.5 54 53" stroke="#451a03" strokeWidth="2" fill="none" strokeLinecap="round" />
                     )}
+
+                    {/* Red Collar & Golden Tag */}
+                    <path d="M33 63 Q50 71 67 63" stroke="#ef4444" strokeWidth="4" strokeLinecap="round" fill="none" />
+                    <circle cx="50" cy="68" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
+                    <circle cx="50" cy="68" r="1.5" fill="#ffffff" opacity="0.7" />
+
+                    {/* Front Paws */}
+                    <ellipse cx="36" cy="84" rx="6.5" ry="4.5" fill="url(#qrGoldFur2)" stroke="#b45309" strokeWidth="0.8" />
+                    <ellipse cx="64" cy="84" rx="6.5" ry="4.5" fill="url(#qrGoldFur2)" stroke="#b45309" strokeWidth="0.8" />
                   </svg>
                 </div>
               </div>
@@ -252,7 +280,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
               </div>
             </div>
 
-            {/* Title & Speech Content (without Quorra Therapy Companion label) */}
+            {/* Title & Speech Content */}
             <div className="flex flex-col gap-1">
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 Scan to Open TalkWithDad
@@ -281,7 +309,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
               {copied ? (
                 <Check className="w-5 h-5 sm:w-6 sm:h-6 text-white stroke-[3]" />
               ) : (
-                <Copy className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 stroke-[2.5]" />
+                <Copy className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
               )}
               <span>{copied ? "Copied Link! ✓" : "Copy Link"}</span>
             </DebouncedTouchable>
@@ -301,8 +329,17 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
 
       {/* Main Card: QR Code and Step-by-Step Instructions Side-by-Side */}
       <div className="w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-slate-300 dark:border-slate-700 shadow-xl flex flex-col lg:flex-row items-center lg:items-start gap-8">
-        {/* Left Side: QR Code & Download Button */}
-        <div className="flex flex-col items-center gap-4 shrink-0">
+        {/* Left Side: QR Code, Camera Instruction & Download Button */}
+        <div className="flex flex-col items-center gap-4 shrink-0 w-full lg:w-auto">
+          {/* Instruction Text Right Above the QR Code */}
+          <div className="w-full flex items-center justify-center">
+            <div className="inline-flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-2xl bg-amber-500/15 dark:bg-amber-400/20 text-amber-950 dark:text-amber-100 border-2 border-amber-400/60 shadow-sm font-black text-base sm:text-lg text-center">
+              <Camera className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse stroke-[2.5]" />
+              <span>Point your camera here to open this app</span>
+            </div>
+          </div>
+
+          {/* QR Code Container */}
           <div className="p-5 sm:p-6 bg-white rounded-3xl shadow-lg border-4 border-amber-400 dark:border-amber-500 flex items-center justify-center">
             {(() => {
               const margin = 4;
@@ -334,74 +371,135 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
             })()}
           </div>
 
+          {/* Download Button */}
           <DebouncedTouchable
             onPress={handleDownloadSVG}
             minTouchSize="md"
-            className="px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm sm:text-base font-black flex items-center gap-2 border-2 border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer"
+            className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm sm:text-base font-black flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer"
             title="Download printable SVG QR code"
           >
-            <Download className="w-4 h-4 sm:w-5 sm:h-5 text-pink-600" />
+            <Download className="w-4 h-4 sm:w-5 sm:h-5 text-pink-600 dark:text-pink-400" />
             <span>Download Printable QR Code</span>
           </DebouncedTouchable>
         </div>
 
-        {/* Right Side: QR Code Instructions Right Next to the QR Code */}
-        <div className="flex flex-col gap-5 flex-1 w-full">
-          {/* Web Address Box */}
-          <div>
-            <label className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <QrCode className="w-5 h-5 text-pink-600" />
-              <span>Web App Address:</span>
-            </label>
-            <div className="mt-2">
-              <code className="text-base sm:text-lg md:text-xl font-mono font-black px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-pink-700 dark:text-pink-300 border-2 border-slate-300 dark:border-slate-600 select-all block break-all shadow-inner">
-                {appUrl}
-              </code>
+        {/* Right Side: Web Address (Single-Line) and Instructions */}
+        <div className="flex flex-col gap-6 flex-1 w-full">
+          {/* Web Address Box — Single Line Guaranteed without Wrapping */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <label className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
+                <span>Web App Address:</span>
+              </label>
+              <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">
+                Direct Link
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 p-2 sm:p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800/90 border-2 border-slate-300 dark:border-slate-600 shadow-inner">
+              <div className="flex-1 min-w-0 px-3 py-1 overflow-x-auto scrollbar-none">
+                <code className="text-base sm:text-lg md:text-xl font-mono font-black text-pink-700 dark:text-pink-300 select-all whitespace-nowrap block">
+                  {appUrl}
+                </code>
+              </div>
+
+              <DebouncedTouchable
+                onPress={handleCopyLink}
+                minTouchSize="md"
+                className={
+                  "shrink-0 px-4 py-2 rounded-xl font-black text-sm sm:text-base flex items-center gap-1.5 transition-all shadow-sm border-2 cursor-pointer " +
+                  (copied
+                    ? "bg-emerald-600 text-white border-emerald-400"
+                    : "bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-600 border-slate-300 dark:border-slate-500")
+                }
+                title="Copy Web Address"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 text-white stroke-[3]" />
+                    <span>Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </DebouncedTouchable>
             </div>
           </div>
 
-          {/* Instructions Directly Next to QR Code */}
-          <div className="flex flex-col gap-3">
+          {/* Step-by-Step Instructions */}
+          <div className="flex flex-col gap-3.5">
             <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <Smartphone className="w-5 h-5 text-blue-600" />
+              <Smartphone className="w-5 h-5 text-blue-600 dark:text-blue-400 stroke-[2.5]" />
               <span>How to Scan & Save to Home Screen:</span>
             </span>
 
             <div className="grid grid-cols-1 gap-3.5">
-              {/* iPad & iPhone */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-2 border-slate-300 dark:border-slate-600 flex items-start gap-3.5">
-                <span className="text-3xl shrink-0">🍎</span>
-                <div className="flex flex-col gap-1">
+              {/* iPad & iPhone Card */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-2 border-slate-300 dark:border-slate-600 flex items-start gap-4 shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-700 flex items-center justify-center text-2xl shrink-0">
+                  🍎
+                </div>
+                <div className="flex flex-col gap-2 flex-1 min-w-0">
                   <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     Apple iPad & iPhone (Safari)
                   </span>
-                  <span className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200 leading-relaxed">
-                    1. Open the <strong>Camera</strong> app and point it at the QR code.
-                    <br />
-                    2. In Safari, tap the <strong>Share</strong> button (<Share2 className="inline w-4 h-4 text-blue-600" />).
-                    <br />
-                    3. Tap <strong>"Add to Home Screen"</strong>.
-                  </span>
+                  <ol className="space-y-1.5 text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200">
+                    <li className="flex items-start gap-2">
+                      <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">1</span>
+                      <span>Open your device's <strong>Camera</strong> app and point it at the QR code.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">2</span>
+                      <span>When the page opens in Safari, tap the <strong>Share</strong> button (<Share2 className="inline w-4 h-4 text-blue-600 dark:text-blue-400" />).</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">3</span>
+                      <span>Scroll down and tap <strong>"Add to Home Screen"</strong>.</span>
+                    </li>
+                  </ol>
                 </div>
               </div>
 
-              {/* Android */}
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-2 border-slate-300 dark:border-slate-600 flex items-start gap-3.5">
-                <span className="text-3xl shrink-0">🤖</span>
-                <div className="flex flex-col gap-1">
+              {/* Android Card */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border-2 border-slate-300 dark:border-slate-600 flex items-start gap-4 shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 flex items-center justify-center text-2xl shrink-0">
+                  🤖
+                </div>
+                <div className="flex flex-col gap-2 flex-1 min-w-0">
                   <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
                     Android Tablets & Phones (Chrome)
                   </span>
-                  <span className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200 leading-relaxed">
-                    1. Open the <strong>Camera</strong> app and point it at the QR code.
-                    <br />
-                    2. In Chrome, tap the <strong>Menu</strong> (<strong>⋮</strong>) button.
-                    <br />
-                    3. Tap <strong>"Install App"</strong> or <strong>"Add to Home Screen"</strong>.
-                  </span>
+                  <ol className="space-y-1.5 text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200">
+                    <li className="flex items-start gap-2">
+                      <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">1</span>
+                      <span>Open your <strong>Camera</strong> app and point it at the QR code.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">2</span>
+                      <span>In Chrome, tap the <strong>Menu</strong> (<strong>⋮</strong>) button in the top corner.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">3</span>
+                      <span>Tap <strong>"Install App"</strong> or <strong>"Add to Home Screen"</strong>.</span>
+                    </li>
+                  </ol>
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Helpful Offline / Fullscreen Tip */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-blue-50 dark:from-slate-800 dark:to-slate-800/60 border-2 border-amber-200 dark:border-slate-700 flex items-center gap-3.5 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200 leading-snug">
+              <strong>One-Tap Offline Access:</strong> Saving TalkWithDad to your Home Screen launches it in distraction-free full screen and ensures it works seamlessly 100% offline anytime.
+            </p>
           </div>
         </div>
       </div>
