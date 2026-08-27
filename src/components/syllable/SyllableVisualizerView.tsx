@@ -476,7 +476,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
   const hasMultipleParts = activePartsCount > 1;
 
   return (
-    <div className="w-full h-full flex flex-col gap-1.5 sm:gap-2 overflow-y-auto p-1 sm:p-2 select-none scrollbar-thin">
+    <div className="w-full h-full flex flex-col gap-1.5 sm:gap-2 overflow-hidden p-1 sm:p-2 select-none">
       {/* Top Controls Toolbar */}
       <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2 bg-transparent border border-transparent px-1 py-0.5 sm:py-1 rounded-2xl shrink-0">
         <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
@@ -556,7 +556,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
       </div>
 
       {/* Main Articulation Stage */}
-      <div className="w-full shrink-0 min-h-0 h-auto bg-transparent border border-transparent rounded-3xl pt-0.5 sm:pt-1 pb-3 sm:pb-4 px-4 sm:px-6 md:px-8 flex flex-col items-center justify-center gap-1.5 sm:gap-2 relative transition-all duration-200">
+      <div className="w-full shrink-0 min-h-0 h-auto bg-transparent border border-transparent rounded-3xl pt-0.5 sm:pt-1 pb-2 sm:pb-3 px-4 sm:px-6 md:px-8 flex flex-col items-center justify-center gap-1.5 sm:gap-2 relative transition-all duration-200">
         {/* Context Anchor Header (Semantic Clue) */}
         <div className="flex items-center gap-2.5 px-3 py-0 rounded-2xl bg-transparent border border-transparent text-sm sm:text-base font-bold text-slate-300 shrink-0">
           {currentSelectedCard ? (
@@ -649,20 +649,22 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
       </div>
 
-      {/* AAC Card Vocabulary Browser */}
-      <div className="w-full bg-slate-900/90 border border-slate-800/80 p-2.5 sm:p-3 rounded-2xl flex flex-col gap-2 shrink-0 shadow-xs">
+      {/* AAC Card Vocabulary Browser - Dynamically tall to fill remaining viewport height */}
+      <div className="flex-1 min-h-[140px] w-full bg-slate-900/90 border border-slate-800/80 p-2.5 sm:p-3 rounded-2xl flex flex-col gap-2 shadow-xs overflow-hidden">
         {/* Category Navigation Bar */}
-        <CategorySelector
-          categories={allCategories}
-          selectedCategoryId={selectedCategoryId}
-          onSelectCategory={handleSelectCategory}
-          showAll={false}
-          showWeekly={true}
-          showFavorites={true}
-        />
+        <div className="shrink-0">
+          <CategorySelector
+            categories={allCategories}
+            selectedCategoryId={selectedCategoryId}
+            onSelectCategory={handleSelectCategory}
+            showAll={false}
+            showWeekly={true}
+            showFavorites={true}
+          />
+        </div>
 
         {/* Quick Search Input */}
-        <div className="relative w-full">
+        <div className="relative w-full shrink-0">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
@@ -683,10 +685,10 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
           )}
         </div>
 
-        {/* Vocabulary Chips Grid */}
-        <div className="flex items-center gap-2 flex-wrap max-h-32 sm:max-h-36 overflow-y-auto pr-1 scrollbar-thin">
+        {/* Vocabulary Chips Grid (Dynamically fills available height without cutting off cards) */}
+        <div className="flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin flex items-start content-start gap-2 flex-wrap pb-1">
           {filteredVocabList.length === 0 ? (
-            <div className="w-full py-4 text-center text-xs text-slate-500">
+            <div className="w-full py-6 text-center text-xs sm:text-sm text-slate-500">
               No matching AAC card vocabulary found
             </div>
           ) : (
@@ -698,7 +700,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
                   type="button"
                   onClick={() => handleSelectVocabItem(item)}
                   className={`
-                    px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 border-2 shadow-xs
+                    px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 border-2 shadow-xs shrink-0
                     ${
                       isSelected
                         ? 'bg-amber-400 text-slate-950 border-amber-300 font-black ring-2 ring-amber-400/50 shadow-md scale-102'
