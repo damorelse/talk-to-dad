@@ -126,7 +126,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
 
   const isCrossing = resolvedType && resolvedType.startsWith("cross-");
 
-  // Play audio on initial entrance (throttled to 20s cooldown) & handle auto-dismiss (6.0s for corner, 3.8s for crossing)
+  // Play audio on initial entrance (throttled to 20s cooldown) & handle auto-dismiss (14.0s for corner, 6.0s for crossing)
   useEffect(() => {
     if (resolvedType) {
       setIsPetted(false);
@@ -142,8 +142,8 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
       if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
 
-      // Crossing animations take 5.8s (gentle stroke-friendly pace), corner animations stay for 6.2s
-      const durationMs = isCrossing ? 6000 : 6200;
+      // Crossing animations take 5.8s (gentle stroke-friendly pace), corner animations stay for 14.0s
+      const durationMs = isCrossing ? 6000 : 14000;
       dismissTimerRef.current = setTimeout(() => {
         onCompleteRef.current?.();
       }, durationMs);
@@ -176,12 +176,12 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
         setIsPetted(false);
       }, 2500);
 
-      // In corner mode: extend the overall stay by an additional 5.0s from each tap
+      // In corner mode: extend the overall stay by an additional 8.0s from each tap
       if (!isCrossing) {
         if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
         dismissTimerRef.current = setTimeout(() => {
           onCompleteRef.current?.();
-        }, 5000);
+        }, 8000);
       }
     },
     [isCrossing, playQuorraPetTone]
@@ -1213,7 +1213,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
             style={{
               animation: isPetted
                 ? "none"
-                : "quorraCornerPeekLeft6s 6.2s ease-in-out forwards",
+                : "quorraCornerPeekLeft 14s ease-in-out forwards",
               transform: isPetted ? "translateY(0) scale(1)" : undefined,
               opacity: isPetted ? 1 : undefined,
             }}
@@ -1334,16 +1334,16 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           }
         }
 
-        @keyframes quorraCornerPeekLeft6s {
+        @keyframes quorraCornerPeekLeft {
           0% {
             transform: translateY(100px) scale(0.85);
             opacity: 0;
           }
-          8% {
+          4% {
             transform: translateY(0) scale(1);
             opacity: 1;
           }
-          90% {
+          93% {
             transform: translateY(0) scale(1);
             opacity: 1;
           }
@@ -1387,7 +1387,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
             margin: 0 auto;
           }
           .quorra-corner-item {
-            animation: quorraFadeInCorner 6.2s ease-in-out forwards !important;
+            animation: quorraFadeInCorner 14s ease-in-out forwards !important;
             transform: none !important;
           }
           .quorra-tail-wag {
@@ -1401,8 +1401,8 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           }
           @keyframes quorraFadeInCorner {
             0% { opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
+            4% { opacity: 1; }
+            93% { opacity: 1; }
             100% { opacity: 0; }
           }
         }
