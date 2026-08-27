@@ -146,7 +146,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
             <span className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-300 whitespace-nowrap shrink-0">
               URL:
             </span>
-            <div className="flex-1 min-w-0 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 overflow-x-auto scrollbar-none">
+            <div className="flex-1 min-w-0 px-1 py-1 bg-transparent overflow-x-auto scrollbar-none">
               <code className="text-base sm:text-lg md:text-xl font-mono font-black text-pink-700 dark:text-pink-300 select-all whitespace-nowrap block">
                 {appUrl}
               </code>
