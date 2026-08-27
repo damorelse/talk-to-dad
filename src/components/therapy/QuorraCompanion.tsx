@@ -494,7 +494,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="92" cy="91" r="5.5" fill="#0f172a" stroke="#ffffff" strokeWidth="1.5" />
 
                   {/* Arched Feathered Wagging Tail */}
-                  <path d="M 22 52 C 8 38 14 16 30 12 C 26 24 28 36 36 48 Z" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1" className="animate-bounce" />
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "32px 52px", transformBox: "view-box", animation: "quorraCrossingTailWag 0.6s ease-in-out infinite" }}>
+                    <path
+                      d="M 28 54 C 12 38 14 16 30 12 C 26 24 28 36 38 48 C 35 52 31 54 28 54 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 28 22 Q 22 28 26 38" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
 
                   {/* Body & Paws on Board */}
                   <ellipse cx="54" cy="56" rx="26" ry="18" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
@@ -560,7 +568,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   </g>
 
                   {/* Wagging High Tail */}
-                  <path d="M 18 50 C 4 36 10 14 26 10 C 22 22 24 34 32 46 Z" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1" className="animate-bounce" />
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "28px 50px", transformBox: "view-box", animation: "quorraCrossingTailWagFast 0.45s ease-in-out infinite" }}>
+                    <path
+                      d="M 24 52 C 8 36 10 14 26 10 C 22 22 24 34 34 46 C 30 50 26 52 24 52 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 22 20 Q 18 26 22 36" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
 
                   {/* Bounding Body */}
                   <ellipse cx="50" cy="54" rx="27" ry="17" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
@@ -619,7 +635,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   </g>
 
                   {/* Wagging Tail */}
-                  <path d="M 16 54 C 2 40 8 18 24 14 C 20 26 22 38 30 50 Z" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1" className="animate-bounce" />
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "28px 54px", transformBox: "view-box", animation: "quorraCrossingTailWag 0.65s ease-in-out infinite" }}>
+                    <path
+                      d="M 24 56 C 8 40 10 18 26 14 C 22 26 24 38 34 50 C 30 54 26 56 24 56 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 22 24 Q 18 30 22 40" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
 
                   {/* Trotting Body */}
                   <ellipse cx="48" cy="58" rx="27" ry="18" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
@@ -677,8 +701,16 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <rect x="26" y="58" width="14" height="4" rx="2" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
                   <polygon points="38,52 40,56 44,56 41,58 42,62 38,59 34,62 35,58 32,56 36,56" fill="#fbbf24" />
 
-                  {/* Quorra Sitting Proudly in Wagon */}
-                  <path d="M 18 52 C 8 40 12 20 26 18 C 22 28 24 38 30 48 Z" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1" className="animate-bounce" />
+                  {/* Quorra Sitting Proudly in Wagon - Wagging Tail at Left Rump */}
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "42px 48px", transformBox: "view-box", animation: "quorraCrossingTailWag 0.6s ease-in-out infinite" }}>
+                    <path
+                      d="M 38 52 C 22 40 24 20 38 18 C 34 28 36 38 46 46 C 42 50 39 52 38 52 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 34 26 Q 30 32 34 40" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
                   <ellipse cx="58" cy="48" rx="24" ry="20" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
                   <path d="M 68 40 Q 78 48 72 58 Q 62 52 68 40 Z" fill="url(#qMuzzleCream)" />
 
@@ -730,6 +762,17 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
               /* Super Quorra: Flying superhero pose with fluttering red cape */
               <div className="relative w-26 h-22 sm:w-28 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 130 100" className="w-full h-full">
+                  {/* Streaming Feathered Tail */}
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "34px 48px", transformBox: "view-box", animation: "quorraCrossingTailWagFast 0.5s ease-in-out infinite" }}>
+                    <path
+                      d="M 30 50 C 14 46 6 34 16 26 C 20 34 26 40 38 44 C 35 48 32 50 30 50 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 22 32 Q 28 36 34 40" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
+
                   {/* Fluttering Red Superhero Cape */}
                   <path d="M 16 38 Q -6 48 4 72 Q 26 56 34 44 Z" fill="#ef4444" stroke="#b91c1c" strokeWidth="1.5" className="animate-pulse" />
                   <polygon points="12,54 14,58 18,58 15,60 16,64 12,61 8,64 9,60 6,58 10,58" fill="#facc15" />
@@ -795,6 +838,17 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <circle cx="98" cy="41" r="3.5" fill="#f43f5e" />
                   <circle cx="98" cy="41" r="1.5" fill="#facc15" />
 
+                  {/* Wagging Tail Behind Saddle */}
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "44px 48px", transformBox: "view-box", animation: "quorraCrossingTailWag 0.6s ease-in-out infinite" }}>
+                    <path
+                      d="M 40 50 C 26 38 28 18 42 16 C 38 26 40 36 48 44 C 45 48 42 50 40 50 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 38 24 Q 34 30 38 38" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
+
                   {/* Quorra Rider */}
                   <ellipse cx="58" cy="48" rx="22" ry="18" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
                   <ellipse cx="86" cy="48" rx="6" ry="4" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="0.8" />
@@ -852,8 +906,18 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                     <line x1="78" y1="29" x2="60" y2="48" stroke="#94a3b8" strokeWidth="1.2" />
                   </g>
 
+                  {/* Wagging Floating Tail */}
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "44px 64px", transformBox: "view-box", animation: "quorraCrossingTailWag 0.65s ease-in-out infinite" }}>
+                    <path
+                      d="M 40 66 C 24 54 26 34 40 32 C 36 42 38 50 48 58 C 45 62 42 65 40 66 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 34 40 Q 32 48 38 54" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
+
                   {/* Quorra in Teal Harness Floating */}
-                  <path d="M 32 64 C 20 54 22 36 34 34 C 32 44 34 52 40 60 Z" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1" className="animate-bounce" />
                   <ellipse cx="60" cy="68" rx="23" ry="19" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
 
                   {/* Paddling Paws */}
@@ -917,8 +981,18 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                     <circle cx="49" cy="63.5" r="1.4" fill="#0f172a" />
                   </g>
 
+                  {/* High Proud Wagging Tail */}
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "78px 52px", transformBox: "view-box", animation: "quorraCrossingTailWag 0.6s ease-in-out infinite" }}>
+                    <path
+                      d="M 74 54 C 58 40 62 16 80 14 C 76 24 78 36 86 46 C 82 51 77 53 74 54 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 72 24 Q 68 30 72 40" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
+
                   {/* Quorra Leading Parade */}
-                  <path d="M 68 50 C 56 38 60 18 74 14 C 70 24 72 36 78 46 Z" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1" className="animate-bounce" />
                   <ellipse cx="96" cy="56" rx="25" ry="17" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
                   <path d="M 108 46 Q 118 56 112 66 Q 102 60 108 46 Z" fill="url(#qMuzzleCream)" />
 
@@ -973,8 +1047,18 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
                   <polygon points="26,42 28,46 32,46 29,48 30,52 26,49 22,52 23,48 20,46 24,46" fill="#facc15" className="animate-spin" />
                   <polygon points="50,62 52,66 56,66 53,68 54,72 50,69 46,72 47,68 44,66 48,66" fill="#facc15" className="animate-spin" />
 
+                  {/* High Energetic Sprinting Tail */}
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "72px 52px", transformBox: "view-box", animation: "quorraCrossingTailWagFast 0.45s ease-in-out infinite" }}>
+                    <path
+                      d="M 68 54 C 52 40 56 16 74 14 C 70 24 72 36 80 46 C 76 51 71 53 68 54 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 66 24 Q 62 30 66 40" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
+
                   {/* Sprinting Dog Body */}
-                  <path d="M 64 50 C 50 38 54 18 68 14 C 64 24 66 36 72 46 Z" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1" className="animate-bounce" />
                   <ellipse cx="90" cy="56" rx="26" ry="17" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
                   <path d="M 102 46 Q 112 56 106 66 Q 96 60 102 46 Z" fill="url(#qMuzzleCream)" />
 
@@ -1020,7 +1104,15 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
               <div className="relative w-24 h-22 sm:w-26 sm:h-24 shrink-0 filter drop-shadow-xl">
                 <svg viewBox="0 0 120 100" className="w-full h-full">
                   {/* Arched Feathered Wagging Tail */}
-                  <path d="M 16 54 C 2 40 8 18 24 14 C 20 26 22 38 30 50 Z" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1" className="animate-bounce" />
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "32px 54px", transformBox: "view-box", animation: "quorraCrossingTailWag 0.6s ease-in-out infinite" }}>
+                    <path
+                      d="M 28 56 C 12 40 16 16 34 12 C 30 24 32 36 42 48 C 38 53 32 55 28 56 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                    <path d="M 28 22 Q 22 28 26 38" stroke="#fef08a" strokeWidth="1.2" fill="none" opacity="0.8" />
+                  </g>
 
                   {/* Trotting Torso */}
                   <ellipse cx="50" cy="58" rx="28" ry="18" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
@@ -1155,14 +1247,14 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
               <div className="w-full h-full filter drop-shadow-2xl">
                 <svg viewBox="0 0 100 100" className="w-full h-full">
                   {/* Wagging Tail at Right for left-corner balance */}
-                  <path
-                    d="M 82 60 Q 96 45 88 32 Q 78 42 81 60 Z"
-                    fill="url(#qGoldFur)"
-                    stroke="#d97706"
-                    strokeWidth="1"
-                    className="animate-spin origin-bottom-left opacity-95"
-                    style={{ animationDuration: "0.6s" }}
-                  />
+                  <g className="quorra-tail-wag" style={{ transformOrigin: "80px 60px", transformBox: "view-box", animation: "quorraCornerTailWag 0.6s ease-in-out infinite" }}>
+                    <path
+                      d="M 78 62 Q 96 45 88 32 Q 76 42 78 62 Z"
+                      fill="url(#qGoldFur)"
+                      stroke="#d97706"
+                      strokeWidth="1"
+                    />
+                  </g>
 
                   {/* Golden Head */}
                   <circle cx="50" cy="46" r="28" fill="url(#qGoldFur)" stroke="#d97706" strokeWidth="1.2" />
@@ -1261,6 +1353,33 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           }
         }
 
+        @keyframes quorraCrossingTailWag {
+          0%, 100% {
+            transform: rotate(0deg);
+          }
+          50% {
+            transform: rotate(-14deg);
+          }
+        }
+
+        @keyframes quorraCrossingTailWagFast {
+          0%, 100% {
+            transform: rotate(0deg);
+          }
+          50% {
+            transform: rotate(-18deg);
+          }
+        }
+
+        @keyframes quorraCornerTailWag {
+          0%, 100% {
+            transform: rotate(0deg);
+          }
+          50% {
+            transform: rotate(16deg);
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .quorra-crossing-item {
             animation: quorraFadeInTop 5.8s ease-in-out forwards !important;
@@ -1270,6 +1389,9 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           .quorra-corner-item {
             animation: quorraFadeInCorner 6.2s ease-in-out forwards !important;
             transform: none !important;
+          }
+          .quorra-tail-wag {
+            animation: none !important;
           }
           @keyframes quorraFadeInTop {
             0% { opacity: 0; transform: translateY(-8px); }
