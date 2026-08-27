@@ -8,7 +8,6 @@ import {
   Check,
   ExternalLink,
   Download,
-  Sparkles,
   Smartphone,
   Heart,
   Share2,
@@ -41,7 +40,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
     return generateQRMatrix(appUrl, ecLevel);
   }, [appUrl, ecLevel]);
 
-  // Trigger burst of floating hearts / sparkles
+  // Trigger burst of floating hearts
   const triggerBurst = useCallback((emojis = ["💖", "🐾", "✨", "❤️"]) => {
     const now = Date.now();
     const newParticles: FloatingParticle[] = emojis.map((emoji, index) => ({
@@ -136,8 +135,8 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-5 overflow-y-auto scrollbar-thin pb-8 max-w-4xl mx-auto">
-      {/* Senior-Friendly Hero Card: Large Typography & Quorra Mascot */}
-      <div className="w-full relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-100 via-rose-50 to-amber-50 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/40 border-2 border-amber-300 dark:border-slate-700 p-5 sm:p-7 shadow-lg">
+      {/* Hero Header Card: Quorra Mascot & Quick Actions */}
+      <div className="w-full relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-100 via-rose-50 to-amber-50 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/40 border-2 border-amber-300 dark:border-slate-700 p-5 sm:p-6 shadow-lg">
         {/* Floating Hearts Particles */}
         {particles.map((p) => (
           <span
@@ -153,9 +152,9 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
           </span>
         ))}
 
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-          {/* Quorra Mascot & Large Speech Info */}
-          <div className="flex items-center gap-5 text-center md:text-left">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-5 relative z-10">
+          {/* Quorra Mascot & Title */}
+          <div className="flex items-center gap-5 text-center sm:text-left">
             {/* Interactive Quorra Golden Retriever Illustration */}
             <div
               onClick={handlePetQuorra}
@@ -180,37 +179,37 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                 <div className="w-full h-full rounded-3xl bg-amber-50 dark:bg-slate-900 flex items-center justify-center overflow-hidden relative">
                   <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-sm">
                     <defs>
-                      <linearGradient id="seniorGoldFur" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <linearGradient id="qrGoldFur2" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#fbbf24" />
                         <stop offset="100%" stopColor="#d97706" />
                       </linearGradient>
-                      <linearGradient id="seniorEarFur" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <linearGradient id="qrEarFur2" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#d97706" />
                         <stop offset="100%" stopColor="#b45309" />
                       </linearGradient>
-                      <linearGradient id="seniorSnout" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <linearGradient id="qrSnout2" x1="0%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" stopColor="#fef3c7" />
                         <stop offset="100%" stopColor="#fde68a" />
                       </linearGradient>
                     </defs>
 
                     {/* Dog Body */}
-                    <ellipse cx="50" cy="78" rx="28" ry="18" fill="url(#seniorGoldFur)" />
+                    <ellipse cx="50" cy="78" rx="28" ry="18" fill="url(#qrGoldFur2)" />
                     <ellipse cx="50" cy="74" rx="16" ry="11" fill="#fef3c7" />
 
                     {/* Wagging Tail */}
                     <path
                       d="M24 74 Q12 60 16 48 Q20 56 26 70 Z"
-                      fill="url(#seniorGoldFur)"
+                      fill="url(#qrGoldFur2)"
                       className={isQuorraPet ? "animate-pulse" : ""}
                     />
 
                     {/* Ears */}
-                    <ellipse cx="30" cy="46" rx="8" ry="16" transform="rotate(-15 30 46)" fill="url(#seniorEarFur)" />
-                    <ellipse cx="70" cy="46" rx="8" ry="16" transform="rotate(15 70 46)" fill="url(#seniorEarFur)" />
+                    <ellipse cx="30" cy="46" rx="8" ry="16" transform="rotate(-15 30 46)" fill="url(#qrEarFur2)" />
+                    <ellipse cx="70" cy="46" rx="8" ry="16" transform="rotate(15 70 46)" fill="url(#qrEarFur2)" />
 
                     {/* Head */}
-                    <circle cx="50" cy="45" r="22" fill="url(#seniorGoldFur)" />
+                    <circle cx="50" cy="45" r="22" fill="url(#qrGoldFur2)" />
 
                     {/* Eyes */}
                     {isQuorraPet ? (
@@ -232,7 +231,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                     <ellipse cx="64" cy="48" rx="4" ry="2.5" fill="#f43f5e" opacity="0.4" />
 
                     {/* Snout & Nose */}
-                    <ellipse cx="50" cy="52" rx="9" ry="6.5" fill="url(#seniorSnout)" />
+                    <ellipse cx="50" cy="52" rx="9" ry="6.5" fill="url(#qrSnout2)" />
                     <ellipse cx="50" cy="48.5" rx="3.5" ry="2.5" fill="#1e293b" />
                     <circle cx="49" cy="47.8" r="0.9" fill="#ffffff" opacity="0.9" />
 
@@ -246,39 +245,34 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                 </div>
               </div>
 
-              {/* Large Pet Me Badge */}
+              {/* Pet Me Badge */}
               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-1 whitespace-nowrap pointer-events-none border border-amber-300">
                 <Heart className="w-3 h-3 fill-current" />
                 <span>Pet Me!</span>
               </div>
             </div>
 
-            {/* Large Text Content */}
-            <div className="flex flex-col gap-1.5">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-200/90 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200 text-sm sm:text-base font-black self-center md:self-start">
-                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <span>Quorra Therapy Companion</span>
-              </div>
-
+            {/* Title & Speech Content (without Quorra Therapy Companion label) */}
+            <div className="flex flex-col gap-1">
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 Scan to Open TalkWithDad
               </h2>
 
               <p className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 leading-snug">
                 {isQuorraPet
-                  ? "🐕 Woof! Good girl! Point your iPad or phone camera at the QR code below."
+                  ? "🐕 Woof! Good girl! Point your camera at the QR code below."
                   : "Point any smartphone or iPad camera at the code below to open this app."}
               </p>
             </div>
           </div>
 
-          {/* Large Action Buttons */}
-          <div className="flex flex-row md:flex-col gap-3 shrink-0 w-full md:w-auto">
+          {/* Action Buttons */}
+          <div className="flex flex-row sm:flex-col gap-3 shrink-0 w-full sm:w-auto">
             <DebouncedTouchable
               onPress={handleCopyLink}
               minTouchSize="md"
               className={
-                "flex-1 md:flex-none px-6 py-3.5 rounded-2xl font-black text-base sm:text-lg flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer border-2 " +
+                "flex-1 sm:flex-none px-6 py-3.5 rounded-2xl font-black text-base sm:text-lg flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer border-2 " +
                 (copied
                   ? "bg-emerald-600 text-white border-emerald-400"
                   : "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700 border-slate-300 dark:border-slate-600")
@@ -296,7 +290,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
               href={appUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 md:flex-none px-6 py-3.5 rounded-2xl font-black text-base sm:text-lg bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-2.5 transition-all shadow-md border-2 border-blue-400 cursor-pointer"
+              className="flex-1 sm:flex-none px-6 py-3.5 rounded-2xl font-black text-base sm:text-lg bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center gap-2.5 transition-all shadow-md border-2 border-blue-400 cursor-pointer"
             >
               <ExternalLink className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
               <span>Open Link</span>
@@ -305,9 +299,9 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
         </div>
       </div>
 
-      {/* Main Display: Extra-Large High-Contrast QR Code & Senior Setup Steps */}
-      <div className="w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-slate-300 dark:border-slate-700 shadow-xl flex flex-col md:flex-row items-center gap-8">
-        {/* Left: Extra-Large QR Code Container */}
+      {/* Main Card: QR Code and Step-by-Step Instructions Side-by-Side */}
+      <div className="w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-slate-300 dark:border-slate-700 shadow-xl flex flex-col lg:flex-row items-center lg:items-start gap-8">
+        {/* Left Side: QR Code & Download Button */}
         <div className="flex flex-col items-center gap-4 shrink-0">
           <div className="p-5 sm:p-6 bg-white rounded-3xl shadow-lg border-4 border-amber-400 dark:border-amber-500 flex items-center justify-center">
             {(() => {
@@ -351,8 +345,9 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
           </DebouncedTouchable>
         </div>
 
-        {/* Right: Large Web Address & Easy-to-Read Instructions */}
-        <div className="flex flex-col gap-6 flex-1 w-full">
+        {/* Right Side: QR Code Instructions Right Next to the QR Code */}
+        <div className="flex flex-col gap-5 flex-1 w-full">
+          {/* Web Address Box */}
           <div>
             <label className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
               <QrCode className="w-5 h-5 text-pink-600" />
@@ -365,11 +360,11 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
             </div>
           </div>
 
-          {/* Simple Step-by-Step Instructions with Large High-Contrast Text */}
+          {/* Instructions Directly Next to QR Code */}
           <div className="flex flex-col gap-3">
             <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
               <Smartphone className="w-5 h-5 text-blue-600" />
-              <span>How to Save on iPad or Phone:</span>
+              <span>How to Scan & Save to Home Screen:</span>
             </span>
 
             <div className="grid grid-cols-1 gap-3.5">
@@ -381,7 +376,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                     Apple iPad & iPhone (Safari)
                   </span>
                   <span className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200 leading-relaxed">
-                    1. Scan the QR code with your Camera.
+                    1. Open the <strong>Camera</strong> app and point it at the QR code.
                     <br />
                     2. In Safari, tap the <strong>Share</strong> button (<Share2 className="inline w-4 h-4 text-blue-600" />).
                     <br />
@@ -398,7 +393,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                     Android Tablets & Phones (Chrome)
                   </span>
                   <span className="text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200 leading-relaxed">
-                    1. Scan the QR code with your Camera.
+                    1. Open the <strong>Camera</strong> app and point it at the QR code.
                     <br />
                     2. In Chrome, tap the <strong>Menu</strong> (<strong>⋮</strong>) button.
                     <br />
