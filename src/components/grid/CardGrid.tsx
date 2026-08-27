@@ -101,7 +101,7 @@ export const CardGrid: React.FC<CardGridProps> = ({
       </div>
 
       {/* Main Responsive Scaled Card Grid */}
-      <div className="flex-1 w-full overflow-y-auto p-1 scrollbar-thin">
+      <div className="flex-1 w-full overflow-y-auto p-1 scrollbar-none">
         {filteredCards.length === 0 ? (
           <div className="w-full h-full flex flex-col items-center justify-center text-slate-500 dark:text-slate-400">
             <span className="text-4xl mb-2">🔍</span>

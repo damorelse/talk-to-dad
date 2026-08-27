@@ -58,7 +58,7 @@ export const BigSpeechKeyboard: React.FC<BigSpeechKeyboardProps> = ({ cards }) =
     <div className="w-full h-full flex flex-col gap-2.5 overflow-hidden select-none p-1">
       {/* Typed Text Display Box */}
       <div className="w-full bg-slate-900 border-2 border-slate-700 rounded-2xl p-3 flex items-center justify-between gap-3 shrink-0 shadow-lg min-h-[76px]">
-        <div className="flex-1 overflow-x-auto text-xl sm:text-2xl md:text-3xl font-black text-white px-2 py-1 scrollbar-thin">
+        <div className="flex-1 overflow-x-auto text-xl sm:text-2xl md:text-3xl font-black text-white px-2 py-1 scrollbar-none">
           {text || (
             <span className="text-slate-500 font-normal italic text-lg sm:text-xl">
               Type or tap predictive words to speak...

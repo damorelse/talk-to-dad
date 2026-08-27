@@ -53,7 +53,7 @@ export const VisualSceneViewer: React.FC<VisualSceneViewerProps> = ({
     <div className="w-full h-full flex flex-col gap-2 overflow-hidden select-none">
       {/* Scene Navigation Bar */}
       <div className="w-full flex items-center justify-between gap-2 shrink-0 bg-slate-900 p-2 rounded-2xl border border-slate-800">
-        <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto scrollbar-thin py-0.5 scroll-smooth">
+        <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto scrollbar-none py-0.5 scroll-smooth">
           {scenes.map((scene) => (
             <DebouncedTouchable
               key={scene.id}

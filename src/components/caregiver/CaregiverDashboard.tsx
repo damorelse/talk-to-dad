@@ -170,7 +170,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
       </div>
 
       {/* Sub-Navigation Tabs */}
-      <div className="w-full flex items-center gap-2 overflow-x-auto scrollbar-thin py-1 shrink-0">
+      <div className="w-full flex items-center gap-2 overflow-x-auto scrollbar-none py-1 shrink-0">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -195,7 +195,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
       </div>
 
       {/* Dynamic Content Area */}
-      <div className="flex-1 w-full overflow-y-auto p-1 scrollbar-thin">
+      <div className="flex-1 w-full overflow-y-auto p-1 scrollbar-none">
         {/* --- SETTINGS TAB --- */}
         {activeTab === 'settings' && (
           <div className="w-full max-w-3xl mx-auto flex flex-col gap-4 bg-white dark:bg-slate-900 border-2 border-pink-500/30 dark:border-pink-500/30 rounded-3xl p-5 shadow-xl shadow-pink-950/20">

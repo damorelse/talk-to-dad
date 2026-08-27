@@ -38,7 +38,35 @@
     overflow: hidden;
     overscroll-behavior: none;
   }
+
+  /* Delete all visible scroll bars across all elements to maximize real estate while keeping scrolling functional */
+  *,
+  *::before,
+  *::after {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE & Edge */
+  }
+
+  *::-webkit-scrollbar {
+    display: none !important; /* Chrome, Safari, Opera, Edge */
+    width: 0px !important;
+    height: 0px !important;
+  }
 }
+
+.scrollbar-none,
+.scrollbar-thin {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.scrollbar-none::-webkit-scrollbar,
+.scrollbar-thin::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
 
 /* High contrast accessibility theme override */
 .high-contrast-mode {

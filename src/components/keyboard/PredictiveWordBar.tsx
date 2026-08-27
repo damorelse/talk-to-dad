@@ -23,7 +23,7 @@ export const PredictiveWordBar: React.FC<PredictiveWordBarProps> = ({
 
   return (
     <div
-      className="w-full bg-transparent border-0 p-1 flex items-center gap-2 overflow-x-auto select-none shrink-0 scrollbar-thin shadow-none"
+      className="w-full bg-transparent border-0 p-1 flex items-center gap-2 overflow-x-auto select-none shrink-0 scrollbar-none shadow-none"
       role="region"
       aria-label="Predictive Word Bar"
     >

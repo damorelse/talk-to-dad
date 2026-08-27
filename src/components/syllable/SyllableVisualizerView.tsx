@@ -476,7 +476,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
   const hasMultipleParts = activePartsCount > 1;
 
   return (
-    <div className="w-full h-full flex flex-col gap-2 overflow-y-auto scrollbar-thin p-1 sm:p-2 select-none">
+    <div className="w-full h-full flex flex-col gap-2 overflow-y-auto scrollbar-none p-1 sm:p-2 select-none">
       {/* Top Controls Toolbar */}
       <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2 bg-transparent border border-transparent px-1 py-0.5 sm:py-1 rounded-2xl shrink-0">
         <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
@@ -686,7 +686,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
 
         {/* Vocabulary Chips Grid (Dynamically fills available height without cutting off cards) */}
-        <div className="flex-1 min-h-[120px] overflow-y-auto pr-1 scrollbar-thin flex items-start content-start gap-2 flex-wrap pb-2">
+        <div className="flex-1 min-h-[120px] overflow-y-auto pr-1 scrollbar-none flex items-start content-start gap-2 flex-wrap pb-2">
           {filteredVocabList.length === 0 ? (
             <div className="w-full py-6 text-center text-xs sm:text-sm text-slate-500">
               No matching AAC card vocabulary found

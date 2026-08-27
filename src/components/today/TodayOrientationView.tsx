@@ -171,7 +171,7 @@ export const TodayOrientationView: React.FC = () => {
   const isLocationActive = isSpeaking && (activeSpeechType === 'location' || activeSpeechType === 'all');
 
   return (
-    <div className="w-full h-full flex flex-col gap-3 overflow-y-auto p-1 select-none scrollbar-thin">
+    <div className="w-full h-full flex flex-col gap-3 overflow-y-auto p-1 select-none scrollbar-none">
       {/* 1. HERO GREETING & MASTER SPEAK BUTTON (Quorra Mascot + Greeting) */}
       <div className="w-full bg-transparent px-1.5 py-0.5 flex items-center justify-start gap-3.5 sm:gap-4 min-w-0 flex-wrap sm:flex-nowrap">
         {/* Left: Quorra Mascot Avatar & Greeting */}

@@ -38,7 +38,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
 }) => {
   return (
     <div
-      className={`w-full flex items-center gap-2 sm:gap-2.5 overflow-x-auto py-1 scrollbar-thin select-none shrink-0 scroll-smooth ${className}`}
+      className={`w-full flex items-center gap-2 sm:gap-2.5 overflow-x-auto py-1 scrollbar-none select-none shrink-0 scroll-smooth ${className}`}
       role="tablist"
       aria-label="AAC Categories"
     >

@@ -62,7 +62,7 @@ export const PainMapContainer: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col lg:flex-row gap-3 overflow-y-auto p-1 select-none scrollbar-thin">
+    <div className="w-full h-full flex flex-col lg:flex-row gap-3 overflow-y-auto p-1 select-none scrollbar-none">
       {/* Left side: Interactive Dual Body Silhouettes (Front & Back) */}
       <div className="flex-1 lg:flex-[1.08] bg-slate-900 border-2 border-slate-700 rounded-3xl p-4 flex flex-col items-center justify-between shadow-xl min-w-0">
         <div className="w-full text-center px-2 mb-1">

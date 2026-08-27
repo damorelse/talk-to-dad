@@ -137,7 +137,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 overflow-y-auto scrollbar-thin pb-8 max-w-4xl mx-auto">
+    <div className="w-full flex flex-col gap-6 overflow-y-auto scrollbar-none pb-8 max-w-4xl mx-auto">
       {/* Hero Header Card: Quorra Mascot & Quick Actions */}
       <div className="w-full relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-100 via-rose-50 to-amber-50 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/40 border-2 border-amber-300 dark:border-slate-700 p-5 sm:p-6 shadow-lg">
         {/* Floating Hearts Particles */}
