@@ -1,7 +1,7 @@
 /**
  * Pure TypeScript Offline QR Code Generator (ISO/IEC 18004 Standard)
- * Supports Byte Mode encoding for URLs, text, and data with Levels L, M, Q, H.
- * Zero external dependencies, 100% offline and deterministic.
+ * Supports Byte Mode encoding for URLs and arbitrary text across Levels L, M, Q, H.
+ * Zero external dependencies, 100% offline, deterministic, and verifiable.
  */
 
 export type QRErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';
@@ -22,19 +22,19 @@ function gfMul(a: number, b: number): number {
   return EXP_TABLE[LOG_TABLE[a] + LOG_TABLE[b]];
 }
 
-// Reed-Solomon Generator Polynomial
+// Reed-Solomon Generator Polynomial expansion: prod_{i=0}^{degree-1} (x + alpha^i)
 function rsGeneratorPoly(degree: number): Uint8Array {
-  let poly = new Uint8Array([1]);
+  let poly = [1];
   for (let i = 0; i < degree; i++) {
     const factor = EXP_TABLE[i];
-    const next = new Uint8Array(poly.length + 1);
+    const next = new Array(poly.length + 1).fill(0);
     for (let j = 0; j < poly.length; j++) {
-      next[j] ^= gfMul(poly[j], factor);
-      next[j + 1] ^= poly[j];
+      next[j] ^= poly[j];
+      next[j + 1] ^= gfMul(poly[j], factor);
     }
     poly = next;
   }
-  return poly;
+  return new Uint8Array(poly);
 }
 
 // Reed-Solomon Error Correction computation
@@ -46,7 +46,7 @@ function rsEncode(data: Uint8Array, ecLength: number): Uint8Array {
   for (let i = 0; i < data.length; i++) {
     const coef = buffer[i];
     if (coef !== 0) {
-      for (let j = 0; j < gen.length; j++) {
+      for (let j = 1; j < gen.length; j++) {
         buffer[i + j] ^= gfMul(gen[j], coef);
       }
     }
@@ -57,7 +57,16 @@ function rsEncode(data: Uint8Array, ecLength: number): Uint8Array {
 interface QRVersionSpec {
   version: number;
   totalCodewords: number;
-  ecCodewords: Record<QRErrorCorrectionLevel, { ecPerBlock: number; blocksGroup1: number; dataPerBlockG1: number; blocksGroup2: number; dataPerBlockG2: number }>;
+  ecCodewords: Record<
+    QRErrorCorrectionLevel,
+    {
+      ecPerBlock: number;
+      blocksGroup1: number;
+      dataPerBlockG1: number;
+      blocksGroup2: number;
+      dataPerBlockG2: number;
+    }
+  >;
   alignmentPatterns: number[];
 }
 
@@ -171,7 +180,7 @@ function createDataBits(text: string, version: number, ecLevel: QRErrorCorrectio
   // 1. Mode indicator: Byte mode (0100)
   bb.put(0x4, 4);
 
-  // 2. Character count indicator (8 bits for v1-9)
+  // 2. Character count indicator (8 bits for v1-9, 16 bits for v10+)
   const charCountBits = version < 10 ? 8 : 16;
   bb.put(data.length, charCountBits);
 
@@ -192,7 +201,7 @@ function createDataBits(text: string, version: number, ecLevel: QRErrorCorrectio
     bb.putBit(false);
   }
 
-  // 6. Pad bytes 0xEC, 0x11 until full
+  // 6. Pad bytes 0xEC, 0x11 until capacity is reached
   const padBytes = [0xec, 0x11];
   let padIdx = 0;
   while (bb.getLength() < bitsNeeded) {
@@ -284,7 +293,7 @@ function calculatePenalty(matrix: boolean[][], size: number): number {
   // N3: 1:1:3:1:1 patterns
   for (let r = 0; r < size; r++) {
     for (let c = 0; c < size - 10; c++) {
-      const p1 = !matrix[r][c] && !matrix[r][c+1] && !matrix[r][c+2] && !matrix[r][c+3] && matrix[r][c+4] && !matrix[r][c+5] && matrix[r][c+6] && matrix[r][c+7] && matrix[r][c+8] && !matrix[r][c+9] && matrix[r][c+10];
+      const p1 = !matrix[r][c] && !matrix[r+1] && !matrix[r][c+2] && !matrix[r][c+3] && matrix[r][c+4] && !matrix[r][c+5] && matrix[r][c+6] && matrix[r][c+7] && matrix[r][c+8] && !matrix[r][c+9] && matrix[r][c+10];
       const p2 = matrix[r][c] && !matrix[r][c+1] && matrix[r][c+2] && matrix[r][c+3] && matrix[r][c+4] && !matrix[r][c+5] && matrix[r][c+6] && !matrix[r][c+7] && !matrix[r][c+8] && !matrix[r][c+9] && !matrix[r][c+10];
       if (p1 || p2) penalty += 40;
     }
@@ -406,7 +415,7 @@ export function generateQRMatrix(
   if (alignCoords.length >= 2) {
     for (const r of alignCoords) {
       for (const c of alignCoords) {
-        if (isFunction[r][c]) continue;
+        if ((r <= 8 && c <= 8) || (r <= 8 && c >= size - 9) || (r >= size - 9 && c <= 8)) continue;
         for (let dr = -2; dr <= 2; dr++) {
           for (let dc = -2; dc <= 2; dc++) {
             const isDark = (Math.abs(dr) === 2 || Math.abs(dc) === 2 || (dr === 0 && dc === 0));
@@ -464,7 +473,6 @@ export function generateQRMatrix(
     c -= 2;
   }
 
-  // Evaluate all 8 masks to find the one with the lowest penalty score
   let bestMask = 0;
   let bestPenalty = Infinity;
   let bestMatrix: boolean[][] = [];
@@ -488,6 +496,7 @@ export function generateQRMatrix(
       formatBits.push(((formatInfo >>> i) & 1) === 1);
     }
 
+    // Top-Left around finder:
     candidate[8][0] = formatBits[0];
     candidate[8][1] = formatBits[1];
     candidate[8][2] = formatBits[2];
@@ -504,11 +513,13 @@ export function generateQRMatrix(
     candidate[1][8] = formatBits[13];
     candidate[0][8] = formatBits[14];
 
-    for (let i = 0; i < 8; i++) {
-      candidate[8][size - 1 - i] = formatBits[i];
-    }
+    // Bottom-Left (under finder, bits 0..6):
     for (let i = 0; i < 7; i++) {
-      candidate[size - 7 + i][8] = formatBits[8 + i];
+      candidate[size - 1 - i][8] = formatBits[i];
+    }
+    // Top-Right (under finder, bits 7..14):
+    for (let i = 0; i < 8; i++) {
+      candidate[8][size - 8 + i] = formatBits[7 + i];
     }
 
     const penalty = calculatePenalty(candidate, size);

@@ -452,36 +452,37 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
             </DebouncedTouchable>
           </div>
 
-          {/* QR Code Container with High-Contrast White Background & Paw Badge */}
-          <div className="p-4 sm:p-6 bg-white rounded-3xl shadow-inner border-4 border-amber-400/60 dark:border-amber-500/40 relative flex items-center justify-center">
-            {/* SVG QR Code Rendering */}
-            <svg
-              viewBox={"0 0 " + qrResult.size + " " + qrResult.size}
-              className="w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 select-none"
-              shapeRendering="crispEdges"
-            >
-              <rect width="100%" height="100%" fill="#ffffff" />
-              {qrResult.matrix.map((row, r) =>
-                row.map((isDark, c) => {
-                  if (!isDark) return null;
-                  return (
-                    <rect
-                      key={r + "-" + c}
-                      x={c}
-                      y={r}
-                      width={1}
-                      height={1}
-                      fill="#0f172a"
-                    />
-                  );
-                })
-              )}
-            </svg>
-
-            {/* Central Cute Paw Icon Badge */}
-            <div className="absolute w-12 h-12 rounded-xl bg-amber-400 text-amber-950 flex items-center justify-center shadow-lg border-2 border-white pointer-events-none select-none">
-              <span className="text-xl">🐾</span>
-            </div>
+          {/* QR Code Container with High-Contrast White Background & 4-Module Quiet Zone */}
+          <div className="p-4 sm:p-6 bg-white rounded-3xl shadow-xl border-4 border-amber-400/60 dark:border-amber-500/40 relative flex items-center justify-center">
+            {/* SVG QR Code Rendering with Full Quiet Zone */}
+            {(() => {
+              const margin = 4;
+              const totalSize = qrResult.size + margin * 2;
+              return (
+                <svg
+                  viewBox={`0 0 ${totalSize} ${totalSize}`}
+                  className="w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 select-none"
+                  shapeRendering="crispEdges"
+                >
+                  <rect width="100%" height="100%" fill="#ffffff" />
+                  {qrResult.matrix.map((row, r) =>
+                    row.map((isDark, c) => {
+                      if (!isDark) return null;
+                      return (
+                        <rect
+                          key={`${r}-${c}`}
+                          x={c + margin}
+                          y={r + margin}
+                          width={1}
+                          height={1}
+                          fill="#000000"
+                        />
+                      );
+                    })
+                  )}
+                </svg>
+              );
+            })()}
           </div>
 
           {/* URL Tag / Badge */}
