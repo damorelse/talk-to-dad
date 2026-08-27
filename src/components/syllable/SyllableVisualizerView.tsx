@@ -649,8 +649,8 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
       </div>
 
-      {/* AAC Card Vocabulary Browser - Guaranteed minimum height and scrollable on short screens */}
-      <div className="flex-1 min-h-[220px] sm:min-h-[260px] w-full bg-slate-900/90 border border-slate-800/80 p-2.5 sm:p-3 rounded-2xl flex flex-col gap-2 shadow-xs shrink-0 sm:shrink">
+      {/* AAC Card Vocabulary Browser - Taller container with single-touch continuous scroll flow */}
+      <div className="w-full min-h-[420px] sm:min-h-[500px] md:min-h-[560px] bg-slate-900/90 border border-slate-800/80 p-3 sm:p-4 rounded-2xl flex flex-col gap-3 shadow-xs shrink-0">
         {/* Category Navigation Bar */}
         <div className="shrink-0">
           <CategorySelector
@@ -685,10 +685,10 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
           )}
         </div>
 
-        {/* Vocabulary Chips Grid (Dynamically fills available height without cutting off cards) */}
-        <div className="flex-1 min-h-[120px] overflow-y-auto pr-1 scrollbar-none flex items-start content-start gap-2 flex-wrap pb-2">
+        {/* Vocabulary Chips Grid - Naturally wraps and displays all cards in one fluid gesture */}
+        <div className="w-full flex items-start content-start gap-2 sm:gap-2.5 flex-wrap pb-3">
           {filteredVocabList.length === 0 ? (
-            <div className="w-full py-6 text-center text-xs sm:text-sm text-slate-500">
+            <div className="w-full py-8 text-center text-xs sm:text-sm text-slate-500">
               No matching AAC card vocabulary found
             </div>
           ) : (
@@ -700,7 +700,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
                   type="button"
                   onClick={() => handleSelectVocabItem(item)}
                   className={`
-                    px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 border-2 shadow-xs shrink-0
+                    px-3.5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer flex items-center gap-2 border-2 shadow-xs shrink-0
                     ${
                       isSelected
                         ? 'bg-amber-400 text-slate-950 border-amber-300 font-black ring-2 ring-amber-400/50 shadow-md scale-102'
@@ -710,11 +710,11 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
                     }
                   `}
                 >
-                  {item.icon && <span className="text-base leading-none shrink-0">{item.icon}</span>}
+                  {item.icon && <span className="text-base sm:text-lg leading-none shrink-0">{item.icon}</span>}
                   <span className={isSelected ? 'text-slate-950 font-black' : 'text-white'}>
                     {item.wordEn}
                   </span>
-                  <span className={`text-[11px] ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>
+                  <span className={`text-[11px] sm:text-xs ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>
                     · {item.wordZh}
                   </span>
                   {item.isWeeklyTherapy && (
