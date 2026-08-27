@@ -8,6 +8,7 @@ import { useSettings } from "../../hooks/useSettings";
 import { selectWeeklyCards } from "../../services/therapy/weeklyCardSelector";
 import {
   QuorraCompanion,
+  QuorraTrophyCelebration,
   CornerAnimationType,
   CrossingAnimationType,
   ALL_CORNER_ANIMATIONS,
@@ -262,9 +263,7 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
           {isSessionComplete ? (
             /* Rewarding Therapy Complete Summary Card */
             <div className="w-full max-w-lg bg-slate-900 border-2 border-yellow-400/60 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center shadow-2xl gap-4 animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-yellow-400/20 border-2 border-yellow-400 flex items-center justify-center text-4xl shadow-inner animate-bounce">
-                🏆
-              </div>
+              <QuorraTrophyCelebration size="md" className="my-0.5" />
 
               <div className="flex flex-col gap-1">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight">

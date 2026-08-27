@@ -1445,3 +1445,241 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
     </>
   );
 };
+
+export interface QuorraTrophyCelebrationProps {
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}
+
+export const QuorraTrophyCelebration: React.FC<QuorraTrophyCelebrationProps> = ({
+  className = "",
+  size = "md",
+}) => {
+  const [isPetted, setIsPetted] = useState(false);
+  const [petHearts, setPetHearts] = useState<{ id: number; x: number; y: number }[]>([]);
+  const { playPuppyBark, playQuorraPetTone } = useAudio();
+  const petTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handlePet = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    setIsPetted(true);
+    playPuppyBark();
+    playQuorraPetTone();
+
+    const newHeart = {
+      id: Date.now() + Math.random(),
+      x: (Math.random() - 0.5) * 50,
+      y: -15 - Math.random() * 25,
+    };
+    setPetHearts((prev) => [...prev.slice(-5), newHeart]);
+
+    if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
+    petTimeoutRef.current = setTimeout(() => {
+      setIsPetted(false);
+    }, 2500);
+  };
+
+  const dimClass =
+    size === "sm"
+      ? "w-24 h-24 sm:w-28 sm:h-28"
+      : size === "lg"
+      ? "w-36 h-36 sm:w-44 sm:h-44"
+      : "w-32 h-32 sm:w-36 sm:h-36";
+
+  return (
+    <div
+      onClick={handlePet}
+      className={`relative flex flex-col items-center justify-center cursor-pointer select-none group transition-transform hover:scale-105 active:scale-95 ${className}`}
+      title="Tap Quorra to celebrate!"
+    >
+      {/* Speech Bubble Pill */}
+      <div className="mb-2 whitespace-nowrap z-10 animate-bounce">
+        <div className="bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-2xl text-xs sm:text-sm font-black shadow-lg border-2 border-white flex items-center gap-1.5">
+          <span>🐾</span>
+          <span>{isPetted ? "Woof! Love you, Dad! 💖" : "Champion Dad! 🏆 爸爸太棒了！"}</span>
+        </div>
+      </div>
+
+      {/* Dog with Trophy Graphic */}
+      <div className={`relative ${dimClass} filter drop-shadow-2xl`}>
+        {/* Tap-to-Pet Floating Hearts */}
+        {petHearts.map((h) => (
+          <span
+            key={h.id}
+            className="absolute text-2xl pointer-events-none animate-ping z-40"
+            style={{
+              left: "50%",
+              top: "20%",
+              transform: `translate(calc(-50% + ${h.x}px), ${h.y}px)`,
+            }}
+          >
+            💖
+          </span>
+        ))}
+
+        <svg viewBox="0 0 120 120" className="w-full h-full overflow-visible">
+          {/* Shared Gradients */}
+          <defs>
+            <linearGradient id="qTrophyFur" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#fef08a" />
+              <stop offset="35%" stopColor="#fbbf24" />
+              <stop offset="100%" stopColor="#d97706" />
+            </linearGradient>
+            <linearGradient id="qTrophyEar" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#d97706" />
+              <stop offset="100%" stopColor="#9a3412" />
+            </linearGradient>
+            <linearGradient id="qTrophyMuzzle" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#fef3c7" />
+            </linearGradient>
+            <linearGradient id="qGoldCup" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#fef08a" />
+              <stop offset="40%" stopColor="#facc15" />
+              <stop offset="85%" stopColor="#eab308" />
+              <stop offset="100%" stopColor="#b45309" />
+            </linearGradient>
+            <linearGradient id="qCupHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#facc15" stopOpacity="0.1" />
+            </linearGradient>
+          </defs>
+
+          {/* Sparkles radiating around trophy */}
+          <g className="animate-pulse">
+            <text x="14" y="28" fontSize="13">✨</text>
+            <text x="96" y="26" fontSize="13">✨</text>
+            <text x="10" y="80" fontSize="11">⭐</text>
+            <text x="100" y="78" fontSize="11">⭐</text>
+          </g>
+
+          {/* Wagging High Tail at Right */}
+          <g
+            style={{
+              transformOrigin: "90px 72px",
+              transformBox: "view-box",
+              animation: "quorraTrophyTailWag 0.5s ease-in-out infinite",
+            }}
+          >
+            <path
+              d="M 88 74 C 104 56 108 30 92 18 C 84 32 86 48 82 72 Z"
+              fill="url(#qTrophyFur)"
+              stroke="#d97706"
+              strokeWidth="1.2"
+            />
+            <path d="M 94 30 Q 98 42 90 56" stroke="#fef08a" strokeWidth="1.5" fill="none" opacity="0.85" />
+          </g>
+
+          {/* Body and Shoulders */}
+          <ellipse cx="60" cy="78" rx="30" ry="24" fill="url(#qTrophyFur)" stroke="#d97706" strokeWidth="1.3" />
+          <path d="M 46 64 Q 60 74 74 64 Q 70 88 50 88 Z" fill="url(#qTrophyMuzzle)" opacity="0.9" />
+
+          {/* Floppy Left Ear (Behind Head) */}
+          <path
+            d="M 40 32 C 26 34 20 50 22 66 C 24 76 34 78 40 70 C 42 64 42 46 40 32 Z"
+            fill="url(#qTrophyEar)"
+            stroke="#b45309"
+            strokeWidth="1.2"
+          />
+          <path d="M 38 34 Q 28 40 28 54" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
+
+          {/* Floppy Right Ear (Behind Head) */}
+          <path
+            d="M 80 32 C 94 34 100 50 98 66 C 96 76 86 78 80 70 C 78 64 78 46 80 32 Z"
+            fill="url(#qTrophyEar)"
+            stroke="#b45309"
+            strokeWidth="1.2"
+          />
+          <path d="M 82 34 Q 92 40 92 54" stroke="#fef08a" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.85" />
+
+          {/* Golden Head */}
+          <circle cx="60" cy="46" r="28" fill="url(#qTrophyFur)" stroke="#d97706" strokeWidth="1.3" />
+
+          {/* Party/Winner Gold Star Crown on Forehead */}
+          <g transform="translate(60, 20)">
+            <polygon points="0,-10 3,-3 10,-3 5,2 7,9 0,5 -7,9 -5,2 -10,-3 -3,-3" fill="#facc15" stroke="#ca8a04" strokeWidth="1" />
+            <circle cx="0" cy="0" r="1.5" fill="#ffffff" />
+          </g>
+
+          {/* Cream Muzzle & Black Button Nose */}
+          <ellipse cx="60" cy="54" rx="14" ry="11" fill="url(#qTrophyMuzzle)" stroke="#d97706" strokeWidth="1" />
+          <polygon points="60,50 54,45 66,45" fill="#0f172a" />
+          <circle cx="59" cy="47" r="0.9" fill="#ffffff" />
+          <path d="M 60 50 Q 60 58 56 60 M 60 50 Q 60 58 64 60" stroke="#0f172a" strokeWidth="1.8" fill="none" />
+          {/* Happy Open Panting Tongue */}
+          <path d="M 57 58 Q 60 67 63 58 Z" fill="#f43f5e" stroke="#e11d48" strokeWidth="0.8" />
+
+          {/* Specular Puppy Eyes */}
+          <circle cx="49" cy="42" r="4.5" fill="#0f172a" />
+          <circle cx="47.5" cy="40.5" r="1.8" fill="#ffffff" />
+          <circle cx="50.5" cy="43.5" r="0.9" fill="#ffffff" />
+          <circle cx="71" cy="42" r="4.5" fill="#0f172a" />
+          <circle cx="69.5" cy="40.5" r="1.8" fill="#ffffff" />
+          <circle cx="72.5" cy="43.5" r="0.9" fill="#ffffff" />
+
+          {/* Eyebrow Highlights */}
+          <ellipse cx="48" cy="35" rx="2.5" ry="1.2" fill="#fef08a" />
+          <ellipse cx="72" cy="35" rx="2.5" ry="1.2" fill="#fef08a" />
+
+          {/* Red Collar & Golden Tag */}
+          <path d="M 42 72 Q 60 78 78 72" stroke="#ef4444" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+          <circle cx="60" cy="76" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.8" />
+          <circle cx="60" cy="76" r="1.2" fill="#ffffff" />
+
+          {/* ======================================================= */}
+          {/* Gleaming Championship Trophy Held by Front Paws         */}
+          {/* ======================================================= */}
+          <g transform="translate(60, 84)">
+            {/* Trophy Pedestal Base */}
+            <rect x="-14" y="24" width="28" height="6" rx="2" fill="#1e293b" stroke="#0f172a" strokeWidth="1" />
+            <rect x="-10" y="20" width="20" height="4" rx="1" fill="#334155" />
+            <path d="M -4 14 L 4 14 L 6 20 L -6 20 Z" fill="url(#qGoldCup)" stroke="#ca8a04" strokeWidth="0.8" />
+
+            {/* Left & Right Trophy Handles */}
+            <path d="M -15 -4 C -26 -4 -26 12 -12 14" stroke="url(#qGoldCup)" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+            <path d="M 15 -4 C 26 -4 26 12 12 14" stroke="url(#qGoldCup)" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+
+            {/* Main Trophy Cup Bowl */}
+            <path
+              d="M -16 -8 L 16 -8 C 16 8 11 16 0 16 C -11 16 -16 8 -16 -8 Z"
+              fill="url(#qGoldCup)"
+              stroke="#ca8a04"
+              strokeWidth="1.2"
+            />
+            {/* Glossy Curved Highlight */}
+            <path
+              d="M -12 -6 L 2 -6 C 2 6 -2 12 -8 10 C -12 8 -13 0 -12 -6 Z"
+              fill="url(#qCupHighlight)"
+            />
+
+            {/* Engraved Star on Trophy Cup */}
+            <polygon
+              points="0,-1 2,4 7,4 3,7 5,12 0,9 -5,12 -3,7 -7,4 -2,4"
+              fill="#ffffff"
+              opacity="0.9"
+            />
+
+            {/* Number 1 Champion Badge */}
+            <circle cx="0" cy="5" r="3.5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.6" />
+            <text x="0" y="7.5" textAnchor="middle" fontSize="6.5" fontWeight="900" fill="#0f172a">1</text>
+          </g>
+
+          {/* Front Golden Retriever Paws Gripping the Trophy Handles */}
+          <ellipse cx="44" cy="84" rx="7.5" ry="6" fill="#d97706" stroke="#b45309" strokeWidth="0.8" />
+          <ellipse cx="76" cy="84" rx="7.5" ry="6" fill="#d97706" stroke="#b45309" strokeWidth="0.8" />
+        </svg>
+      </div>
+
+      <style>{`
+        @keyframes quorraTrophyTailWag {
+          0%, 100% {
+            transform: rotate(0deg);
+          }
+          50% {
+            transform: rotate(-18deg);
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
