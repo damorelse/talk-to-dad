@@ -28,7 +28,7 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
     <div
       role="region"
       aria-label={`Syllable breakdown for ${word}`}
-      className="flex items-center justify-center flex-wrap gap-3 sm:gap-4 p-1 select-none"
+      className="flex items-center justify-center flex-wrap gap-2.5 sm:gap-4 p-1 select-none"
     >
       {syllables.map((syl, idx) => {
         const isActive = activeSyllableIndex === idx;
@@ -43,8 +43,8 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
               aria-label={`Syllable ${idx + 1}: ${syl.text}, IPA: ${syl.ipa}, Stress: ${syl.stress}`}
               aria-current={isActive ? 'true' : undefined}
               className={`
-                group relative flex flex-col items-center justify-center px-6 sm:px-8 py-3.5 sm:py-4.5 rounded-2xl
-                transition-all duration-200 cursor-pointer min-h-[95px] sm:min-h-[115px] min-w-[90px] sm:min-w-[110px]
+                group relative flex flex-col items-center justify-center px-4 sm:px-7 py-2.5 sm:py-4 rounded-2xl
+                transition-all duration-200 cursor-pointer min-h-[70px] sm:min-h-[95px] md:min-h-[110px] min-w-[75px] sm:min-w-[95px] md:min-w-[110px]
                 border-2 sm:border-3 shadow-md focus:outline-none focus:ring-4 focus:ring-amber-400
                 ${
                   isActive
@@ -57,7 +57,7 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
             >
               {/* Stress Indicator Badge */}
               {showStress && (
-                <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5">
+                <div className="absolute top-1 right-1.5 flex items-center gap-0.5">
                   {isPrimaryStress && (
                     <span
                       title="Primary Stress"
@@ -87,7 +87,7 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
               {/* Syllable Text */}
               <span
                 className={`
-                  font-black text-3xl sm:text-5xl md:text-6xl tracking-wide transition-transform py-1
+                  font-black text-2xl sm:text-4xl md:text-5xl tracking-wide transition-transform py-0.5
                   ${isActive ? 'scale-105 text-slate-950' : 'text-white'}
                 `}
               >
@@ -98,7 +98,7 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
               {showIpa && syl.ipa && (
                 <span
                   className={`
-                    text-sm sm:text-base font-bold tracking-widest leading-tight
+                    text-xs sm:text-sm md:text-base font-bold tracking-widest leading-tight
                     ${isActive ? 'text-slate-950 font-black' : 'text-amber-300'}
                   `}
                 >

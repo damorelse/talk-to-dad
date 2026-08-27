@@ -476,7 +476,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
   const hasMultipleParts = activePartsCount > 1;
 
   return (
-    <div className="w-full h-full flex flex-col gap-1.5 sm:gap-2 overflow-hidden p-1 sm:p-2 select-none">
+    <div className="w-full h-full flex flex-col gap-2 overflow-y-auto scrollbar-thin p-1 sm:p-2 select-none">
       {/* Top Controls Toolbar */}
       <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2 bg-transparent border border-transparent px-1 py-0.5 sm:py-1 rounded-2xl shrink-0">
         <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
@@ -555,8 +555,8 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </form>
       </div>
 
-      {/* Main Articulation Stage - Vertically centered between Top Toolbar and Bottom AAC Container */}
-      <div className="flex-1 min-h-0 w-full bg-transparent border border-transparent rounded-3xl px-4 sm:px-6 md:px-8 flex flex-col items-center justify-center gap-2 sm:gap-3 relative transition-all duration-200 overflow-y-auto scrollbar-none py-1 sm:py-2">
+      {/* Main Articulation Stage */}
+      <div className="w-full shrink-0 min-h-0 bg-transparent border border-transparent rounded-3xl py-1 sm:py-2 px-2 sm:px-6 flex flex-col items-center justify-center gap-1.5 sm:gap-2 relative transition-all duration-200">
         {/* Context Anchor Header (Semantic Clue) */}
         <div className="flex items-center gap-2.5 px-3 py-0 rounded-2xl bg-transparent border border-transparent text-sm sm:text-base font-bold text-slate-300 shrink-0">
           {currentSelectedCard ? (
@@ -576,7 +576,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
 
         {/* Syllable Cards Breakdown Component */}
-        <div className="w-full max-w-5xl py-0.5 sm:py-1 flex items-center justify-center shrink-0">
+        <div className="w-full max-w-5xl py-0.5 sm:py-1 flex items-center justify-center">
           <SyllableCard
             word={word}
             syllableData={isCurrentChinese ? chineseSyllables : pronunciationData.syllables}
@@ -594,7 +594,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
 
         {/* Primary Action Trigger Buttons */}
-        <div className="flex items-center gap-3.5 sm:gap-4 flex-wrap justify-center pt-0.5 sm:pt-1 shrink-0">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center pt-0 sm:pt-0.5 shrink-0">
           {hasMultipleParts && (
             <DebouncedTouchable
               onPress={() => {
@@ -607,7 +607,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
               disabled={isPlaying}
               minTouchSize="lg"
               className={`
-                px-7 sm:px-9 py-3.5 sm:py-4.5 rounded-2xl font-black flex items-center gap-2.5 text-base sm:text-lg shadow-xl transition-all cursor-pointer
+                px-6 sm:px-8 py-2.5 sm:py-3.5 rounded-2xl font-black flex items-center gap-2 text-sm sm:text-base shadow-xl transition-all cursor-pointer
                 ${
                   isPlaying
                     ? 'bg-amber-600/60 text-white/70 cursor-wait'
@@ -615,7 +615,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
                 }
               `}
             >
-              <MessageSquareQuote className="w-6 h-6 stroke-[2.5]" />
+              <MessageSquareQuote className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
               <span>Sound It Out</span>
             </DebouncedTouchable>
           )}
@@ -630,9 +630,9 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
             }}
             disabled={isPlaying}
             minTouchSize="lg"
-            className="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-6 sm:px-8 py-3.5 sm:py-4.5 rounded-2xl font-black flex items-center gap-2 text-base sm:text-lg shadow-xl shadow-blue-900/40"
+            className="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-2xl font-black flex items-center gap-2 text-sm sm:text-base shadow-xl shadow-blue-900/40"
           >
-            <Volume2 className="w-6 h-6 stroke-[2.5]" />
+            <Volume2 className="w-5 h-5 sm:w-6 sm:h-6 stroke-[2.5]" />
             <span>Speak</span>
           </DebouncedTouchable>
 
@@ -640,7 +640,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
             <button
               type="button"
               onClick={stopAll}
-              className="bg-red-600 hover:bg-red-500 text-white px-4 py-3.5 rounded-2xl font-bold flex items-center gap-1.5 text-sm shadow-lg cursor-pointer"
+              className="bg-red-600 hover:bg-red-500 text-white px-4 py-2.5 sm:py-3 rounded-2xl font-bold flex items-center gap-1.5 text-xs sm:text-sm shadow-lg cursor-pointer"
             >
               <Square className="w-4 h-4 fill-current" />
               <span>Stop</span>
@@ -649,8 +649,8 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
       </div>
 
-      {/* AAC Card Vocabulary Browser - Anchored to bottom touching device screen */}
-      <div className="shrink-0 w-full max-h-[42%] sm:max-h-[38%] md:max-h-[35%] bg-slate-900/90 border border-slate-800/80 p-2.5 sm:p-3 rounded-2xl flex flex-col gap-2 shadow-xs overflow-hidden">
+      {/* AAC Card Vocabulary Browser - Guaranteed minimum height and scrollable on short screens */}
+      <div className="flex-1 min-h-[220px] sm:min-h-[260px] w-full bg-slate-900/90 border border-slate-800/80 p-2.5 sm:p-3 rounded-2xl flex flex-col gap-2 shadow-xs shrink-0 sm:shrink">
         {/* Category Navigation Bar */}
         <div className="shrink-0">
           <CategorySelector
@@ -686,7 +686,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
 
         {/* Vocabulary Chips Grid (Dynamically fills available height without cutting off cards) */}
-        <div className="flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin flex items-start content-start gap-2 flex-wrap pb-1">
+        <div className="flex-1 min-h-[120px] overflow-y-auto pr-1 scrollbar-thin flex items-start content-start gap-2 flex-wrap pb-2">
           {filteredVocabList.length === 0 ? (
             <div className="w-full py-6 text-center text-xs sm:text-sm text-slate-500">
               No matching AAC card vocabulary found
