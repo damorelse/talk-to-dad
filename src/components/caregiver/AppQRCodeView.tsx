@@ -189,53 +189,8 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
           <span>Point your camera here to open this app</span>
         </div>
 
-        {/* QR Code & Quorra Side-by-Side Container */}
+        {/* Quorra & QR Code Side-by-Side Container (Quorra on the left, QR on the right) */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 sm:gap-12 w-full">
-          {/* QR Code Column */}
-          <div className="flex flex-col items-center gap-4 shrink-0">
-            <div className="p-4 sm:p-5 bg-white rounded-3xl shadow-lg border-4 border-amber-400 dark:border-amber-500 flex items-center justify-center">
-              {(() => {
-                const margin = 4;
-                const totalSize = qrResult.size + margin * 2;
-                return (
-                  <svg
-                    viewBox={`0 0 ${totalSize} ${totalSize}`}
-                    className="w-56 h-56 sm:w-64 sm:h-64 md:w-68 md:h-68 select-none"
-                    shapeRendering="crispEdges"
-                  >
-                    <rect width="100%" height="100%" fill="#ffffff" />
-                    {qrResult.matrix.map((row, r) =>
-                      row.map((isDark, c) => {
-                        if (!isDark) return null;
-                        return (
-                          <rect
-                            key={`${r}-${c}`}
-                            x={c + margin}
-                            y={r + margin}
-                            width={1}
-                            height={1}
-                            fill="#000000"
-                          />
-                        );
-                      })
-                    )}
-                  </svg>
-                );
-              })()}
-            </div>
-
-            {/* Download Printable SVG Button */}
-            <DebouncedTouchable
-              onPress={handleDownloadSVG}
-              minTouchSize="md"
-              className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm sm:text-base font-black flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer"
-              title="Download printable SVG QR code"
-            >
-              <Download className="w-4 h-4 sm:w-5 sm:h-5 text-pink-600 dark:text-pink-400" />
-              <span>Download Printable QR Code</span>
-            </DebouncedTouchable>
-          </div>
-
           {/* Quorra Mascot Column (Interactive Animated Golden Retriever) */}
           <div className="flex flex-col items-center justify-center relative">
             {/* Floating Hearts Particles relative to Quorra */}
@@ -369,6 +324,51 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                 <span>Pet Quorra! 🐾</span>
               </div>
             </div>
+          </div>
+
+          {/* QR Code Column */}
+          <div className="flex flex-col items-center gap-4 shrink-0">
+            <div className="p-4 sm:p-5 bg-white rounded-3xl shadow-lg border-4 border-amber-400 dark:border-amber-500 flex items-center justify-center">
+              {(() => {
+                const margin = 4;
+                const totalSize = qrResult.size + margin * 2;
+                return (
+                  <svg
+                    viewBox={`0 0 ${totalSize} ${totalSize}`}
+                    className="w-56 h-56 sm:w-64 sm:h-64 md:w-68 md:h-68 select-none"
+                    shapeRendering="crispEdges"
+                  >
+                    <rect width="100%" height="100%" fill="#ffffff" />
+                    {qrResult.matrix.map((row, r) =>
+                      row.map((isDark, c) => {
+                        if (!isDark) return null;
+                        return (
+                          <rect
+                            key={`${r}-${c}`}
+                            x={c + margin}
+                            y={r + margin}
+                            width={1}
+                            height={1}
+                            fill="#000000"
+                          />
+                        );
+                      })
+                    )}
+                  </svg>
+                );
+              })()}
+            </div>
+
+            {/* Download Printable SVG Button */}
+            <DebouncedTouchable
+              onPress={handleDownloadSVG}
+              minTouchSize="md"
+              className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 text-sm sm:text-base font-black flex items-center justify-center gap-2 border-2 border-slate-300 dark:border-slate-600 shadow-sm cursor-pointer"
+              title="Download printable SVG QR code"
+            >
+              <Download className="w-4 h-4 sm:w-5 sm:h-5 text-pink-600 dark:text-pink-400" />
+              <span>Download Printable QR Code</span>
+            </DebouncedTouchable>
           </div>
         </div>
       </div>
