@@ -82,7 +82,7 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
     setCrossingAnimKey((k) => k + 1);
   }, []);
 
-  // Milestone animations on multiples of 3 randomly picked from the 25 corner animations (stays 14.0s)
+  // Milestone animations on multiples of 3 randomly picked from the 25 corner animations (stays 8.0s)
   const triggerMilestoneAnimation = useCallback(() => {
     const randomAnim = ALL_CORNER_ANIMATIONS[Math.floor(Math.random() * ALL_CORNER_ANIMATIONS.length)];
     setCornerAnim(randomAnim);

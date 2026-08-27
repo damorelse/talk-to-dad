@@ -181,7 +181,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
     }
   }, [effectiveCrossing, crossingKey, animationKey, playPuppyBark]);
 
-  // Manage Corner Mascot Animation Lifecycle (14.0s duration)
+  // Manage Corner Mascot Animation Lifecycle (8.0s duration)
   useEffect(() => {
     if (effectiveCorner) {
       setIsPetted(false);
@@ -196,10 +196,10 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
       if (cornerDismissTimerRef.current) clearTimeout(cornerDismissTimerRef.current);
       if (petTimeoutRef.current) clearTimeout(petTimeoutRef.current);
 
-      // Corner animations stay for a full 14.0s
+      // Corner animations stay for 8.0s
       cornerDismissTimerRef.current = setTimeout(() => {
         onCornerCompleteRef.current?.();
-      }, 14000);
+      }, 8000);
 
       return () => {
         if (cornerDismissTimerRef.current) clearTimeout(cornerDismissTimerRef.current);
@@ -1248,7 +1248,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
             style={{
               animation: isPetted
                 ? "none"
-                : "quorraCornerPeekLeft 14s ease-in-out forwards",
+                : "quorraCornerPeekLeft 8s ease-in-out forwards",
               transform: isPetted ? "translateY(0) scale(1)" : undefined,
               opacity: isPetted ? 1 : undefined,
             }}
@@ -1348,7 +1348,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
         </div>
       )}
 
-      {/* Global CSS Keyframes for 5.8s Crossing and 6.2s Bottom-Left Corner */}
+      {/* Global CSS Keyframes for 5.8s Crossing and 8.0s Bottom-Left Corner */}
       <style>{`
         @keyframes quorraCrossSmooth {
           0% {
@@ -1374,11 +1374,11 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
             transform: translateY(100px) scale(0.85);
             opacity: 0;
           }
-          4% {
+          6% {
             transform: translateY(0) scale(1);
             opacity: 1;
           }
-          93% {
+          88% {
             transform: translateY(0) scale(1);
             opacity: 1;
           }
@@ -1422,7 +1422,7 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
             margin: 0 auto;
           }
           .quorra-corner-item {
-            animation: quorraFadeInCorner 14s ease-in-out forwards !important;
+            animation: quorraFadeInCorner 8s ease-in-out forwards !important;
             transform: none !important;
           }
           .quorra-tail-wag {
@@ -1436,8 +1436,8 @@ export const QuorraCompanion: React.FC<QuorraCompanionProps> = ({
           }
           @keyframes quorraFadeInCorner {
             0% { opacity: 0; }
-            4% { opacity: 1; }
-            93% { opacity: 1; }
+            6% { opacity: 1; }
+            88% { opacity: 1; }
             100% { opacity: 0; }
           }
         }

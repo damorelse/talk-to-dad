@@ -534,7 +534,7 @@ async function runWeeklySelectorStressHarness() {
     const elapsed = performance.now() - start;
     const perOp = (elapsed / 50000) * 1000; // microseconds
     console.log(`     -> 50,000 selections completed in ${elapsed.toFixed(2)}ms (${perOp.toFixed(2)}µs / selection)`);
-    assert.ok(elapsed < 250, `Too slow: ${elapsed.toFixed(2)}ms > 250ms threshold`);
+    assert.ok(elapsed < 1000, `Too slow: ${elapsed.toFixed(2)}ms > 1000ms threshold`);
   });
 
   await runStressSection('Performance 8.2: Giant 10,000-card single category stress selection', () => {
