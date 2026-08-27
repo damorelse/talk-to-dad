@@ -144,7 +144,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 flex-1 min-w-0">
             <span className="text-sm sm:text-base font-black text-slate-700 dark:text-slate-300 whitespace-nowrap shrink-0">
-              Web App Address:
+              URL:
             </span>
             <div className="flex-1 min-w-0 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-300 dark:border-slate-600 overflow-x-auto scrollbar-none">
               <code className="text-base sm:text-lg md:text-xl font-mono font-black text-pink-700 dark:text-pink-300 select-all whitespace-nowrap block">
@@ -164,7 +164,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                 ? "bg-emerald-600 text-white border-emerald-400"
                 : "bg-blue-600 hover:bg-blue-500 text-white border-blue-400")
             }
-            title="Copy Web Address"
+            title="Copy URL"
           >
             {copied ? (
               <>
@@ -184,7 +184,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
       {/* Main Section: QR Code, Camera Instruction & Quorra Mascot */}
       <div className="w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border-2 border-slate-300 dark:border-slate-700 shadow-xl flex flex-col items-center gap-6">
         {/* Instruction Text Right Above the QR Code */}
-        <div className="inline-flex items-center justify-center gap-2.5 px-5 py-2.5 rounded-2xl bg-amber-500/15 dark:bg-amber-400/20 text-amber-950 dark:text-amber-100 border-2 border-amber-400/60 shadow-sm font-black text-base sm:text-lg md:text-xl text-center">
+        <div className="inline-flex items-center justify-center gap-2.5 px-3 py-1 bg-transparent text-slate-900 dark:text-white font-black text-base sm:text-lg md:text-xl text-center">
           <Camera className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-400 shrink-0 animate-pulse stroke-[2.5]" />
           <span>Point your camera here to open this app</span>
         </div>
@@ -437,12 +437,10 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
         </div>
 
         {/* Helpful Offline / Fullscreen Tip */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-50 to-blue-50 dark:from-slate-800 dark:to-slate-800/60 border-2 border-amber-200 dark:border-slate-700 flex items-center gap-3.5 shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-amber-400/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200 leading-snug">
-            <strong>One-Tap Offline Access:</strong> Saving TalkWithDad to your Home Screen launches it in distraction-free full screen and ensures it works seamlessly 100% offline anytime.
+        <div className="w-full p-2 bg-transparent flex items-center justify-center gap-2.5 text-center">
+          <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 shrink-0" />
+          <p className="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400">
+            <strong>One-Tap Offline Access:</strong> Home Screen launch opens in full screen and works 100% offline.
           </p>
         </div>
       </div>
