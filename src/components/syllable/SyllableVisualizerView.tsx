@@ -555,8 +555,8 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </form>
       </div>
 
-      {/* Main Articulation Stage */}
-      <div className="w-full shrink-0 min-h-0 h-auto bg-transparent border border-transparent rounded-3xl pt-0.5 sm:pt-1 pb-2 sm:pb-3 px-4 sm:px-6 md:px-8 flex flex-col items-center justify-center gap-1.5 sm:gap-2 relative transition-all duration-200">
+      {/* Main Articulation Stage - Vertically centered between Top Toolbar and Bottom AAC Container */}
+      <div className="flex-1 min-h-0 w-full bg-transparent border border-transparent rounded-3xl px-4 sm:px-6 md:px-8 flex flex-col items-center justify-center gap-2 sm:gap-3 relative transition-all duration-200 overflow-y-auto scrollbar-none py-1 sm:py-2">
         {/* Context Anchor Header (Semantic Clue) */}
         <div className="flex items-center gap-2.5 px-3 py-0 rounded-2xl bg-transparent border border-transparent text-sm sm:text-base font-bold text-slate-300 shrink-0">
           {currentSelectedCard ? (
@@ -576,7 +576,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
 
         {/* Syllable Cards Breakdown Component */}
-        <div className="w-full max-w-5xl py-0.5 sm:py-1 flex items-center justify-center">
+        <div className="w-full max-w-5xl py-0.5 sm:py-1 flex items-center justify-center shrink-0">
           <SyllableCard
             word={word}
             syllableData={isCurrentChinese ? chineseSyllables : pronunciationData.syllables}
@@ -594,7 +594,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
 
         {/* Primary Action Trigger Buttons */}
-        <div className="flex items-center gap-3.5 sm:gap-4 flex-wrap justify-center pt-0 sm:pt-0.5 shrink-0">
+        <div className="flex items-center gap-3.5 sm:gap-4 flex-wrap justify-center pt-0.5 sm:pt-1 shrink-0">
           {hasMultipleParts && (
             <DebouncedTouchable
               onPress={() => {
@@ -649,8 +649,8 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
         </div>
       </div>
 
-      {/* AAC Card Vocabulary Browser - Dynamically tall to fill remaining viewport height */}
-      <div className="flex-1 min-h-[140px] w-full bg-slate-900/90 border border-slate-800/80 p-2.5 sm:p-3 rounded-2xl flex flex-col gap-2 shadow-xs overflow-hidden">
+      {/* AAC Card Vocabulary Browser - Anchored to bottom touching device screen */}
+      <div className="shrink-0 w-full max-h-[42%] sm:max-h-[38%] md:max-h-[35%] bg-slate-900/90 border border-slate-800/80 p-2.5 sm:p-3 rounded-2xl flex flex-col gap-2 shadow-xs overflow-hidden">
         {/* Category Navigation Bar */}
         <div className="shrink-0">
           <CategorySelector
