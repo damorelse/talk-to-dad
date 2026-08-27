@@ -98,6 +98,11 @@ export class AppDatabase extends Dexie {
             existing.clueZh = card.clueZh;
             updated = true;
           }
+          if (existing.id === 'card-family-dog' && (!existing.clue?.includes('Quorra') || !existing.clueZh?.includes('Quorra'))) {
+            existing.clue = card.clue;
+            existing.clueZh = card.clueZh;
+            updated = true;
+          }
           if ((existing.id === 'card-pain' || existing.id === 'card-medicine') && existing.isFavorite) {
             existing.isFavorite = false;
             updated = true;
