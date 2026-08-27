@@ -10,6 +10,8 @@ const PRECACHE_ASSETS = [
   './styles.css',
   './manifest.json',
   './favicon.svg',
+  './privacy.html',
+  './terms.html',
 ];
 
 // Install event: Precache core application shell

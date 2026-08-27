@@ -93,6 +93,8 @@ const requiredFiles = [
   'manifest.json',
   'sw.js',
   'favicon.svg',
+  'privacy.html',
+  'terms.html',
 ];
 
 let allFilesPresent = true;

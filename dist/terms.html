@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>Terms of Service · 服務條款 - TalkWithDad AAC</title>
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <style>
+      :root {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --surface-border: #334155;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --primary: #db2777;
+        --primary-light: #f472b6;
+        --accent: #2563eb;
+        --warning-bg: rgba(245, 158, 11, 0.12);
+        --warning-border: rgba(245, 158, 11, 0.4);
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f8fafc;
+          --surface: #ffffff;
+          --surface-border: #e2e8f0;
+          --text: #0f172a;
+          --text-muted: #64748b;
+          --primary: #db2777;
+          --primary-light: #be185d;
+          --accent: #2563eb;
+          --warning-bg: #fffbeb;
+          --warning-border: #fcd34d;
+        }
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+        padding: 24px 16px;
+      }
+      .container {
+        max-width: 860px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      header {
+        background: var(--surface);
+        border: 2px solid var(--primary);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+      }
+      .nav-links {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .nav-links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        background: var(--bg);
+        border: 1px solid var(--surface-border);
+        border-radius: 10px;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+        transition: all 0.15s ease;
+      }
+      .nav-links a:hover {
+        border-color: var(--primary);
+        color: var(--primary-light);
+      }
+      .badge {
+        display: inline-block;
+        background: rgba(219, 39, 119, 0.15);
+        color: var(--primary-light);
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+      h1 { font-size: 26px; font-weight: 900; line-height: 1.2; }
+      h1 span { font-size: 18px; color: var(--primary-light); font-weight: 700; }
+      .meta { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+      
+      .summary-box {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: 16px;
+        padding: 20px;
+      }
+      .summary-box h2 { font-size: 16px; font-weight: 800; margin-bottom: 12px; color: var(--text); }
+      .summary-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      @media (min-width: 640px) {
+        .summary-grid { grid-template-columns: 1fr 1fr; }
+      }
+      .summary-card {
+        background: var(--bg);
+        border: 1px solid var(--surface-border);
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 13px;
+      }
+      .summary-card strong { color: var(--text); display: block; margin-bottom: 4px; }
+      .summary-card span { color: var(--text-muted); font-size: 12px; }
+
+      .section {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .section.important {
+        background: var(--warning-bg);
+        border-color: var(--warning-border);
+      }
+      .section h3 {
+        font-size: 17px;
+        font-weight: 800;
+        border-bottom: 1px solid var(--surface-border);
+        padding-bottom: 8px;
+      }
+      .section.important h3 {
+        color: #f59e0b;
+      }
+      .section h3 span { display: block; font-size: 13px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+      .content-en { font-size: 14px; color: var(--text); line-height: 1.6; }
+      .content-en p { margin-bottom: 8px; }
+      .content-en p:last-child { margin-bottom: 0; }
+      .content-zh {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        border-top: 1px dashed var(--surface-border);
+        padding-top: 8px;
+      }
+      .content-zh p { margin-bottom: 6px; }
+      .content-zh p:last-child { margin-bottom: 0; }
+
+      footer {
+        text-align: center;
+        font-size: 12px;
+        color: var(--text-muted);
+        padding: 20px 0;
+      }
+
+      @media print {
+        body { background: #fff; color: #000; padding: 0; }
+        .nav-links, .btn-print { display: none; }
+        header, .summary-box, .section { border: 1px solid #ccc; box-shadow: none; break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="nav-links">
+          <a href="./index.html">← Back to App (返回應用程式)</a>
+          <a href="./privacy.html">Privacy Policy (隱私權政策)</a>
+        </div>
+        <div class="badge">Terms of Service · 服務條款</div>
+        <h1>Terms of Service <span>(服務條款)</span></h1>
+        <p class="meta">TalkWithDad AAC Progressive Web App · Effective Date: August 26, 2026 · Last Updated: August 26, 2026</p>
+      </header>
+
+      <!-- Key Highlights Summary -->
+      <div class="summary-box">
+        <h2>Key Terms & Disclaimers · 條款與免責重點摘要</h2>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <strong>Assistive Communication Aid</strong>
+            <span>TalkWithDad is an open-source assistive communication and speech rehabilitation web application.<br>輔助溝通工具：開放原始碼之輔助溝通與言語復健網頁應用程式。</span>
+          </div>
+          <div class="summary-card">
+            <strong>STRICT MEDICAL DISCLAIMER</strong>
+            <span>NOT a medical device, diagnostic tool, or replacement for professional speech-language therapy.<br>嚴格醫療免責：絕非醫療器材、診斷工具或專業語言治療之替代品。</span>
+          </div>
+          <div class="summary-card">
+            <strong>STRICT EMERGENCY DISCLAIMER</strong>
+            <span>Emergency phrases are for bedside alerting only and CANNOT dial 911/119 or dispatch help.<br>嚴格緊急免責：僅供現場床邊警示，無法撥打救護電話或派遣急救人員。</span>
+          </div>
+          <div class="summary-card">
+            <strong>Provided "AS IS" Without Warranty</strong>
+            <span>The application is provided free of charge on an "AS IS" and "AS AVAILABLE" basis.<br>依「現況」免費提供：不提供任何明示或默示擔保。</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 1 -->
+      <div class="section">
+        <h3>1. Acceptance of Terms <span>1. 條款接受與適用範圍</span></h3>
+        <div class="content-en">
+          <p>By accessing, installing, browsing, or using the TalkWithDad Progressive Web App ("TalkWithDad", "the Application", or "the Service"), you ("User", "Caregiver", or "You") agree to be bound by these Terms of Service ("Terms").</p>
+          <p>If you do not agree with any part of these Terms, you must not access or use the Application.</p>
+          <p>If you are a caregiver, speech-language pathologist (SLP), occupational therapist, or family member assisting another individual, you represent that you have the authority to configure and use the Application on their behalf.</p>
+        </div>
+        <div class="content-zh">
+          <p>當您存取、安裝、瀏覽或使用 TalkWithDad 漸進式網頁應用程式（「TalkWithDad」、「本應用程式」或「本服務」）時，即代表您（「使用者」、「照護者」或「您」）同意受本服務條款（「本條款」）之約束。</p>
+          <p>若您不同意本條款之任何部分，請勿存取或使用本應用程式。</p>
+          <p>若您為協助他人使用之照護者、語言治療師（SLP）、職能治療師或家庭成員，您聲明並保證您具備代表該使用者設定及使用本應用程式之合法權限。</p>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="section important">
+        <h3>2. STRICT MEDICAL & CLINICAL DISCLAIMER (NOT MEDICAL ADVICE) <span>2. 嚴格醫療與臨床免責聲明（非醫療建議）</span></h3>
+        <div class="content-en">
+          <p><strong>TALKWITHDAD IS AN ASSISTIVE COMMUNICATION AND EDUCATIONAL SPEECH PRACTICE AID ONLY. IT IS NOT A MEDICAL DEVICE, CLINICAL DIAGNOSTIC INSTRUMENT, OR THERAPEUTIC MEDICAL APPLIANCE.</strong></p>
+          <p>• <strong>No Medical Relationship:</strong> Use of the Application does not establish a doctor-patient, therapist-patient, or healthcare provider relationship.<br>
+          • <strong>Not a Substitute for Professional Care:</strong> The Application, including its clinical clues, phonetic syllable visualizers, pain scale maps, and deterministic therapy decks, is NOT a substitute for professional medical assessment, neurological evaluation, clinical diagnosis, treatment planning, or speech-language pathology.<br>
+          • <strong>Consult Qualified Professionals:</strong> Always seek the advice of a qualified physician, neurologist, certified speech-language pathologist, or other licensed healthcare professional with any questions regarding stroke recovery, aphasia, apraxia, dysarthria, or rehabilitation protocols.<br>
+          • <strong>Never Disregard Advice:</strong> Never disregard or delay seeking professional medical advice or clinical care because of something you have read, configured, or practiced in this Application.</p>
+        </div>
+        <div class="content-zh">
+          <p><strong>TALKWITHDAD 僅為輔助溝通與教育性言語練習工具。本應用程式絕非醫療器材、臨床診斷儀器或治療性醫療設備。</strong></p>
+          <p>• <strong>無醫病關係：</strong>使用本應用程式不構成醫病關係、語言治療師與病患關係或任何醫療照護提供者關係。<br>
+          • <strong>非專業醫療替代品：</strong>本應用程式所提供之功能（包括臨床提示、音節視覺化、疼痛圖譜量表與每週復健訓練卡片）絕不能替代專業醫療評估、神經學檢查、臨床診斷、治療計畫或語言病理治療。<br>
+          • <strong>請諮詢合格專業人士：</strong>關於中風康復、失語症、失用症、構音障礙或復健處方之任何問題，請務必諮詢合格醫師、神經科專科醫師、執業語言治療師或其他合格醫療專業人員。<br>
+          • <strong>絕勿延誤就醫：</strong>絕不可因本應用程式中閱讀、設定或練習之任何內容，而忽視或延誤尋求專業醫療建議或臨床治療。</p>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="section important">
+        <h3>3. STRICT EMERGENCY & LIFE SAFETY DISCLAIMER (NOT AN EMERGENCY SYSTEM) <span>3. 嚴格緊急狀況與人身安全免責聲明（非緊急救援系統）</span></h3>
+        <div class="content-en">
+          <p><strong>TALKWITHDAD IS NOT AN EMERGENCY DISPATCH SYSTEM, 911 TELEPHONY DIALER, OR CERTIFIED LIFE-SAFETY MONITORING TOOL.</strong></p>
+          <p>• <strong>Bedside Alerting Only:</strong> The "Emergency Bar", rapid priority buttons ("HELP", "PAIN", "YES", "NO", "BATHROOM"), and audible alarm tones are designed solely for face-to-face, local bedside communication with nearby persons in the same physical room.<br>
+          • <strong>Cannot Contact Authorities:</strong> The Application cannot and will not dial emergency services (e.g. 911, 112, 999, 110, 119), contact medical dispatchers, send SMS/cellular distress alerts, or broadcast location coordinates.<br>
+          • <strong>In a Medical Emergency:</strong> If you or the individual you are caring for experiences a medical emergency, acute pain, stroke symptoms (FAST: Face drooping, Arm weakness, Speech difficulty, Time to call), difficulty breathing, or loss of consciousness, IMMEDIATELY call your local emergency telephone number (911/112/119) or use a certified telephone / medical alert button.</p>
+        </div>
+        <div class="content-zh">
+          <p><strong>TALKWITHDAD 絕非緊急調度系統、911 自動撥號工具或經認證之人身安全監控系統。</strong></p>
+          <p>• <strong>僅供現場床邊警示：</strong>頂部「緊急快捷列」、優先按鈕（「求助 HELP」、「疼痛 PAIN」、「好 YES」、「不要 NO」、「上廁所 BATHROOM」）及蜂鳴警示音僅供同處一室之身旁照護者現場床邊溝通使用。<br>
+          • <strong>無法通報緊急機構：</strong>本應用程式無法且絕不會撥打緊急救護電話（如 911、112、999、110、119）、無法聯繫救護調度中心、無法發送簡訊/行動通訊求救訊號，亦無法廣播定位座標。<br>
+          • <strong>面臨緊急醫療狀況時：</strong>若您或您照護的對象面臨緊急醫療狀況、急性劇痛、中風徵兆（辛辛那提/FAST 評估：臉部不對稱、手臂無力、言語障礙、即刻送醫）、呼吸困難或意識喪失，請立即使用電話撥打當地緊急救護電話（911 / 112 / 119）或使用經認證之醫療求救警鈴。</p>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="section">
+        <h3>4. License & Permitted Use <span>4. 授權許可與合法使用條款</span></h3>
+        <div class="content-en">
+          <p>• <strong>License Grant:</strong> TalkWithDad is provided under open-source and permissive personal usage terms. You are granted a personal, non-exclusive, non-transferable, revocable license to access, install as a PWA, and use the Application for personal, familial, caregiving, and clinical rehabilitation purposes.<br>
+          • <strong>Prohibited Conduct:</strong> You agree not to:<br>
+          - Use the Application for any unlawful purpose or in violation of any applicable local, national, or international health regulations.<br>
+          - Attempt to decompile, reverse-engineer, or tamper with the client-side code in a manner intended to compromise software security or bypass caregiver lock protections.<br>
+          - Use the Application to harass, abuse, or harm any individual.</p>
+        </div>
+        <div class="content-zh">
+          <p>• <strong>授權許可：</strong>TalkWithDad 依開源及個人非商業授權條款提供。您獲授個人、非專屬、不可轉讓且可撤銷之許可，得以 PWA 形式安裝並存取本應用程式，供個人、家庭、居家照護及臨床復健練習使用。<br>
+          • <strong>禁止行為：</strong>您同意不得：<br>
+          - 將本應用程式用於任何非法目的，或違反任何適用之地方、國家或國際醫療衛生法規。<br>
+          - 企圖惡意反編譯、逆向工程或竄改使用者端程式碼以破壞軟體安全或繞過照護者防誤觸鎖定機制。<br>
+          - 利用本應用程式騷擾、辱罵或傷害任何個人。</p>
+        </div>
+      </div>
+
+      <!-- Section 5 -->
+      <div class="section">
+        <h3>5. User Content, Custom Vocabulary & Backups <span>5. 使用者自訂內容、詞彙庫與備份責任</span></h3>
+        <div class="content-en">
+          <p>• <strong>Ownership of Content:</strong> You retain full ownership and intellectual property rights to any custom AAC cards, vocabulary, clinical clues, audio recordings, and images you create or upload to the Application.<br>
+          • <strong>Local Storage Responsibility:</strong> Because TalkWithDad operates 100% locally and maintains NO centralized cloud database, YOU ARE SOLELY RESPONSIBLE FOR MAINTAINING REGULAR BACKUPS of your data.<br>
+          • <strong>Backup Feature:</strong> We provide a built-in JSON export and import utility in the Caregiver Dashboard. We strongly recommend exporting a backup copy of your custom card library after making significant modifications.<br>
+          • <strong>Data Loss:</strong> We shall not be liable for any loss, corruption, or unintentional deletion of data resulting from browser cache clearing, device resets, browser upgrades, or operating system updates.</p>
+        </div>
+        <div class="content-zh">
+          <p>• <strong>內容所有權：</strong>您對在應用程式中建立或上傳之任何自訂 AAC 圖卡、詞彙、臨床提示、語音錄音及圖片保有完整的著作權與智慧財產權。<br>
+          • <strong>本機儲存管理責任：</strong>由於 TalkWithDad 為 100% 純本機運作且不維護任何中央雲端資料庫，您須自行全權負責定期備份您的自訂資料。<br>
+          • <strong>備份工具：</strong>我們在「照護者設定」中提供內建 JSON 匯出與匯入工具。強烈建議您在進行重大自訂修改後，隨時匯出備份檔案保存。<br>
+          • <strong>資料滅失免責：</strong>因瀏覽器清除快取、裝置重設、瀏覽器升級或作業系統更新所導致之任何資料遺失、損毀或非預期刪除，我們概不承擔任何責任。</p>
+        </div>
+      </div>
+
+      <!-- Section 6 -->
+      <div class="section">
+        <h3>6. GitHub Pages Hosting & Third-Party Platforms <span>6. GitHub Pages 代管與第三方平台說明</span></h3>
+        <div class="content-en">
+          <p>TalkWithDad is hosted statically on GitHub Pages. We do not warrant that GitHub Pages will be uninterrupted, error-free, or perpetually available.</p>
+          <p>Once installed as a Progressive Web App (PWA) on your device, the Application will function offline via its Service Worker cache. However, initial installation, updates, and external Google Sheets sync depend on active internet connectivity and third-party infrastructure.</p>
+        </div>
+        <div class="content-zh">
+          <p>TalkWithDad 係以靜態網頁形式託管於 GitHub Pages。我們無法保證 GitHub Pages 伺服器將永不中斷、無錯誤或永久可用。</p>
+          <p>當本應用程式以 PWA 形式安裝至您的裝置後，可透過 Service Worker 快取完全離線運作。然而，首次安裝、版本更新及 Google 試算表同步功能仍須依賴網路連線及第三方基礎設施。</p>
+        </div>
+      </div>
+
+      <!-- Section 7 -->
+      <div class="section important">
+        <h3>7. Disclaimer of Warranties ("AS IS" and "AS AVAILABLE") <span>7. 免責聲明（「現況」與「現有」基礎）</span></h3>
+        <div class="content-en">
+          <p><strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, TALKWITHDAD IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE.</strong></p>
+          <p>WE EXPRESSLY DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO:<br>
+          • IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.<br>
+          • WARRANTIES THAT THE APPLICATION WILL MEET YOUR CLINICAL OR COMMUNICATION NEEDS, BE UNINTERRUPTED, ACCURATE, SECURE, OR ERROR-FREE.<br>
+          • WARRANTIES REGARDING THE ACCURACY OR RELIABILITY OF SYNTHESIZED SPEECH, BILINGUAL TRANSLATIONS, PHONETIC SPLITTING, OR REHABILITATION RESULTS.</p>
+        </div>
+        <div class="content-zh">
+          <p><strong>在適用法律所允許之最大範圍內，TALKWITHDAD 均按「現況（AS IS）」及「現有（AS AVAILABLE）」基礎提供，不附帶任何明示、默示、法定或其他形式之擔保。</strong></p>
+          <p>我們明確排除所有擔保責任，包括但不限於：<br>
+          • 適銷性、特定目的適用性及不侵權之默示擔保。<br>
+          • 擔保本應用程式必能滿足您的臨床復健或溝通需求、運作不中斷、完全準確、安全或無錯誤。<br>
+          • 對於語音合成準確度、雙語翻譯品質、音節切分正確性或言語復健成效之任何保證。</p>
+        </div>
+      </div>
+
+      <!-- Section 8 -->
+      <div class="section important">
+        <h3>8. Limitation of Liability <span>8. 責任限制條款</span></h3>
+        <div class="content-en">
+          <p><strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE DEVELOPERS, CONTRIBUTORS, CREATORS, HOSTS, OR AFFILIATED PARTIES OF TALKWITHDAD BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES ARISING OUT OF OR IN CONNECTION WITH:</strong></p>
+          <p>1. YOUR USE OR INABILITY TO USE THE APPLICATION;<br>
+          2. ANY RELIANCE PLACED ON AAC OUTPUTS, BILINGUAL CLUES, OR SPEECH PHRASES IN MEDICAL, CAREGIVING, OR DAILY SITUATIONS;<br>
+          3. ANY DELAYS OR FAILURES IN SEEKING TIMELY PROFESSIONAL MEDICAL OR EMERGENCY ATTENTION;<br>
+          4. LOSS OF DATA, DELETION OF CUSTOM VOCABULARY, OR DEVICE CORRUPTION;<br>
+          5. HARDWARE, BROWSER, OR OPERATING SYSTEM INCOMPATIBILITIES.</p>
+          <p>THIS LIMITATION APPLIES REGARDLESS OF THE LEGAL THEORY (TORT, CONTRACT, STRICT LIABILITY, OR OTHERWISE), EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+        </div>
+        <div class="content-zh">
+          <p><strong>在適用法律所允許之最大範圍內，TALKWITHDAD 之開發者、貢獻者、創作者、代管方或相關人員，在任何情況下均不對因下列原因所引起或相關之任何直接、間接、附隨、特別、衍生性、懲罰性或示範性損害承擔任何責任：</strong></p>
+          <p>1. 您使用或無法使用本應用程式；<br>
+          2. 於醫療、照護或日常生活中依賴 AAC 語音輸出、雙語提示或溝通詞彙；<br>
+          3. 延誤或未能及時尋求專業醫療治療或緊急救護；<br>
+          4. 資料遺失、自訂詞彙刪除或裝置損壞；<br>
+          5. 硬體、瀏覽器或作業系統之不相容問題。</p>
+          <p>無論該請求係基於侵權、契約、無過失責任或其他任何法律理論，即使事先已被告知發生該等損害之可能性，本責任限制條款均一體適用。</p>
+        </div>
+      </div>
+
+      <!-- Section 9 -->
+      <div class="section">
+        <h3>9. Governing Law, Severability & Entire Agreement <span>9. 準據法、條款可分性與完整協議</span></h3>
+        <div class="content-en">
+          <p>• <strong>Severability:</strong> If any provision of these Terms is found to be unlawful, void, or for any reason unenforceable, that provision shall be deemed severable and shall not affect the validity and enforceability of any remaining provisions.<br>
+          • <strong>Entire Agreement:</strong> These Terms, together with our Privacy Policy, constitute the entire agreement between you and the developers of TalkWithDad regarding your use of the Application.<br>
+          • <strong>Non-Waiver:</strong> Failure to enforce any right or provision of these Terms will not be considered a waiver of those rights.</p>
+        </div>
+        <div class="content-zh">
+          <p>• <strong>條款可分性：</strong>若本條款之任何條款被認定為違法、無效或因故無法執行，該條款應視為可分，且不影響其他任何條款之有效性與可執行性。<br>
+          • <strong>完整協議：</strong>本條款連同我們的隱私權政策，構成您與 TalkWithDad 開發者間關於本應用程式使用之完整協議。<br>
+          • <strong>權利不拋棄：</strong>未執行本條款之任何權利或規定，不構成對該等權利之拋棄。</p>
+        </div>
+      </div>
+
+      <!-- Section 10 -->
+      <div class="section">
+        <h3>10. Modifications to Terms & Contact Information <span>10. 條款修訂與聯繫方式</span></h3>
+        <div class="content-en">
+          <p>We reserve the right to modify these Terms at any time. Changes become effective immediately upon posting to the Application with an updated "Last Updated" timestamp.</p>
+          <p>For open-source inquiries, feature requests, or legal notices, please reach out via our GitHub repository: <a href="https://github.com/damorelse/talk-to-dad" target="_blank" rel="noopener noreferrer" style="color: var(--primary-light);">https://github.com/damorelse/talk-to-dad</a></p>
+        </div>
+        <div class="content-zh">
+          <p>我們保留隨時修訂本條款之權利。修訂後之條款於公布至本應用程式並更新「最後修訂日期」時立即生效。</p>
+          <p>如對開源專案有任何疑問、功能建議或法務通知，請透過我們的 GitHub 儲存庫聯繫：<a href="https://github.com/damorelse/talk-to-dad" target="_blank" rel="noopener noreferrer" style="color: var(--primary-light);">https://github.com/damorelse/talk-to-dad</a></p>
+        </div>
+      </div>
+
+      <footer>
+        <p>TalkWithDad AAC · Open Source Offline Assistive Communication</p>
+        <p>Hosted on GitHub Pages · Zero Data Collection Architecture</p>
+      </footer>
+    </div>
+  </body>
+</html>

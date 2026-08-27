@@ -12,6 +12,8 @@ import { DebouncedTouchable } from '../common/DebouncedTouchable';
 import { useDatabase } from '../../hooks/useDatabase';
 import { useSettings } from '../../hooks/useSettings';
 import { speechEngine, filterAndGroupVoices } from '../../services/audio/WebSpeechEngine';
+import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../../services/legal/legalContent';
+import { LegalModal } from '../legal/LegalModal';
 import {
   Settings,
   Grid,
@@ -26,6 +28,13 @@ import {
   LayoutGrid,
   Sparkles,
   QrCode,
+  ShieldCheck,
+  FileText,
+  Printer,
+  ExternalLink,
+  AlertTriangle,
+  HeartHandshake,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface CaregiverDashboardProps {
@@ -40,7 +49,8 @@ type CaregiverTab =
   | 'settings'
   | 'cards'
   | 'backup'
-  | 'qrcode';
+  | 'qrcode'
+  | 'legal';
 
 export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
   categories,
@@ -52,6 +62,9 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<CaregiverTab>('settings');
   const [editingCard, setEditingCard] = useState<AACCard | null>(null);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalModalDoc, setLegalModalDoc] = useState<'privacy' | 'terms'>('privacy');
+  const [activeLegalSubTab, setActiveLegalSubTab] = useState<'privacy' | 'terms'>('privacy');
 
   const [isTestingEnglish, setIsTestingEnglish] = useState(false);
   const [isTestingChinese, setIsTestingChinese] = useState(false);
@@ -132,6 +145,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
     { id: 'cards', label: 'Cards', icon: <Grid className="w-5 h-5" /> },
     { id: 'backup', label: 'Backup & Restore', icon: <Download className="w-5 h-5" /> },
     { id: 'qrcode', label: 'App QR Code', icon: <QrCode className="w-5 h-5" /> },
+    { id: 'legal', label: 'Privacy & Terms', icon: <ShieldCheck className="w-5 h-5" /> },
   ];
 
   const handleToggleFavorite = async (card: AACCard) => {
@@ -582,6 +596,55 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
                 className="accent-amber-500 w-full cursor-pointer h-2 bg-slate-200 dark:bg-slate-800 rounded-lg"
               />
             </div>
+
+            {/* 6. Legal, Privacy & Medical Disclaimers */}
+            <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-pink-500" />
+                  <span>Privacy Policy & Terms of Service</span>
+                </label>
+                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30">
+                  Zero Data Collection
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                TalkWithDad AAC is engineered with 100% on-device privacy (GDPR Article 25). No personal data, health information, or voice recordings are collected or transmitted. Hosted statically on GitHub Pages.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                <DebouncedTouchable
+                  onPress={() => {
+                    setLegalModalDoc('privacy');
+                    setIsLegalModalOpen(true);
+                  }}
+                  minTouchSize="sm"
+                  className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-pink-400 flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-pink-500 shrink-0" />
+                    <span>Privacy Policy (隱私權政策)</span>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                </DebouncedTouchable>
+
+                <DebouncedTouchable
+                  onPress={() => {
+                    setLegalModalDoc('terms');
+                    setIsLegalModalOpen(true);
+                  }}
+                  minTouchSize="sm"
+                  className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:border-pink-400 flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-blue-500 shrink-0" />
+                    <span>Terms of Service (服務條款)</span>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                </DebouncedTouchable>
+              </div>
+            </div>
           </div>
         )}
 
@@ -678,6 +741,157 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
         {activeTab === 'qrcode' && (
           <AppQRCodeView />
         )}
+
+        {/* --- PRIVACY & TERMS LEGAL TAB --- */}
+        {activeTab === 'legal' && (
+          <div className="w-full max-w-4xl mx-auto flex flex-col gap-4 bg-white dark:bg-slate-900 border-2 border-pink-500/30 rounded-3xl p-4 sm:p-6 shadow-xl">
+            {/* Top Subtabs & Action Bar */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setActiveLegalSubTab('privacy')}
+                  className={`
+                    flex-1 sm:flex-initial py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-2 transition-all cursor-pointer
+                    ${
+                      activeLegalSubTab === 'privacy'
+                        ? 'bg-pink-600 text-white border-pink-400 shadow-md font-black'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                    }
+                  `}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Privacy Policy (隱私權政策)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveLegalSubTab('terms')}
+                  className={`
+                    flex-1 sm:flex-initial py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-2 transition-all cursor-pointer
+                    ${
+                      activeLegalSubTab === 'terms'
+                        ? 'bg-pink-600 text-white border-pink-400 shadow-md font-black'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                    }
+                  `}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Terms of Service (服務條款)</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 cursor-pointer"
+                  title="Print Document"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const url = activeLegalSubTab === 'privacy' ? './privacy.html' : './terms.html';
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold flex items-center gap-1.5 border border-slate-300 dark:border-slate-700 cursor-pointer"
+                  title="Open Standalone Page"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Open Page</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Document Header */}
+            {(() => {
+              const doc = activeLegalSubTab === 'privacy' ? PRIVACY_POLICY : TERMS_OF_SERVICE;
+              return (
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-pink-50 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-900/50 flex flex-col gap-1">
+                    <h3 className="text-base font-black text-pink-700 dark:text-pink-300">
+                      {doc.title} <span className="text-sm font-bold">({doc.titleZh})</span>
+                    </h3>
+                    <p className="text-xs text-pink-600 dark:text-pink-400 font-semibold">
+                      {doc.subtitle} · {doc.subtitleZh}
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                      Effective Date: {doc.effectiveDate} · Last Updated: {doc.lastUpdated}
+                    </p>
+                  </div>
+
+                  {/* Summary Highlights */}
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col gap-2.5">
+                    <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                      <span>Key Highlights · 重點摘要</span>
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                      {doc.summaryPoints.map((pt, idx) => (
+                        <div
+                          key={idx}
+                          className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col gap-1 text-xs"
+                        >
+                          <p className="font-bold text-slate-800 dark:text-slate-200">{pt.en}</p>
+                          <p className="text-slate-500 dark:text-slate-400">{pt.zh}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* All Sections */}
+                  <div className="space-y-4">
+                    {doc.sections.map((section) => (
+                      <div
+                        key={section.id}
+                        className={`
+                          p-4 rounded-2xl border flex flex-col gap-2.5
+                          ${
+                            section.isImportant
+                              ? 'bg-amber-500/10 border-amber-500/40 shadow-sm'
+                              : 'bg-slate-50/50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800'
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+                          {section.isImportant ? (
+                            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                          ) : (
+                            <ShieldCheck className="w-4 h-4 text-pink-500 shrink-0" />
+                          )}
+                          <div className="flex flex-col">
+                            <h4 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white">
+                              {section.title}
+                            </h4>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold">
+                              {section.titleZh}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                          {section.contentEn.map((para, pIdx) => (
+                            <p key={`en-${pIdx}`}>{para}</p>
+                          ))}
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/80 space-y-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                          {section.contentZh.map((para, pIdx) => (
+                            <p key={`zh-${pIdx}`}>{para}</p>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
       </div>
 
       {/* Card Editor Modal */}
@@ -690,6 +904,14 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
             onRefreshData();
           }}
           onCancel={() => setIsCardModalOpen(false)}
+        />
+      )}
+
+      {/* Legal & Privacy Modal */}
+      {isLegalModalOpen && (
+        <LegalModal
+          initialDoc={legalModalDoc}
+          onClose={() => setIsLegalModalOpen(false)}
         />
       )}
     </div>

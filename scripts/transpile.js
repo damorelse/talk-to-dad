@@ -41,7 +41,8 @@ export function cleanTypeScript(code, filePath = 'file.tsx') {
       impPath.endsWith('/audio') ||
       impPath.endsWith('/syllables') ||
       impPath.endsWith('/keyboard') ||
-      impPath.endsWith('/googleSheets')
+      impPath.endsWith('/googleSheets') ||
+      impPath.endsWith('/legal')
     ) {
       return `from '${impPath}/index.js'`;
     }
@@ -59,7 +60,8 @@ export function cleanTypeScript(code, filePath = 'file.tsx') {
         rewritten.endsWith('/db') ||
         rewritten.endsWith('/audio') ||
         rewritten.endsWith('/syllables') ||
-        rewritten.endsWith('/keyboard')
+        rewritten.endsWith('/keyboard') ||
+        rewritten.endsWith('/legal')
       ) {
         rewritten = `${rewritten}/index.js`;
       } else {
