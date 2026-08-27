@@ -7,6 +7,7 @@ import {
 } from '../../types';
 import { CardEditorModal } from './CardEditorModal';
 import { BackupRestoreView } from './BackupRestoreView';
+import { AppQRCodeView } from './AppQRCodeView';
 import { DebouncedTouchable } from '../common/DebouncedTouchable';
 import { useDatabase } from '../../hooks/useDatabase';
 import { useSettings } from '../../hooks/useSettings';
@@ -24,6 +25,7 @@ import {
   Volume2,
   LayoutGrid,
   Sparkles,
+  QrCode,
 } from 'lucide-react';
 
 interface CaregiverDashboardProps {
@@ -37,7 +39,8 @@ interface CaregiverDashboardProps {
 type CaregiverTab =
   | 'settings'
   | 'cards'
-  | 'backup';
+  | 'backup'
+  | 'qrcode';
 
 export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
   categories,
@@ -128,6 +131,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
     { id: 'settings', label: 'Settings', icon: <Settings className="w-5 h-5" /> },
     { id: 'cards', label: 'Cards', icon: <Grid className="w-5 h-5" /> },
     { id: 'backup', label: 'Backup & Restore', icon: <Download className="w-5 h-5" /> },
+    { id: 'qrcode', label: 'App QR Code', icon: <QrCode className="w-5 h-5" /> },
   ];
 
   const handleToggleFavorite = async (card: AACCard) => {
@@ -668,6 +672,11 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
         {/* --- BACKUP & RESTORE TAB --- */}
         {activeTab === 'backup' && (
           <BackupRestoreView onDataChanged={onRefreshData} />
+        )}
+
+        {/* --- APP QR CODE TAB --- */}
+        {activeTab === 'qrcode' && (
+          <AppQRCodeView />
         )}
       </div>
 

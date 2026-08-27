@@ -41,6 +41,7 @@ const testFiles = [
   path.join(rootDir, 'dist-test/tests/suites/tier8_sound_it_out_aac_vocab.test.js'),
   path.join(rootDir, 'dist-test/tests/suites/tier9_today_orientation.test.js'),
   path.join(rootDir, 'dist-test/tests/suites/tier10_quorra_companion_delight.test.js'),
+  path.join(rootDir, 'dist-test/tests/suites/tier11_qrcode_and_flower_garden.test.js'),
   path.join(rootDir, 'dist-test/tests/empirical_challenge_runner.js'),
   path.join(rootDir, 'dist-test/tests/empirical_deep_fuzzer.js'),
   path.join(rootDir, 'dist-test/tests/weekly_selector_stress_harness.js'),
