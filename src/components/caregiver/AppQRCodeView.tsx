@@ -269,17 +269,16 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
             >
               <div
                 className={
-                  "w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 rounded-3xl bg-gradient-to-tr from-amber-400 via-pink-400 to-amber-200 p-1.5 shadow-xl transition-transform duration-200 " +
-                  (isQuorraPet ? "scale-110 ring-4 ring-pink-400 animate-bounce" : "group-hover:scale-105")
+                  "w-36 h-36 sm:w-44 sm:h-44 md:w-48 md:h-48 flex items-center justify-center transition-transform duration-200 " +
+                  (isQuorraPet ? "scale-110 animate-bounce" : "group-hover:scale-105")
                 }
               >
-                <div className="w-full h-full rounded-3xl bg-amber-50 dark:bg-slate-900 flex items-center justify-center overflow-hidden relative">
-                  <svg
-                    viewBox="0 0 100 100"
-                    className={`w-full h-full drop-shadow-sm transition-transform duration-300 ${
-                      isQuorraPet ? "scale-105" : "animate-quorra-breathe"
-                    }`}
-                  >
+                <svg
+                  viewBox="0 0 100 100"
+                  className={`w-full h-full drop-shadow-md transition-transform duration-300 ${
+                    isQuorraPet ? "scale-105" : "animate-quorra-breathe"
+                  }`}
+                >
                     <defs>
                       <linearGradient id="qrGoldFur2" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#fbbf24" />
@@ -362,7 +361,6 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
                     <ellipse cx="36" cy="84" rx="6.5" ry="4.5" fill="url(#qrGoldFur2)" stroke="#b45309" strokeWidth="0.8" />
                     <ellipse cx="64" cy="84" rx="6.5" ry="4.5" fill="url(#qrGoldFur2)" stroke="#b45309" strokeWidth="0.8" />
                   </svg>
-                </div>
               </div>
 
               {/* Pet Me Badge */}
