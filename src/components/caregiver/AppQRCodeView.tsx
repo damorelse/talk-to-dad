@@ -193,14 +193,14 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 sm:gap-12 w-full">
           {/* QR Code Column */}
           <div className="flex flex-col items-center gap-4 shrink-0">
-            <div className="p-5 sm:p-6 bg-white rounded-3xl shadow-lg border-4 border-amber-400 dark:border-amber-500 flex items-center justify-center">
+            <div className="p-4 sm:p-5 bg-white rounded-3xl shadow-lg border-4 border-amber-400 dark:border-amber-500 flex items-center justify-center">
               {(() => {
                 const margin = 4;
                 const totalSize = qrResult.size + margin * 2;
                 return (
                   <svg
                     viewBox={`0 0 ${totalSize} ${totalSize}`}
-                    className="w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 select-none"
+                    className="w-56 h-56 sm:w-64 sm:h-64 md:w-68 md:h-68 select-none"
                     shapeRendering="crispEdges"
                   >
                     <rect width="100%" height="100%" fill="#ffffff" />
