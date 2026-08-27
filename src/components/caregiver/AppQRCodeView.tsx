@@ -416,7 +416,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
             </div>
             <div className="flex flex-col gap-2.5 flex-1 min-w-0">
               <span className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                Android Tablets & Phones (Chrome)
+                Android Phones (Chrome)
               </span>
               <ol className="space-y-2 text-sm sm:text-base font-bold text-slate-700 dark:text-slate-200">
                 <li className="flex items-start gap-2.5">
