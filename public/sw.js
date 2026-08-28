@@ -1,5 +1,5 @@
 /**
- * Service Worker: TalkWithDad Offline-First AAC Progressive Web App
+ * Service Worker: Talk With Dad Offline-First AAC Progressive Web App
  * Cache-First strategy for static assets and offline shell, Network-First fallback.
  */
 

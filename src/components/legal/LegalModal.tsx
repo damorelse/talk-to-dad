@@ -65,7 +65,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 </span>
               </h2>
               <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
-                TalkWithDad AAC · Effective: {activeDoc.effectiveDate}
+                Talk With Dad AAC · Effective: {activeDoc.effectiveDate}
               </p>
             </div>
           </div>
@@ -224,7 +224,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
           {/* Footer Note */}
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400 flex flex-col items-center gap-1">
             <p className="font-bold">
-              TalkWithDad AAC · Open Source Offline Assistive Communication
+              Talk With Dad AAC · Open Source Offline Assistive Communication
             </p>
             <p className="text-[11px]">
               Hosted on GitHub Pages · Client-Side Execution · Zero Data Collection

@@ -828,7 +828,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
               </div>
 
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                TalkWithDad AAC is engineered with 100% on-device privacy (GDPR Article 25). No personal data, health information, or voice recordings are collected or transmitted. Hosted statically on GitHub Pages.
+                Talk With Dad AAC is engineered with 100% on-device privacy (GDPR Article 25). No personal data, health information, or voice recordings are collected or transmitted. Hosted statically on GitHub Pages.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">

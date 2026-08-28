@@ -1,5 +1,5 @@
 /**
- * TalkWithDad AAC Progressive Web App - Production Builder & Packager
+ * Talk With Dad - Production Builder & Packager
  * Generates the complete, standalone offline PWA distribution bundle in dist/
  */
 
@@ -15,7 +15,7 @@ const distDir = path.resolve(rootDir, 'dist');
 const publicDir = path.resolve(rootDir, 'public');
 
 console.log('================================================================');
-console.log('    TALKWITHDAD AAC PROGRESSIVE WEB APP - PRODUCTION BUILD      ');
+console.log('         TALK WITH DAD - PRODUCTION BUILD                       ');
 console.log('================================================================');
 
 // 1. Clean / create dist directories

@@ -1,6 +1,6 @@
 {
-  "name": "TalkWithDad",
-  "short_name": "TalkWithDad",
+  "name": "Talk With Dad",
+  "short_name": "Talk With Dad",
   "description": "iPad-optimized offline AAC app for stroke recovery, aphasia rehabilitation, and family caregiving.",
   "start_url": "./",
   "scope": "./",

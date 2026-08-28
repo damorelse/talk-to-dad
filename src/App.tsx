@@ -80,7 +80,7 @@ export const App: React.FC = () => {
     return (
       <div className="w-full h-full h-[100dvh] bg-slate-950 flex flex-col items-center justify-center gap-3 text-white">
         <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm font-bold text-slate-400">Loading TalkWithDad AAC...</p>
+        <p className="text-sm font-bold text-slate-400">Loading Talk With Dad AAC...</p>
       </div>
     );
   }
