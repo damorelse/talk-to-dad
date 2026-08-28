@@ -14,6 +14,8 @@ import { useSettings } from '../../hooks/useSettings';
 import { speechEngine, filterAndGroupVoices } from '../../services/audio/WebSpeechEngine';
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../../services/legal/legalContent';
 import { LegalModal } from '../legal/LegalModal';
+import { googleAuthService, GoogleAuthState } from '../../services/googleSheets/googleAuthService';
+import { syncGoogleSheetOnStartup } from '../../services/googleSheets/googleSheetsAutoSync';
 import {
   Settings,
   Grid,
@@ -35,6 +37,11 @@ import {
   AlertTriangle,
   HeartHandshake,
   CheckCircle2,
+  RefreshCw,
+  AlertCircle,
+  LogIn,
+  LogOut,
+  KeyRound,
 } from 'lucide-react';
 
 interface CaregiverDashboardProps {
@@ -69,9 +76,22 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
   const [isTestingEnglish, setIsTestingEnglish] = useState(false);
   const [isTestingChinese, setIsTestingChinese] = useState(false);
 
+  // Google OAuth & Sync states
+  const [authState, setAuthState] = useState<GoogleAuthState>(() => googleAuthService.getAuthState());
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isSyncingNow, setIsSyncingNow] = useState(false);
+  const [syncFeedback, setSyncFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
   const { saveCard, deleteCard } = useDatabase();
   const { updateSettings } = useSettings();
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>(() => speechEngine.getVoices());
+
+  useEffect(() => {
+    const unsub = googleAuthService.subscribe(() => {
+      setAuthState(googleAuthService.getAuthState());
+    });
+    return () => unsub();
+  }, []);
 
   useEffect(() => {
     const updateVoices = () => {
@@ -137,6 +157,82 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
       });
     } finally {
       setIsTestingChinese(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (isAuthenticating) return;
+    setIsAuthenticating(true);
+    setSyncFeedback(null);
+
+    try {
+      const res = await googleAuthService.requestAccessToken({
+        clientId: settings.googleOAuthClientId,
+      });
+
+      if (res.userEmail && res.userEmail !== settings.googleOAuthUserEmail) {
+        await updateSettings({ googleOAuthUserEmail: res.userEmail });
+      }
+
+      setSyncFeedback({
+        type: 'success',
+        message: `Google Account connected: ${res.userEmail || 'Authenticated'} (Google 帳號已連結)`,
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setSyncFeedback({
+        type: 'error',
+        message: `Authentication failed: ${msg} (驗證失敗)`,
+      });
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  const handleGoogleSignOut = async () => {
+    try {
+      await googleAuthService.signOut();
+      await updateSettings({ googleOAuthUserEmail: '' });
+      setSyncFeedback({
+        type: 'success',
+        message: 'Disconnected from Google Account. (已解除 Google 帳號連結)',
+      });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setSyncFeedback({
+        type: 'error',
+        message: `Sign out error: ${msg}`,
+      });
+    }
+  };
+
+  const handleSyncNow = async () => {
+    if (isSyncingNow) return;
+    setIsSyncingNow(true);
+    setSyncFeedback(null);
+
+    try {
+      const res = await syncGoogleSheetOnStartup({ force: true });
+      if (res.synced) {
+        onRefreshData();
+        setSyncFeedback({
+          type: 'success',
+          message: res.message || `Successfully synced ${res.importedCards} cards from Google Sheet! (成功同步圖卡)`,
+        });
+      } else {
+        setSyncFeedback({
+          type: 'error',
+          message: res.error || res.message || 'Sync failed. Please check your Sheet URL and permissions.',
+        });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setSyncFeedback({
+        type: 'error',
+        message: `Sync error: ${msg}`,
+      });
+    } finally {
+      setIsSyncingNow(false);
     }
   };
 
@@ -540,36 +636,158 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
               </div>
             </div>
 
-            {/* 4. Google Sheet Auto-Sync on Startup */}
-            <div className="flex flex-col gap-2.5 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
+            {/* 4. Google Sheet Synchronization & Google Identity Services OAuth */}
+            <div className="flex flex-col gap-3.5 p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
-                  <span>Google Sheet Startup Auto-Sync</span>
+                  <span>Google Sheet Synchronization (Google 試算表同步)</span>
                 </label>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <input
-                  type="url"
-                  value={settings.googleSheetSyncUrl || ''}
-                  onChange={(e) => updateSettings({ googleSheetSyncUrl: e.target.value })}
-                  placeholder="https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit..."
-                  className="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                />
+              {/* Feedback Alert */}
+              {syncFeedback && (
+                <div
+                  className={`p-3 rounded-xl border flex items-start gap-2.5 text-xs font-bold ${
+                    syncFeedback.type === 'success'
+                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-300'
+                      : 'bg-rose-500/10 border-rose-500/40 text-rose-700 dark:text-rose-300'
+                  }`}
+                >
+                  {syncFeedback.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  )}
+                  <span className="flex-1 leading-snug">{syncFeedback.message}</span>
+                </div>
+              )}
 
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+              {/* Sheet URL & Tab Name */}
+              <div className="flex flex-col gap-2.5">
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Google Sheet URL (試算表網址)
+                  </span>
+                  <input
+                    type="url"
+                    value={settings.googleSheetSyncUrl || ''}
+                    onChange={(e) => updateSettings({ googleSheetSyncUrl: e.target.value })}
+                    placeholder="https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit..."
+                    className="w-full p-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex-1 flex flex-col gap-1">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      Sheet Tab Name (工作表分頁名稱，選填)
+                    </span>
+                    <input
+                      type="text"
+                      value={settings.googleSheetSyncCardsTab || ''}
+                      onChange={(e) => updateSettings({ googleSheetSyncCardsTab: e.target.value })}
+                      placeholder="Cards (default)"
+                      className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer pt-1">
                   <input
                     type="checkbox"
                     checked={settings.googleSheetAutoSyncOnLoad !== false}
                     onChange={(e) => updateSettings({ googleSheetAutoSyncOnLoad: e.target.checked })}
                     className="w-4 h-4 rounded text-emerald-600 bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 focus:ring-emerald-500 cursor-pointer"
                   />
-                  <span>Automatically sync on initial page load</span>
+                  <span>Automatically sync on initial page load (每次啟動時自動同步)</span>
                 </label>
+              </div>
+
+              {/* Google Identity Services (GIS) OAuth 2.0 Configuration for Private Sheets */}
+              <div className="flex flex-col gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black tracking-wider text-slate-800 dark:text-white flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-blue-500" />
+                    <span>Google Account Authorization (Google 帳號授權，存取私人試算表)</span>
+                  </label>
+                  <span
+                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                      authState.isAuthenticated
+                        ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    {authState.isAuthenticated ? 'Connected · 已連結' : 'Not Connected · 未連結'}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                    <KeyRound className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Google OAuth Client ID (OAuth 用戶端 ID)</span>
+                  </span>
+                  <input
+                    type="text"
+                    value={settings.googleOAuthClientId || ''}
+                    onChange={(e) => updateSettings({ googleOAuthClientId: e.target.value })}
+                    placeholder="e.g. 1234567890-abc.apps.googleusercontent.com"
+                    className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
+                    Create a Web Application Client ID in Google Cloud Console with authorized origin and spreadsheets.readonly scope.
+                  </p>
+                </div>
+
+                {/* Auth Controls & Status */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1">
+                  {authState.isAuthenticated ? (
+                    <div className="w-full flex items-center justify-between gap-2 bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-xl">
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 truncate">
+                          Signed in as: {authState.userEmail || settings.googleOAuthUserEmail || 'Google User'}
+                        </span>
+                        <span className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80">
+                          OAuth Token Active (已成功取得授權)
+                        </span>
+                      </div>
+                      <DebouncedTouchable
+                        onPress={handleGoogleSignOut}
+                        minTouchSize="sm"
+                        className="py-1.5 px-3 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-lg text-xs font-bold flex items-center gap-1.5 shrink-0 cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>Disconnect (解除連結)</span>
+                      </DebouncedTouchable>
+                    </div>
+                  ) : (
+                    <DebouncedTouchable
+                      onPress={handleGoogleSignIn}
+                      disabled={isAuthenticating}
+                      minTouchSize="sm"
+                      className="w-full sm:w-auto py-2 px-3.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm cursor-pointer disabled:opacity-50"
+                    >
+                      <LogIn className="w-4 h-4" />
+                      <span>{isAuthenticating ? 'Authorizing... (驗證中)' : 'Sign in with Google (以 Google 帳號登入)'}</span>
+                    </DebouncedTouchable>
+                  )}
+                </div>
+              </div>
+
+              {/* Sync Now Action Button & Last Sync Details */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                <DebouncedTouchable
+                  onPress={handleSyncNow}
+                  disabled={isSyncingNow}
+                  minTouchSize="sm"
+                  className="w-full sm:w-auto py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-md shadow-emerald-900/30 cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isSyncingNow ? 'animate-spin' : ''}`} />
+                  <span>{isSyncingNow ? 'Syncing... (同步中)' : 'Sync Now (立即同步)'}</span>
+                </DebouncedTouchable>
 
                 {settings.lastGoogleSheetSyncStatus && (
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium text-center sm:text-right">
                     Last sync: {settings.lastGoogleSheetSyncStatus}
                   </p>
                 )}

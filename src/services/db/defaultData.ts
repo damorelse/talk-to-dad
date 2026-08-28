@@ -22,6 +22,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   googleSheetSyncUrl: 'https://docs.google.com/spreadsheets/d/1MsCXaC6F-uJiiYsqnS4-abW2nFTYFyTMd09hHRfwOwE/edit',
   googleSheetAutoSyncOnLoad: true,
   googleSheetSyncCardsTab: 'Cards',
+  googleOAuthClientId: '',
+  googleOAuthUserEmail: '',
 };
 
 export const DEFAULT_CATEGORIES: AACCategory[] = [

@@ -164,6 +164,8 @@ export interface AppSettings {
   googleSheetSyncUrl?: string; // Auto-sync Google Sheet URL on initial load
   googleSheetAutoSyncOnLoad?: boolean; // Enable auto-sync on initial page load (default true)
   googleSheetSyncCardsTab?: string; // Sheet/tab name for Cards (optional)
+  googleOAuthClientId?: string; // Google OAuth 2.0 Client ID for private sheets
+  googleOAuthUserEmail?: string; // Authenticated Google user email
   lastGoogleSheetSyncTime?: number; // Timestamp of last successful sync
   lastGoogleSheetSyncStatus?: string; // Status message from last sync
 }

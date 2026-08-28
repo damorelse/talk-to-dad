@@ -320,4 +320,227 @@ describe('Tier 7: Google Sheets Pull & Sound It Out Synchronization', () => {
       unsubscribe();
     });
   });
+
+  describe('8. Google Identity Services (GIS) OAuth 2.0 Token Management', () => {
+    it('should manage and validate OAuth session tokens with expiration safety window', async () => {
+      const { googleAuthService } = await import('../../src/services/googleSheets/googleAuthService.js');
+
+      // Set fresh token valid for 3600 seconds
+      googleAuthService.setSession('mock-oauth-token-12345', 3600, 'caregiver@example.com', 'client-id-xyz');
+
+      const token = googleAuthService.getValidAccessToken();
+      assert.equal(token, 'mock-oauth-token-12345');
+
+      const authState = googleAuthService.getAuthState();
+      assert.equal(authState.isAuthenticated, true);
+      assert.equal(authState.userEmail, 'caregiver@example.com');
+      assert.equal(authState.clientId, 'client-id-xyz');
+    });
+
+    it('should treat expired tokens as invalid', async () => {
+      const { googleAuthService } = await import('../../src/services/googleSheets/googleAuthService.js');
+
+      // Set token with only 30s remaining (below 60s buffer)
+      googleAuthService.setSession('mock-expiring-token', 30, 'user@example.com');
+
+      const token = googleAuthService.getValidAccessToken();
+      assert.equal(token, null);
+
+      const authState = googleAuthService.getAuthState();
+      assert.equal(authState.isAuthenticated, false);
+    });
+
+    it('should cleanly sign out and revoke active tokens', async () => {
+      const { googleAuthService } = await import('../../src/services/googleSheets/googleAuthService.js');
+
+      googleAuthService.setSession('active-token-to-revoke', 3600, 'test@example.com');
+      assert.ok(googleAuthService.getValidAccessToken());
+
+      let listenerNotified = false;
+      const unsub = googleAuthService.subscribe(() => {
+        listenerNotified = true;
+      });
+
+      await googleAuthService.signOut();
+
+      assert.equal(googleAuthService.getValidAccessToken(), null);
+      assert.equal(googleAuthService.getAuthState().isAuthenticated, false);
+      assert.equal(listenerNotified, true);
+
+      unsub();
+    });
+  });
+
+  describe('9. Google Sheets API v4 Fetching with OAuth Bearer Token', () => {
+    it('should fetch and parse cell values matrix via API v4 endpoint', async () => {
+      const originalFetch = global.fetch;
+
+      // Mock Google Sheets API v4 response
+      global.fetch = async (url, options) => {
+        const urlStr = String(url);
+        assert.ok(options?.headers?.Authorization?.includes('Bearer test-token-abc'));
+
+        if (urlStr.includes('/values/Cards') || urlStr.includes('/values/Sheet1')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              range: 'Cards!A1:H3',
+              majorDimension: 'ROWS',
+              values: [
+                ['Label', 'Spoken Text', 'Role', 'Emoji', 'Syllables', 'Category', 'Label ZH', 'Spoken ZH'],
+                ['Warm Blanket', 'Please give me a warm blanket.', 'nouns', '🛌', 'Warm · Blan · ket', 'Daily Needs', '保暖被子', '請給我一件保暖被子。'],
+                ['Call Nurse', 'Please call the nurse.', 'emergency', '👩‍⚕️', 'Call · Nurse', 'Health', '呼叫護理師', '請幫我呼叫護理師。'],
+              ],
+            }),
+          };
+        }
+
+        return { ok: false, status: 404 };
+      };
+
+      try {
+        const { headers, rows } = await googleSheetsService.fetchSpreadsheetValuesViaApi(
+          '1MsCXaC6F-uJiiYsqnS4-abW2nFTYFyTMd09hHRfwOwE',
+          'test-token-abc',
+          { sheetName: 'Cards' }
+        );
+
+        assert.equal(headers.length, 8);
+        assert.equal(rows.length, 2);
+        assert.equal(rows[0][0], 'Warm Blanket');
+        assert.equal(rows[0][6], '保暖被子');
+        assert.equal(rows[1][0], 'Call Nurse');
+        assert.equal(rows[1][2], 'emergency');
+      } finally {
+        global.fetch = originalFetch;
+      }
+    });
+
+    it('should resolve sheet title by gid from metadata when sheetName is omitted', async () => {
+      const originalFetch = global.fetch;
+
+      global.fetch = async (url) => {
+        const urlStr = String(url);
+        if (urlStr.includes('fields=sheets.properties')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              sheets: [
+                { properties: { sheetId: 0, title: 'Overview' } },
+                { properties: { sheetId: 123456, title: 'AAC_Vocab' } },
+              ],
+            }),
+          };
+        }
+        if (urlStr.includes('/values/AAC_Vocab')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              range: 'AAC_Vocab!A1:C2',
+              values: [
+                ['Label', 'Spoken Text', 'Role'],
+                ['Hot Soup', 'I want soup', 'nouns'],
+              ],
+            }),
+          };
+        }
+        return { ok: false, status: 404 };
+      };
+
+      try {
+        const { headers, rows } = await googleSheetsService.fetchSpreadsheetValuesViaApi(
+          'spreadsheet-test-id',
+          'mock-token',
+          { gid: '123456' }
+        );
+
+        assert.equal(headers[0], 'Label');
+        assert.equal(rows.length, 1);
+        assert.equal(rows[0][0], 'Hot Soup');
+      } finally {
+        global.fetch = originalFetch;
+      }
+    });
+
+    it('should handle API 401/403 authorization errors with informative message', async () => {
+      const originalFetch = global.fetch;
+
+      global.fetch = async () => ({
+        ok: false,
+        status: 401,
+        statusText: 'Unauthorized',
+        text: async () => 'Invalid Credentials',
+      });
+
+      try {
+        await assert.rejects(
+          () => googleSheetsService.fetchSpreadsheetValuesViaApi('spreadsheet-id', 'expired-token'),
+          /Google authorization/
+        );
+      } finally {
+        global.fetch = originalFetch;
+      }
+    });
+  });
+
+  describe('10. Unified fetchAndParseSheet Dispatcher & Private Sheet Handling', () => {
+    it('should route to Sheets API v4 when accessToken is present and parse cards accurately', async () => {
+      const originalFetch = global.fetch;
+
+      global.fetch = async (url) => {
+        const urlStr = String(url);
+        if (urlStr.includes('/values/Cards')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              values: [
+                ['Label', 'Spoken Text', 'Role', 'Emoji', 'Syllables', 'Category'],
+                ['Green Tea', 'I want green tea', 'nouns', '🍵', 'Green · Tea', 'Food & Drink'],
+              ],
+            }),
+          };
+        }
+        return { ok: false, status: 404 };
+      };
+
+      try {
+        const res = await googleSheetsService.fetchAndParseSheet(
+          'https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit',
+          {
+            categories: DEFAULT_CATEGORIES,
+            sheetName: 'Cards',
+            accessToken: 'valid-oauth-token',
+          }
+        );
+
+        assert.equal(res.cards.length, 1);
+        assert.equal(res.cards[0].label, 'Green Tea');
+        assert.equal(res.cards[0].categoryId, 'cat-food');
+      } finally {
+        global.fetch = originalFetch;
+      }
+    });
+
+    it('should detect private sheet HTML login redirects and throw actionable auth error', async () => {
+      const originalFetch = global.fetch;
+
+      global.fetch = async () => ({
+        ok: true,
+        text: async () => '<!DOCTYPE html><html><title>Google Accounts: ServiceLogin</title></html>',
+      });
+
+      try {
+        await assert.rejects(
+          () => googleSheetsService.fetchGoogleSheetCsv('https://docs.google.com/spreadsheets/d/privateSheetId/edit'),
+          /The Google Sheet is private and requires Google Login/
+        );
+      } finally {
+        global.fetch = originalFetch;
+      }
+    });
+  });
 });

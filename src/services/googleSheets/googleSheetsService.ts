@@ -126,9 +126,9 @@ export class GoogleSheetsService {
    */
   async fetchGoogleSheetCsv(
     urlOrId: string, 
-    options: { sheetName?: string; gid?: string; timeoutMs?: number } = {}
+    options: { sheetName?: string; gid?: string; timeoutMs?: number; accessToken?: string } = {}
   ): Promise<string> {
-    const { sheetName, gid, timeoutMs = 12000 } = options;
+    const { sheetName, gid, timeoutMs = 12000, accessToken } = options;
     const urlInfo = this.parseGoogleSheetUrl(urlOrId, sheetName, gid);
     
     // Choose most appropriate target URL
@@ -138,21 +138,31 @@ export class GoogleSheetsService {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
 
+    const headers: Record<string, string> = {
+      'Accept': 'text/csv, text/plain, */*',
+    };
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+
     try {
       const response = await fetch(targetUrl, {
         method: 'GET',
         signal: controller.signal,
-        headers: {
-          'Accept': 'text/csv, text/plain, */*',
-        },
+        headers,
       });
 
       clearTimeout(timer);
 
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          throw new Error(
+            `Access Denied (${response.status}). This Google Sheet is private and requires Google Account authorization.`
+          );
+        }
         throw new Error(
           `Failed to fetch Google Sheet (${response.status} ${response.statusText}). ` +
-          `Please ensure the sheet has sharing set to "Anyone with the link can view" or "Publish to web".`
+          `Please ensure the sheet has sharing set to "Anyone with the link can view" or sign in with Google.`
         );
       }
 
@@ -162,8 +172,8 @@ export class GoogleSheetsService {
       if (text.includes('<!DOCTYPE html>') || text.includes('<html')) {
         if (text.includes('accounts.google.com') || text.includes('ServiceLogin')) {
           throw new Error(
-            'The Google Sheet is private and requires Google Login. Please set sharing permissions to ' +
-            '"Anyone with the link can view" (or File > Share > Publish to web), then try again.'
+            'The Google Sheet is private and requires Google Login. Please sign in with Google in Settings or set sharing permissions to ' +
+            '"Anyone with the link can view" (or File > Share > Publish to web).'
           );
         }
       }
@@ -178,6 +188,112 @@ export class GoogleSheetsService {
         throw err;
       }
       throw new Error(`Failed to fetch Google Sheet: ${String(err)}`);
+    }
+  }
+
+  /**
+   * Fetches spreadsheet rows using the official Google Sheets API v4 with an OAuth Bearer token.
+   */
+  async fetchSpreadsheetValuesViaApi(
+    spreadsheetId: string,
+    accessToken: string,
+    options: { sheetName?: string; gid?: string; timeoutMs?: number } = {}
+  ): Promise<ParsedCsvTable> {
+    const { sheetName, gid, timeoutMs = 15000 } = options;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      let targetRange = sheetName?.trim() || '';
+
+      // If sheetName is not provided, resolve sheet title from metadata (matching gid if provided)
+      if (!targetRange) {
+        const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=sheets.properties`;
+        const metaResponse = await fetch(metaUrl, {
+          method: 'GET',
+          signal: controller.signal,
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json',
+          },
+        });
+
+        if (!metaResponse.ok) {
+          if (metaResponse.status === 401 || metaResponse.status === 403) {
+            throw new Error(
+              `Google authorization error (${metaResponse.status}). Please check your Google permissions or sign in again.`
+            );
+          }
+          if (metaResponse.status === 404) {
+            throw new Error(`Google Spreadsheet not found (ID: ${spreadsheetId}). Please verify the Sheet URL.`);
+          }
+          const errBody = await metaResponse.text().catch(() => '');
+          throw new Error(`Google Sheets API metadata request failed (${metaResponse.status}): ${errBody}`);
+        }
+
+        const metaData = await metaResponse.json();
+        const sheetsList = metaData.sheets || [];
+
+        if (sheetsList.length === 0) {
+          throw new Error('No sheets/tabs found in the specified Google Spreadsheet.');
+        }
+
+        if (gid) {
+          const matched = sheetsList.find((s: any) => String(s.properties?.sheetId) === String(gid));
+          targetRange = matched?.properties?.title || sheetsList[0]?.properties?.title || 'Sheet1';
+        } else {
+          targetRange = sheetsList[0]?.properties?.title || 'Sheet1';
+        }
+      }
+
+      // Fetch cell values from range
+      const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(targetRange)}`;
+      console.info(`[GoogleSheetsService] Fetching API v4 values from: ${valuesUrl}`);
+
+      const valuesResponse = await fetch(valuesUrl, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json',
+        },
+      });
+
+      clearTimeout(timer);
+
+      if (!valuesResponse.ok) {
+        if (valuesResponse.status === 401 || valuesResponse.status === 403) {
+          throw new Error(
+            `Google authorization expired or insufficient permissions (${valuesResponse.status}). Please sign in again in Settings.`
+          );
+        }
+        const errText = await valuesResponse.text().catch(() => '');
+        throw new Error(`Google Sheets API values request failed (${valuesResponse.status}): ${errText}`);
+      }
+
+      const valuesData = await valuesResponse.json();
+      const rawValues: unknown[][] = valuesData.values || [];
+
+      if (rawValues.length === 0) {
+        return { headers: [], rows: [] };
+      }
+
+      // Normalize row values to string matrix
+      const headers = (rawValues[0] || []).map(cell => String(cell ?? '').trim());
+      const rows = rawValues.slice(1).map(row => 
+        (row || []).map(cell => String(cell ?? '').trim())
+      );
+
+      return { headers, rows };
+    } catch (err: unknown) {
+      clearTimeout(timer);
+      if (err instanceof Error) {
+        if (err.name === 'AbortError') {
+          throw new Error('Request to Google Sheets API timed out.');
+        }
+        throw err;
+      }
+      throw new Error(`Failed to fetch spreadsheet via Google API: ${String(err)}`);
     }
   }
 
@@ -396,6 +512,65 @@ export class GoogleSheetsService {
       errors,
       totalRows: rows.length,
     };
+  }
+
+  /**
+   * Unified fetch and parse method: handles both OAuth-authenticated Google Sheets API v4
+   * (for private sheets) and CSV/Gviz export endpoints (for public sheets).
+   */
+  async fetchAndParseSheet(
+    urlOrId: string,
+    options: {
+      categories: AACCategory[];
+      sheetName?: string;
+      gid?: string;
+      accessToken?: string;
+      defaultCategoryId?: string;
+      timeoutMs?: number;
+    }
+  ): Promise<SheetImportResult> {
+    const { categories, sheetName, gid, accessToken, defaultCategoryId, timeoutMs } = options;
+    const urlInfo = this.parseGoogleSheetUrl(urlOrId, sheetName, gid);
+
+    // If an OAuth access token is provided and we have a spreadsheet ID, use the official Sheets API v4
+    if (accessToken && urlInfo.spreadsheetId && !urlInfo.isPublished) {
+      console.info(`[GoogleSheetsService] Using Google Sheets API v4 with OAuth token for ID: ${urlInfo.spreadsheetId}`);
+      const { headers, rows } = await this.fetchSpreadsheetValuesViaApi(
+        urlInfo.spreadsheetId,
+        accessToken,
+        { sheetName: sheetName || urlInfo.sheetName, gid: urlInfo.gid || gid, timeoutMs }
+      );
+
+      if (rows.length === 0) {
+        return {
+          type: 'cards',
+          cards: [],
+          errors: ['No valid data rows found in Google Sheet.'],
+          totalRows: 0,
+        };
+      }
+
+      const { cards, errors } = this.parseCardsData(rows, headers, categories, defaultCategoryId);
+      return {
+        type: 'cards',
+        cards,
+        errors,
+        totalRows: rows.length,
+      };
+    }
+
+    // Otherwise, fetch via CSV endpoint (public sheets)
+    const csvText = await this.fetchGoogleSheetCsv(urlOrId, {
+      sheetName,
+      gid,
+      timeoutMs,
+      accessToken,
+    });
+
+    return this.parseSheetData(csvText, {
+      categories,
+      defaultCategoryId,
+    });
   }
 }
 

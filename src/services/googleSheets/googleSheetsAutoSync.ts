@@ -1,6 +1,7 @@
 import { db } from '../db/AppDatabase.ts';
 import { DEFAULT_SETTINGS } from '../db/defaultData.ts';
 import { googleSheetsService } from './googleSheetsService.ts';
+import { googleAuthService } from './googleAuthService.ts';
 import { sheetDataStore } from './sheetDataStore.ts';
 import type { AACCard, AppSettings } from '../../types/index.ts';
 
@@ -42,10 +43,12 @@ export function getInitialGoogleSheetUrlFromParams(): string | null {
 
 /**
  * Automatically syncs Cards from the configured Google Sheet on startup.
+ * Supports OAuth access token for private Google Sheets.
  * NOTE: Sheet items are stored strictly in-memory in sheetDataStore and are NOT persisted to IndexedDB.
  */
 export async function syncGoogleSheetOnStartup(options: {
   force?: boolean;
+  accessToken?: string;
   onProgress?: (status: string) => void;
 } = {}): Promise<AutoSyncResult> {
   try {
@@ -83,7 +86,6 @@ export async function syncGoogleSheetOnStartup(options: {
     }
 
     console.info(`[GoogleSheetsAutoSync] Initiating sheet sync with URL: ${effectiveUrl}`);
-
     options.onProgress?.('Fetching Google Sheet...');
 
     const categories = await db.categories.toArray();
@@ -91,17 +93,17 @@ export async function syncGoogleSheetOnStartup(options: {
     const errors: string[] = [];
     const accumulatedCards: AACCard[] = [];
 
-    // 3. Tab-based or single URL fetch
+    // 3. Obtain OAuth Token if available
+    const token = options.accessToken || googleAuthService.getValidAccessToken() || undefined;
+
+    // 4. Tab-based or single URL fetch
     const cardsTab = settings.googleSheetSyncCardsTab?.trim();
 
     try {
-      const csvText = await googleSheetsService.fetchGoogleSheetCsv(effectiveUrl, {
-        sheetName: cardsTab || undefined,
-      });
-
-      const parsed = googleSheetsService.parseSheetData(csvText, {
+      const parsed = await googleSheetsService.fetchAndParseSheet(effectiveUrl, {
         categories,
-        targetType: 'cards',
+        sheetName: cardsTab || undefined,
+        accessToken: token,
       });
 
       if (parsed.cards.length > 0) {
@@ -113,7 +115,8 @@ export async function syncGoogleSheetOnStartup(options: {
         errors.push(...parsed.errors);
       }
     } catch (err: unknown) {
-      errors.push(`Sync error: ${err instanceof Error ? err.message : String(err)}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(msg);
     }
 
     // Set into in-memory non-persistent store (never written to IndexedDB)
@@ -121,8 +124,10 @@ export async function syncGoogleSheetOnStartup(options: {
 
     const now = Date.now();
     settings.lastGoogleSheetSyncTime = now;
+    const isOAuth = Boolean(token);
+
     if (totalImportedCards > 0) {
-      settings.lastGoogleSheetSyncStatus = `Synced ${totalImportedCards} Cards at ${new Date(now).toLocaleTimeString()}`;
+      settings.lastGoogleSheetSyncStatus = `Synced ${totalImportedCards} Cards${isOAuth ? ' (OAuth)' : ''} at ${new Date(now).toLocaleTimeString()}`;
     } else if (errors.length > 0) {
       settings.lastGoogleSheetSyncStatus = `Sync notice: ${errors.join(', ')}`;
     } else {
