@@ -200,12 +200,12 @@ export const PRIVACY_POLICY: LegalDocument = {
       contentEn: [
         'We may update this Privacy Policy from time to time. Any revisions will be published with an updated "Last Updated" date at the top of this document.',
         'Because the App collects no email addresses or contact information, we encourage users to review this page periodically.',
-        'If you have questions, feedback, or legal inquiries regarding this Privacy Policy, please open an issue or inquiry on our official GitHub repository: https://github.com/damorelse/talk-to-dad',
+        'If you have questions, feedback, or legal inquiries regarding this Privacy Policy, please open an issue or inquiry on our official GitHub repository: https://github.com/damorelse/talk-with-dad',
       ],
       contentZh: [
         '我們可能會不定期修訂本隱私權政策。任何修訂內容均會公布並更新本文件頂部之「最後修訂日期」。',
         '因本應用程式不收集電子郵件或聯絡資訊，建議使用者定期查閱本政策。',
-        '若您對本隱私權政策有任何疑問、建議或法務諮詢，請至我們的官方 GitHub 儲存庫提出 Issue：https://github.com/damorelse/talk-to-dad',
+        '若您對本隱私權政策有任何疑問、建議或法務諮詢，請至我們的官方 GitHub 儲存庫提出 Issue：https://github.com/damorelse/talk-with-dad',
       ],
     },
   ],
@@ -405,11 +405,11 @@ export const TERMS_OF_SERVICE: LegalDocument = {
       titleZh: '10. 條款修訂與聯繫方式',
       contentEn: [
         'We reserve the right to modify these Terms at any time. Changes become effective immediately upon posting to the Application with an updated "Last Updated" timestamp.',
-        'For open-source inquiries, feature requests, or legal notices, please reach out via our GitHub repository: https://github.com/damorelse/talk-to-dad',
+        'For open-source inquiries, feature requests, or legal notices, please reach out via our GitHub repository: https://github.com/damorelse/talk-with-dad',
       ],
       contentZh: [
         '我們保留隨時修訂本條款之權利。修訂後之條款於公布至本應用程式並更新「最後修訂日期」時立即生效。',
-        '如對開源專案有任何疑問、功能建議或法務通知，請透過我們的 GitHub 儲存庫聯繫：https://github.com/damorelse/talk-to-dad',
+        '如對開源專案有任何疑問、功能建議或法務通知，請透過我們的 GitHub 儲存庫聯繫：https://github.com/damorelse/talk-with-dad',
       ],
     },
   ],

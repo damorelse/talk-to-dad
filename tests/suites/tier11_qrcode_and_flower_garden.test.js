@@ -175,7 +175,7 @@ function decodeQRMatrixToText(matrix) {
 }
 
 describe("Tier 11: App QR Code Tab & Mascot Companion", () => {
-  const TARGET_URL = "https://damorelse.github.io/talk-to-dad/";
+  const TARGET_URL = "https://damorelse.github.io/talk-with-dad/";
 
   describe("1. Deterministic Offline QR Code Matrix Generator", () => {
     test("should generate valid QR matrix for target GitHub Pages URL", () => {
@@ -261,9 +261,9 @@ describe("Tier 11: App QR Code Tab & Mascot Companion", () => {
 
   describe("2. App URL Invariant & Component Integrity", () => {
     test("should point precisely to damorelse GitHub Pages URL", () => {
-      assert.strictEqual(TARGET_URL, "https://damorelse.github.io/talk-to-dad/");
+      assert.strictEqual(TARGET_URL, "https://damorelse.github.io/talk-with-dad/");
       assert.ok(TARGET_URL.startsWith("https://"));
-      assert.ok(TARGET_URL.endsWith("/talk-to-dad/"));
+      assert.ok(TARGET_URL.endsWith("/talk-with-dad/"));
     });
   });
 });

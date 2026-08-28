@@ -18,7 +18,7 @@ export interface AppQRCodeViewProps {
   appUrl?: string;
 }
 
-const DEFAULT_APP_URL = "https://damorelse.github.io/talk-to-dad/";
+const DEFAULT_APP_URL = "https://damorelse.github.io/talk-with-dad/";
 
 interface FloatingParticle {
   id: number;
@@ -126,7 +126,7 @@ export const AppQRCodeView: React.FC<AppQRCodeViewProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "talk-to-dad-qr-code.svg";
+    link.download = "talk-with-dad-qr-code.svg";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
