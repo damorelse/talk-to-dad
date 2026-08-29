@@ -315,6 +315,64 @@ export class PiperTTSService {
   }
 
   /**
+   * Synthesizes audio for an individual IPA phoneme.
+   */
+  async synthesizeIndividualPhonemeAudio(
+    phoneme: string,
+    speed = 0.4,
+    pitch = 1.0,
+    voiceId = 'en_US-lessac-medium'
+  ): Promise<string> {
+    const cleanPhoneme = phoneme.replace(/[/\[\]]/g, '').trim();
+    const cacheKey = `phoneme:${cleanPhoneme}:${speed.toFixed(2)}:${pitch.toFixed(2)}:${voiceId}`;
+
+    if (this.inMemoryCache.has(cacheKey)) {
+      return this.inMemoryCache.get(cacheKey)!;
+    }
+
+    const dbBlobId = `piper-phoneme-${cleanPhoneme}-${Math.round(speed * 100)}-${voiceId}`;
+    try {
+      const stored = await db.mediaBlobs.get(dbBlobId);
+      if (stored && stored.dataBase64) {
+        this.inMemoryCache.set(cacheKey, stored.dataBase64);
+        return stored.dataBase64;
+      }
+    } catch {
+      // IndexedDB lookup fallback
+    }
+
+    const generated = generateDeterministicPhonemeAudio([cleanPhoneme], 'primary', speed, pitch, voiceId);
+    this.inMemoryCache.set(cacheKey, generated.base64);
+
+    try {
+      await db.mediaBlobs.put({
+        id: dbBlobId,
+        type: 'audio',
+        mimeType: 'audio/wav',
+        dataBase64: generated.base64,
+        createdAt: Date.now(),
+      });
+    } catch {
+      // Ignore DB write errors
+    }
+
+    return generated.base64;
+  }
+
+  /**
+   * Plays an individual phoneme's audio.
+   */
+  async playPhonemeAudio(
+    phoneme: string,
+    speed = 0.4,
+    pitch = 1.0,
+    voiceId = 'en_US-lessac-medium'
+  ): Promise<void> {
+    const audioBase64 = await this.synthesizeIndividualPhonemeAudio(phoneme, speed, pitch, voiceId);
+    await this.playSyllableAudio(audioBase64);
+  }
+
+  /**
    * Clears in-memory audio cache.
    */
   clearCache(): void {

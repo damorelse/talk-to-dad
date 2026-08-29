@@ -84,16 +84,17 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
     let isCurrent = true;
     const warmCache = async () => {
       if (!pronunciationData || pronunciationData.syllables.length === 0) return;
-      if (!piperOnnxService.isReady()) return;
 
       setIsSynthesizing(true);
       try {
-        const hydrated = await piperOnnxService.synthesizeWord(pronunciationData, speed);
+        const hydrated = piperOnnxService.isReady()
+          ? await piperOnnxService.synthesizeWord(pronunciationData, speed)
+          : await piperTTSService.synthesizeWordAudio(pronunciationData, speed);
         if (isCurrent && isMountedRef.current) {
           setPronunciationData(hydrated);
         }
       } catch (err) {
-        console.error('Neural synthesis error:', err);
+        console.error('Syllable synthesis error:', err);
       } finally {
         if (isCurrent && isMountedRef.current) {
           setIsSynthesizing(false);
@@ -119,7 +120,9 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
       try {
         let audioBase64 = syl.audioBase64;
         if (!audioBase64) {
-          audioBase64 = await piperOnnxService.synthesizeSyllable(syl, word, speed);
+          audioBase64 = piperOnnxService.isReady()
+            ? await piperOnnxService.synthesizeSyllable(syl, word, speed)
+            : await piperTTSService.synthesizeSyllableAudio(syl, word, speed);
         }
         await piperTTSService.playSyllableAudio(audioBase64);
       } catch (err) {
@@ -136,6 +139,20 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
     [pronunciationData, word, speed]
   );
 
+  // Play an isolated individual IPA phoneme chip
+  const playIndividualPhoneme = useCallback(
+    async (phoneme: string) => {
+      if (!phoneme) return;
+      iosAudioUnlock.ensureUnlockedAndResumed();
+      try {
+        await piperTTSService.playPhonemeAudio(phoneme, speed);
+      } catch (err) {
+        console.error('Failed to play phoneme audio:', err);
+      }
+    },
+    [speed]
+  );
+
   // Synchronized sequential articulation training ("Sound It Out")
   // Sequence: 1. Speaks whole phrase -> 2. Sounds it out syllable-by-syllable -> 3. Speaks whole phrase again
   const soundItOut = useCallback(async () => {
@@ -150,7 +167,7 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
     try {
       const activeData = piperOnnxService.isReady()
         ? await piperOnnxService.synthesizeWord(pronunciationData, speed)
-        : pronunciationData;
+        : await piperTTSService.synthesizeWordAudio(pronunciationData, speed);
 
       // STEP 1: First says the whole phrase using normal voice
       if (isMountedRef.current) {
@@ -166,23 +183,20 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
         await new Promise((r) => setTimeout(r, 450));
       }
 
-      // STEP 2: Then sounds it out syllable-by-syllable using Piper neural syllables
+      // STEP 2: Then sounds it out syllable-by-syllable using dedicated phoneme audio
       for (let i = 0; i < activeData.syllables.length; i++) {
         if (!isMountedRef.current) break;
         const syl = activeData.syllables[i];
         setActiveSyllableIdx(i);
 
-        if (syl.audioBase64) {
-          await piperTTSService.playSyllableAudio(syl.audioBase64);
-        } else {
-          await new Promise<void>((resolve) => {
-            speechEngine.speak(syl.text, {
-              locale: 'en-US',
-              rate: speed,
-              onEnd: () => resolve(),
-              onError: () => resolve(),
-            });
-          });
+        let audio = syl.audioBase64;
+        if (!audio) {
+          audio = piperOnnxService.isReady()
+            ? await piperOnnxService.synthesizeSyllable(syl, word, speed)
+            : await piperTTSService.synthesizeSyllableAudio(syl, word, speed);
+        }
+        if (audio) {
+          await piperTTSService.playSyllableAudio(audio);
         }
         await new Promise((r) => setTimeout(r, pauseMs));
       }
@@ -244,6 +258,7 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
     isPlaying,
     isSynthesizing,
     playSingleSyllable,
+    playIndividualPhoneme,
     soundItOut,
     speakWholeWord,
     stop,

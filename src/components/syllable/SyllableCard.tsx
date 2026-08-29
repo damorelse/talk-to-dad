@@ -8,6 +8,7 @@ export interface SyllableCardProps {
   activeSyllableIndex?: number | null;
   syllableData?: SyllablePhonemeData[];
   onSyllableClick?: (syllableText: string, index: number, data?: SyllablePhonemeData) => void;
+  onPhonemeClick?: (phoneme: string) => void;
   showIpa?: boolean;
   showStress?: boolean;
 }
@@ -17,6 +18,7 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
   activeSyllableIndex = null,
   syllableData,
   onSyllableClick,
+  onPhonemeClick,
   showIpa = true,
   showStress = true,
 }) => {
@@ -94,16 +96,53 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
                 {syl.text}
               </span>
 
-              {/* Sub-label for BoPoMoFo (注音) or IPA when available */}
-              {showIpa && syl.ipa && (
-                <span
-                  className={`
-                    text-xs sm:text-sm md:text-base font-bold tracking-widest leading-tight
-                    ${isActive ? 'text-slate-950 font-black' : 'text-amber-300'}
-                  `}
-                >
-                  {syl.ipa}
-                </span>
+              {/* Sub-label for BoPoMoFo (注音) or IPA Phonemes */}
+              {showIpa && (
+                <div className="flex items-center justify-center flex-wrap gap-1 mt-1 z-10">
+                  {syl.phonemes && syl.phonemes.length > 0 ? (
+                    syl.phonemes.map((ph, pIdx) => (
+                      <span
+                        key={`${ph}-${pIdx}`}
+                        role={onPhonemeClick ? 'button' : undefined}
+                        tabIndex={onPhonemeClick ? 0 : undefined}
+                        onClick={(e) => {
+                          if (onPhonemeClick) {
+                            e.stopPropagation();
+                            onPhonemeClick(ph);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (onPhonemeClick && (e.key === 'Enter' || e.key === ' ')) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            onPhonemeClick(ph);
+                          }
+                        }}
+                        title={onPhonemeClick ? `Play phoneme /${ph}/` : undefined}
+                        className={`
+                          text-xs sm:text-sm font-mono px-1.5 py-0.5 rounded transition-transform
+                          ${onPhonemeClick ? 'cursor-pointer hover:bg-amber-300 hover:text-slate-950 active:scale-95' : ''}
+                          ${
+                            isActive
+                              ? 'text-slate-950 font-black bg-amber-300/80 border border-amber-950/20'
+                              : 'text-amber-300 bg-slate-900/60 border border-amber-400/20'
+                          }
+                        `}
+                      >
+                        /{ph}/
+                      </span>
+                    ))
+                  ) : syl.ipa ? (
+                    <span
+                      className={`
+                        text-xs sm:text-sm md:text-base font-bold tracking-widest leading-tight
+                        ${isActive ? 'text-slate-950 font-black' : 'text-amber-300'}
+                      `}
+                    >
+                      {syl.ipa}
+                    </span>
+                  ) : null}
+                </div>
               )}
             </button>
           </React.Fragment>

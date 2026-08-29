@@ -333,6 +333,26 @@ describe('Tier 6: Piper TTS & eSpeak NG Syllable Articulation Trainer', () => {
       assert.equal(photoIds[0], 1); // BOS
       assert.equal(photoIds[photoIds.length - 1], 2); // EOS
     });
+
+    it('should synthesize individual IPA phoneme audio via synthesizeIndividualPhonemeAudio', async () => {
+      const phonemeAudio = await piperTTSService.synthesizeIndividualPhonemeAudio('/f/', 0.5);
+      assert.ok(phonemeAudio.startsWith('data:audio/wav;base64,'));
+
+      const cachedAudio = await piperTTSService.synthesizeIndividualPhonemeAudio('f', 0.5);
+      assert.equal(phonemeAudio, cachedAudio, 'Clean phoneme lookup should match cached result');
+    });
+
+    it('should gracefully synthesize audio via piperOnnxService fallback when model is not ready', async () => {
+      const testSyl = {
+        index: 0,
+        text: 'wa',
+        ipa: 'ˈwɔː',
+        stress: 'primary',
+        phonemes: ['w', 'ɔː'],
+      };
+      const audio = await piperOnnxService.synthesizeSyllable(testSyl, 'water', 0.5);
+      assert.ok(audio.startsWith('data:audio/wav;base64,'));
+    });
   });
 });
 
