@@ -6,7 +6,7 @@
  */
 
 import { db } from '../db/AppDatabase.ts';
-import { createWavHeader, bytesToBase64DataUrl } from './piperTTSService.ts';
+import { createWavHeader, bytesToBase64DataUrl, generateDeterministicPhonemeAudio, piperTTSService } from './piperTTSService.ts';
 import { SyllablePhonemeData, WordPronunciationData } from '../../types/index.ts';
 
 // Safely resolve ONNX Runtime Web in browser, worker, or testing environments
@@ -231,77 +231,91 @@ class PiperOnnxService {
     } = {}
   ): Promise<{ base64: string; durationMs: number; rawBytes: Uint8Array }> {
     if (!this.isReady() || !this.session || !this.config) {
-      await this.loadModel();
+      try {
+        await this.loadModel();
+      } catch (e) {
+        console.warn('Piper ONNX model load skipped/failed; falling back to deterministic phonetic generator:', e);
+        return generateDeterministicPhonemeAudio(phonemes, 'primary', options.speed ?? 0.5);
+      }
     }
 
-    const phonemeIds = this.phonemesToIds(phonemes);
-    const sampleRate = this.config!.audio.sample_rate || 22050;
-
-    // Speech rate control via length_scale (lower length_scale = faster, higher = slower)
-    const baseLengthScale = this.config!.inference.length_scale || 1.0;
-    const userSpeed = options.speed ?? 0.5;
-    const effectiveLengthScale = baseLengthScale * (1.0 / Math.max(0.2, userSpeed));
-
-    const noiseScale = options.noiseScale ?? (this.config!.inference.noise_scale || 0.667);
-    const noiseW = options.noiseW ?? (this.config!.inference.noise_w || 0.8);
-
-    const ortRuntime = await getOrt();
-    if (!ortRuntime) throw new Error('ONNX Runtime is not available');
-
-    // Create ONNX Tensors
-    const inputTensor = new ortRuntime.Tensor(
-      'int64',
-      BigInt64Array.from(phonemeIds.map((id) => BigInt(id))),
-      [1, phonemeIds.length]
-    );
-
-    const inputLengthsTensor = new ortRuntime.Tensor(
-      'int64',
-      BigInt64Array.from([BigInt(phonemeIds.length)]),
-      [1]
-    );
-
-    const scalesTensor = new ortRuntime.Tensor(
-      'float32',
-      Float32Array.from([noiseScale, effectiveLengthScale, noiseW]),
-      [3]
-    );
-
-    const feeds: Record<string, any> = {
-      input: inputTensor,
-      input_lengths: inputLengthsTensor,
-      scales: scalesTensor,
-    };
-
-    // Run Neural Inference
-    const results = await this.session!.run(feeds);
-    const outputTensor = results.output;
-    const audioFloat = outputTensor.data as Float32Array;
-
-    // Convert Float32 samples [-1.0, 1.0] to 16-bit PCM WAV
-    const numSamples = audioFloat.length;
-    const pcmBytes = new Uint8Array(numSamples * 2);
-    const dataView = new DataView(pcmBytes.buffer);
-
-    for (let i = 0; i < numSamples; i++) {
-      const sample = Math.max(-1.0, Math.min(1.0, audioFloat[i]));
-      const int16 = sample < 0 ? Math.round(sample * 0x8000) : Math.round(sample * 0x7fff);
-      dataView.setInt16(i * 2, int16, true);
+    if (!this.isReady() || !this.session || !this.config) {
+      return generateDeterministicPhonemeAudio(phonemes, 'primary', options.speed ?? 0.5);
     }
 
-    const header = createWavHeader(pcmBytes.byteLength, sampleRate, 1, 16);
-    const fullWav = new Uint8Array(header.byteLength + pcmBytes.byteLength);
-    fullWav.set(header, 0);
-    fullWav.set(pcmBytes, header.byteLength);
+    try {
+      const phonemeIds = this.phonemesToIds(phonemes);
+      const sampleRate = this.config.audio.sample_rate || 22050;
 
-    const durationMs = Math.round((numSamples / sampleRate) * 1000.0);
-    const base64Url = bytesToBase64DataUrl(fullWav, 'audio/wav');
+      // Speech rate control via length_scale (lower length_scale = faster, higher = slower)
+      const baseLengthScale = this.config.inference.length_scale || 1.0;
+      const userSpeed = options.speed ?? 0.5;
+      const effectiveLengthScale = baseLengthScale * (1.0 / Math.max(0.2, userSpeed));
 
-    return {
-      base64: base64Url,
-      durationMs,
-      rawBytes: fullWav,
-    };
+      const noiseScale = options.noiseScale ?? (this.config.inference.noise_scale || 0.667);
+      const noiseW = options.noiseW ?? (this.config.inference.noise_w || 0.8);
+
+      const ortRuntime = await getOrt();
+      if (!ortRuntime) throw new Error('ONNX Runtime is not available');
+
+      // Create ONNX Tensors
+      const inputTensor = new ortRuntime.Tensor(
+        'int64',
+        BigInt64Array.from(phonemeIds.map((id) => BigInt(id))),
+        [1, phonemeIds.length]
+      );
+
+      const inputLengthsTensor = new ortRuntime.Tensor(
+        'int64',
+        BigInt64Array.from([BigInt(phonemeIds.length)]),
+        [1]
+      );
+
+      const scalesTensor = new ortRuntime.Tensor(
+        'float32',
+        Float32Array.from([noiseScale, effectiveLengthScale, noiseW]),
+        [3]
+      );
+
+      const feeds: Record<string, any> = {
+        input: inputTensor,
+        input_lengths: inputLengthsTensor,
+        scales: scalesTensor,
+      };
+
+      // Run Neural Inference
+      const results = await this.session.run(feeds);
+      const outputTensor = results.output;
+      const audioFloat = outputTensor.data as Float32Array;
+
+      // Convert Float32 samples [-1.0, 1.0] to 16-bit PCM WAV
+      const numSamples = audioFloat.length;
+      const pcmBytes = new Uint8Array(numSamples * 2);
+      const dataView = new DataView(pcmBytes.buffer);
+
+      for (let i = 0; i < numSamples; i++) {
+        const sample = Math.max(-1.0, Math.min(1.0, audioFloat[i]));
+        const int16 = sample < 0 ? Math.round(sample * 0x8000) : Math.round(sample * 0x7fff);
+        dataView.setInt16(i * 2, int16, true);
+      }
+
+      const header = createWavHeader(pcmBytes.byteLength, sampleRate, 1, 16);
+      const fullWav = new Uint8Array(header.byteLength + pcmBytes.byteLength);
+      fullWav.set(header, 0);
+      fullWav.set(pcmBytes, header.byteLength);
+
+      const durationMs = Math.round((numSamples / sampleRate) * 1000.0);
+      const base64Url = bytesToBase64DataUrl(fullWav, 'audio/wav');
+
+      return {
+        base64: base64Url,
+        durationMs,
+        rawBytes: fullWav,
+      };
+    } catch (inferenceErr) {
+      console.warn('Neural inference error, falling back to deterministic phonetic generator:', inferenceErr);
+      return generateDeterministicPhonemeAudio(phonemes, 'primary', options.speed ?? 0.5);
+    }
   }
 
   /**
@@ -318,25 +332,33 @@ class PiperOnnxService {
     }
 
     const phonemes = syllable.phonemes.length > 0 ? syllable.phonemes : [syllable.text];
-    const result = await this.synthesizePhonemes(phonemes, { speed });
 
-    this.inMemoryCache.set(cacheKey, result.base64);
-
-    // Save to IndexedDB
     try {
-      const blobId = `neural-piper-${word.toLowerCase()}-${syllable.index}-${Math.round(speed * 100)}`;
-      await db.mediaBlobs.put({
-        id: blobId,
-        type: 'audio',
-        mimeType: 'audio/wav',
-        dataBase64: result.base64,
-        createdAt: Date.now(),
-      });
-    } catch {
-      // Ignore DB write errors
+      if (this.isReady()) {
+        const result = await this.synthesizePhonemes(phonemes, { speed });
+        this.inMemoryCache.set(cacheKey, result.base64);
+
+        // Save to IndexedDB
+        try {
+          const blobId = `neural-piper-${word.toLowerCase()}-${syllable.index}-${Math.round(speed * 100)}`;
+          await db.mediaBlobs.put({
+            id: blobId,
+            type: 'audio',
+            mimeType: 'audio/wav',
+            dataBase64: result.base64,
+            createdAt: Date.now(),
+          });
+        } catch {
+          // Ignore DB write errors
+        }
+
+        return result.base64;
+      }
+    } catch (err) {
+      console.warn('Neural syllable synthesis failed, falling back to deterministic phonetic audio:', err);
     }
 
-    return result.base64;
+    return piperTTSService.synthesizeSyllableAudio(syllable, word, speed);
   }
 
   /**
@@ -360,12 +382,19 @@ class PiperOnnxService {
 
     // Synthesize full word
     const allPhonemes = wordData.syllables.flatMap((s) => s.phonemes);
-    const fullAudio = await this.synthesizePhonemes(allPhonemes, { speed: Math.min(speed + 0.2, 1.0) });
+    let fullAudioBase64: string | undefined;
+    try {
+      const fullAudio = await this.synthesizePhonemes(allPhonemes, { speed: Math.min(speed + 0.2, 1.0) });
+      fullAudioBase64 = fullAudio.base64;
+    } catch {
+      const fallback = generateDeterministicPhonemeAudio(allPhonemes, 'primary', Math.min(speed + 0.2, 1.0));
+      fullAudioBase64 = fallback.base64;
+    }
 
     return {
       ...wordData,
       syllables: updatedSyllables,
-      fullAudioBase64: fullAudio.base64,
+      fullAudioBase64,
     };
   }
 }
