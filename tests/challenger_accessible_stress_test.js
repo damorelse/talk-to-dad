@@ -259,10 +259,10 @@ describe('CHALLENGER STRESS SUITE: Accessible Redesign', () => {
         'FlashcardDeck must have First Letter hint button'
       );
 
-      // 2. Verify answer back face only renders emoji, labels, syllables, and Speak Word button
+      // 2. Verify answer back face only renders emoji, labels, and phonetic syllables without dense clutter
       assert.ok(
-        flashcardDeckCode.includes('Speak Word · 朗讀單字') || flashcardDeckCode.includes('Speak Word'),
-        'FlashcardDeck back face must have Speak Word button'
+        flashcardDeckCode.includes('card.label'),
+        'FlashcardDeck back face must render target card label'
       );
       assert.ok(
         !flashcardDeckCode.includes('card.definition'),

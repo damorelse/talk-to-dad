@@ -191,7 +191,7 @@ check('Verify FlashcardDeck progressive hint ladder implementation', () => {
   // Verify clean first letter message
   assert.ok(flashcardSrc.includes('The first letter is'), 'Must show "The first letter is"');
   // Verify streamlined back face
-  assert.ok(flashcardSrc.includes('Speak Word'), 'Back face must have Speak Word button');
+  assert.ok(flashcardSrc.includes('card.label'), 'Back face must render target card label');
   assert.ok(!flashcardSrc.includes('card.definition'), 'Back face must NOT show dense definition on patient face');
   assert.ok(!flashcardSrc.includes('card.exampleSentence'), 'Back face must NOT show dense example sentence on patient face');
 });

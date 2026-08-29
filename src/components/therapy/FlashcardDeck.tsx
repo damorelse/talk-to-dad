@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AACCard, AACCategory } from '../../types';
-import { RefreshCw, Volume2, Sparkles, Lightbulb } from 'lucide-react';
+import { RefreshCw, Sparkles, Lightbulb } from 'lucide-react';
 import { useAudio } from '../../hooks/useAudio';
-import { DEFAULT_CATEGORIES } from '../../services/db/defaultData';
 
 interface FlashcardDeckProps {
   card: AACCard;
@@ -52,11 +51,6 @@ export const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
       `The first letter is ${firstLetter}`,
       `第一個字母是 ${firstLetter}`
     );
-  };
-
-  const handleSpeakAnswer = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    speakBilingual(card.label, card.labelZh);
   };
 
   return (
@@ -113,17 +107,12 @@ export const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
               </p>
             )}
 
-            {/* Revealed First Letter Hint Box */}
+            {/* Streamlined First Letter Hint Display */}
             {showFirstLetter && (
-              <div className="w-full bg-purple-950/90 border border-purple-400/60 rounded-xl py-2 px-3 text-center mt-1 animate-in fade-in zoom-in-95">
-                <p className="text-sm sm:text-base font-black text-amber-300">
+              <div className="text-center mt-2 animate-in fade-in">
+                <p className="text-base sm:text-lg font-black text-amber-300 tracking-wide">
                   The first letter is {firstLetter}
                 </p>
-                {card.labelZh && (
-                  <p className="text-xs sm:text-sm font-semibold text-purple-200 mt-0.5">
-                    第一個字母是 {firstLetter}
-                  </p>
-                )}
               </div>
             )}
           </div>
@@ -168,7 +157,7 @@ export const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
           </div>
         </div>
 
-        {/* Back Face (Streamlined Answer Side - Emoji, Labels, Phonetic Syllables, Speak Button) */}
+        {/* Back Face (Streamlined Answer Side - Emoji, Labels, Phonetic Syllables) */}
         <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-purple-950 via-slate-900 to-slate-900 border-4 border-yellow-400 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col justify-between gap-2 shadow-2xl overflow-y-auto scrollbar-none">
           {/* Header */}
           <div className="w-full flex items-center justify-between shrink-0">
@@ -208,19 +197,6 @@ export const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
                 <span>{card.phoneticSyllables}</span>
               </div>
             )}
-          </div>
-
-          {/* 1-Tap "Speak Word" Button */}
-          <div className="w-full pt-1 border-t border-slate-700/60 shrink-0">
-            <button
-              type="button"
-              onClick={handleSpeakAnswer}
-              className="w-full py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-300 active:bg-yellow-500 text-slate-950 font-black rounded-xl sm:rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20 border-2 border-yellow-300 transition-all cursor-pointer"
-              aria-label="Speak target word"
-            >
-              <Volume2 className="w-5 h-5 stroke-[2.5]" />
-              <span>Speak Word · 朗讀單字</span>
-            </button>
           </div>
         </div>
       </div>
