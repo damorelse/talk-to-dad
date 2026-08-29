@@ -42,6 +42,9 @@ import {
   LogIn,
   LogOut,
   KeyRound,
+  ChevronDown,
+  ChevronUp,
+  Smartphone,
 } from 'lucide-react';
 
 interface CaregiverDashboardProps {
@@ -75,6 +78,9 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
 
   const [isTestingEnglish, setIsTestingEnglish] = useState(false);
   const [isTestingChinese, setIsTestingChinese] = useState(false);
+  const [testFeedbackEn, setTestFeedbackEn] = useState<string | null>(null);
+  const [testFeedbackZh, setTestFeedbackZh] = useState<string | null>(null);
+  const [isAndroidHelpOpen, setIsAndroidHelpOpen] = useState(false);
 
   // Google OAuth & Sync states
   const [authState, setAuthState] = useState<GoogleAuthState>(() => googleAuthService.getAuthState());
@@ -99,13 +105,19 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
     };
 
     updateVoices();
+    const unsubEngine = speechEngine.onVoicesChanged(updateVoices);
+
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.addEventListener?.('voiceschanged', updateVoices);
 
       return () => {
+        unsubEngine();
         window.speechSynthesis.removeEventListener?.('voiceschanged', updateVoices);
       };
     }
+    return () => {
+      unsubEngine();
+    };
   }, []);
 
   const groupedVoices = useMemo(() => {
@@ -133,6 +145,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
   const handleTestEnglish = async () => {
     if (isTestingEnglish) return;
     setIsTestingEnglish(true);
+    setTestFeedbackEn('Testing...');
     try {
       await speechEngine.speak('Hello! Testing the English voice and speech rate setting.', {
         rate: settings.speechRate,
@@ -140,6 +153,11 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
         voiceURI: settings.selectedVoiceEnUS || defaultEnVoiceURI,
         locale: 'en-US',
       });
+      setTestFeedbackEn('✅ Success');
+      setTimeout(() => setTestFeedbackEn(null), 3000);
+    } catch {
+      setTestFeedbackEn('⚠️ Error');
+      setTimeout(() => setTestFeedbackEn(null), 3000);
     } finally {
       setIsTestingEnglish(false);
     }
@@ -148,6 +166,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
   const handleTestChinese = async () => {
     if (isTestingChinese) return;
     setIsTestingChinese(true);
+    setTestFeedbackZh('測試中...');
     try {
       await speechEngine.speak('您好！測試繁體中文語音與語速設定。', {
         rate: settings.speechRate,
@@ -155,6 +174,11 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
         voiceURI: settings.selectedVoiceZhTW || defaultZhVoiceURI,
         locale: 'zh-TW',
       });
+      setTestFeedbackZh('✅ 成功');
+      setTimeout(() => setTestFeedbackZh(null), 3000);
+    } catch {
+      setTestFeedbackZh('⚠️ 異常');
+      setTimeout(() => setTestFeedbackZh(null), 3000);
     } finally {
       setIsTestingChinese(false);
     }
@@ -513,16 +537,68 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
 
               {/* Voices (English and Chinese) */}
               <div className="flex flex-col gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
-                <label className="text-xs font-black tracking-wider text-slate-800 dark:text-white">
-                  Voices
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black tracking-wider text-slate-800 dark:text-white">
+                    Voices
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsAndroidHelpOpen(!isAndroidHelpOpen)}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                  >
+                    <Smartphone className="w-3.5 h-3.5" />
+                    <span>Android Setup Guide</span>
+                    {isAndroidHelpOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </button>
+                </div>
+
+                {/* Collapsible Android Voice Setup Guide */}
+                {isAndroidHelpOpen && (
+                  <div className="p-3.5 bg-blue-50/80 dark:bg-slate-900/90 border border-blue-200 dark:border-blue-800/60 rounded-2xl flex flex-col gap-2 text-xs animate-in fade-in duration-200">
+                    <div className="flex items-center gap-2 font-bold text-blue-900 dark:text-blue-200">
+                      <Smartphone className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                      <span>Android Phone Voice Setup Guide (安卓手機語音設定指南)</span>
+                    </div>
+                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-[11px]">
+                      If voices sound robotic or Chinese speech does not play on your Android phone, install offline Google Speech Services voice packs in Android Settings:
+                    </p>
+                    <ol className="list-decimal list-inside space-y-1.5 text-slate-700 dark:text-slate-200 text-[11px] font-medium pl-1">
+                      <li>
+                        Open Android <strong className="text-slate-900 dark:text-white font-bold">Settings (設定)</strong> → <strong className="text-slate-900 dark:text-white font-bold">System (系統)</strong> or <strong className="text-slate-900 dark:text-white font-bold">General management (一般管理)</strong>.
+                      </li>
+                      <li>
+                        Tap <strong className="text-slate-900 dark:text-white font-bold">Language &amp; input (語言與輸入)</strong> → <strong className="text-slate-900 dark:text-white font-bold">Text-to-speech output (文字轉語音輸出)</strong>.
+                      </li>
+                      <li>
+                        Select <strong className="text-slate-900 dark:text-white font-bold">Preferred engine (偏好的引擎)</strong> → <strong className="text-slate-900 dark:text-white font-bold">Speech Recognition and Synthesis from Google (Google 語音服務)</strong>.
+                      </li>
+                      <li>
+                        Tap the ⚙️ <strong className="text-slate-900 dark:text-white font-bold">Settings gear icon</strong> next to Google Engine → <strong className="text-slate-900 dark:text-white font-bold">Install voice data (安裝語音資料)</strong>.
+                      </li>
+                      <li>
+                        Download <strong className="text-slate-900 dark:text-white font-bold">Chinese (Taiwan) (中文 (台灣))</strong> and <strong className="text-slate-900 dark:text-white font-bold">English (United States) (英文 (美國))</strong> for 100% offline playback.
+                      </li>
+                    </ol>
+                    <div className="mt-1 pt-2 border-t border-blue-200 dark:border-blue-800/40 flex items-center gap-1.5 text-[10px] text-blue-700 dark:text-blue-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span>Once downloaded, local high-quality voices will automatically appear in the selectors below.</span>
+                    </div>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* 1. English Voice */}
                   <div className="p-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col gap-2 shadow-sm">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      🇺🇸 English
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        🇺🇸 English
+                      </span>
+                      {testFeedbackEn && (
+                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                          {testFeedbackEn}
+                        </span>
+                      )}
+                    </div>
 
                     <select
                       value={settings.selectedVoiceEnUS || defaultEnVoiceURI}
@@ -555,9 +631,16 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
 
                   {/* 2. Chinese Voice */}
                   <div className="p-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col gap-2 shadow-sm">
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                      🇹🇼 Chinese
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        🇹🇼 Chinese
+                      </span>
+                      {testFeedbackZh && (
+                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                          {testFeedbackZh}
+                        </span>
+                      )}
+                    </div>
 
                     <select
                       value={settings.selectedVoiceZhTW || defaultZhVoiceURI}
