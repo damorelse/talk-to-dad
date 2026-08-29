@@ -106,9 +106,13 @@ export interface AACCard {
   labelZh?: string; // Traditional Mandarin Chinese name (e.g. "水", "洗手間")
   spokenText: string;
   spokenTextZh?: string; // Traditional Mandarin Chinese spoken phrase
+  definition?: string;        // Simple concept definition in English
+  definitionZh?: string;      // Simple concept definition in Traditional Chinese
+  exampleSentence?: string;   // Common daily life example sentence in English
+  exampleSentenceZh?: string; // Common daily life example sentence in Traditional Chinese
   phoneticSyllables?: string; // e.g. "Wa · ter"
-  clue?: string;              // Clinical descriptive clue in English
-  clueZh?: string;            // Clinical descriptive clue in Traditional Chinese
+  clue?: string;              // Clinical descriptive clue in English (without containing the phrase)
+  clueZh?: string;            // Clinical descriptive clue in Traditional Chinese (without containing the phrase)
   fitzgeraldCategory: FitzgeraldCategory;
   icon?: string; // Lucide icon name or emoji
   imageBlobId?: string; // Key to mediaBlobs

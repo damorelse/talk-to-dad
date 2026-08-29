@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { AACCard, AACCategory, AppSettings } from '../../types';
 import { GridCard } from './GridCard';
+import { CardDetailModal } from './CardDetailModal';
 import { CategorySelector } from './CategorySelector';
 import { useAudio } from '../../hooks/useAudio';
 import { Search } from 'lucide-react';
@@ -18,6 +19,7 @@ export const CardGrid: React.FC<CardGridProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | 'favorites'>('favorites');
   const [searchQuery, setSearchQuery] = useState('');
+  const [inspectCard, setInspectCard] = useState<AACCard | null>(null);
   const { speakCard } = useAudio();
 
   const filteredCards = useMemo(() => {
@@ -30,13 +32,17 @@ export const CardGrid: React.FC<CardGridProps> = ({
       } else if (card.categoryId !== selectedCategory) {
         return false;
       }
-      // Search filter
+      // Search filter across label, spokenText, syllables, definition, example, and clues
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchesLabel = card.label.toLowerCase().includes(q);
-        const matchesSpoken = card.spokenText.toLowerCase().includes(q);
+        const matchesLabel = card.label.toLowerCase().includes(q) || (card.labelZh && card.labelZh.includes(q));
+        const matchesSpoken = card.spokenText.toLowerCase().includes(q) || (card.spokenTextZh && card.spokenTextZh.includes(q));
         const matchesSyllables = card.phoneticSyllables?.toLowerCase().includes(q);
-        if (!matchesLabel && !matchesSpoken && !matchesSyllables) {
+        const matchesDefinition = (card.definition && card.definition.toLowerCase().includes(q)) || (card.definitionZh && card.definitionZh.includes(q));
+        const matchesExample = (card.exampleSentence && card.exampleSentence.toLowerCase().includes(q)) || (card.exampleSentenceZh && card.exampleSentenceZh.includes(q));
+        const matchesClue = (card.clue && card.clue.toLowerCase().includes(q)) || (card.clueZh && card.clueZh.includes(q));
+
+        if (!matchesLabel && !matchesSpoken && !matchesSyllables && !matchesDefinition && !matchesExample && !matchesClue) {
           return false;
         }
       }
@@ -48,23 +54,14 @@ export const CardGrid: React.FC<CardGridProps> = ({
     speakCard(card);
   };
 
-  // Dynamic grid style based on settings
-  const cols = Math.max(3, Math.min(5, settings.gridCols || 4));
-
-  // Dynamic row height bounds based on column density to preserve proportional card shapes
-  const rowHeightMap: Record<number, { min: number; max: number }> = {
-    3: { min: 160, max: 210 },
-    4: { min: 150, max: 195 },
-    5: { min: 135, max: 175 },
-  };
-
-  const currentDensity = rowHeightMap[cols] || rowHeightMap[4];
-
-  const gridStyle: React.CSSProperties = {
-    gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-    gridAutoRows: `minmax(${currentDensity.min}px, ${currentDensity.max}px)`,
-    alignContent: 'start',
-  };
+  // Dynamic responsive grid classes (2 cols on mobile, 3-4 cols on iPad, 4-5 cols on desktop) with settings override
+  const gridColsClass = useMemo(() => {
+    if (settings.gridCols === 2) return 'grid-cols-2';
+    if (settings.gridCols === 3) return 'grid-cols-3';
+    if (settings.gridCols === 5) return 'grid-cols-5';
+    if (settings.gridCols === 6) return 'grid-cols-6';
+    return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5';
+  }, [settings.gridCols]);
 
   return (
     <div className="w-full h-full flex flex-col gap-2.5 overflow-hidden">
@@ -85,7 +82,7 @@ export const CardGrid: React.FC<CardGridProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search words..."
+            placeholder="Search words, clues, definitions..."
             className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
           />
           {searchQuery && (
@@ -110,14 +107,18 @@ export const CardGrid: React.FC<CardGridProps> = ({
           </div>
         ) : (
           <div
-            className="grid gap-2.5 sm:gap-3.5 w-full"
-            style={gridStyle}
+            className={`grid ${gridColsClass} gap-2.5 sm:gap-3.5 w-full`}
+            style={{
+              gridAutoRows: 'minmax(145px, auto)',
+              alignContent: 'start',
+            }}
           >
             {filteredCards.map((card) => (
               <GridCard
                 key={card.id}
                 card={card}
                 onSelect={handleCardSelect}
+                onInspect={(c) => setInspectCard(c)}
                 debounceMs={settings.tapDebounceMs}
                 fontSize={settings.fontSize}
               />
@@ -125,6 +126,14 @@ export const CardGrid: React.FC<CardGridProps> = ({
           </div>
         )}
       </div>
+
+      {/* Card Detail / Inspector Modal */}
+      {inspectCard && (
+        <CardDetailModal
+          card={inspectCard}
+          onClose={() => setInspectCard(null)}
+        />
+      )}
     </div>
   );
 };

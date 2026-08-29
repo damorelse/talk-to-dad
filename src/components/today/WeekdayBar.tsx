@@ -43,9 +43,9 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
           >
             {/* Today Badge */}
             {isToday && (
-              <div className="absolute -top-2.5 inset-x-0 flex items-center justify-center pointer-events-none">
-                <span className="bg-amber-400 text-slate-950 text-[8px] sm:text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-full shadow">
-                  Today
+              <div className="absolute -top-3 inset-x-0 flex items-center justify-center pointer-events-none">
+                <span className="bg-amber-400 text-slate-950 text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md border border-amber-300 ring-1 ring-amber-500/40">
+                  TODAY
                 </span>
               </div>
             )}
@@ -53,18 +53,18 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
             {/* Day Short Name in English */}
             <span
               className={`
-                text-[10px] sm:text-[11px] font-black uppercase tracking-tight
-                ${isToday ? 'text-amber-300 pt-0.5' : 'text-slate-400'}
+                text-xs sm:text-sm font-black uppercase tracking-tight
+                ${isToday ? 'text-amber-300 pt-0.5' : 'text-slate-300'}
               `}
             >
               {weekday.nameShort}
             </span>
 
-            {/* Day Number (Day of Month) */}
+            {/* Day Number (Day of Month >= 18px) */}
             <span
               className={`
-                text-sm sm:text-base font-black leading-none font-mono
-                ${isToday ? 'text-white scale-110 drop-shadow' : 'text-slate-200'}
+                text-lg sm:text-xl md:text-2xl font-black leading-none font-mono
+                ${isToday ? 'text-white scale-110 drop-shadow-md' : 'text-slate-100'}
               `}
             >
               {dayOfMonth}
@@ -73,8 +73,8 @@ export const WeekdayBar: React.FC<WeekdayBarProps> = ({
             {/* Day Name in Traditional Chinese */}
             <span
               className={`
-                text-[10px] sm:text-[11px] font-extrabold
-                ${isToday ? 'text-amber-200 font-black' : 'text-slate-400'}
+                text-xs sm:text-sm font-extrabold
+                ${isToday ? 'text-amber-200 font-black' : 'text-slate-300'}
               `}
             >
               {weekday.nameZhShort}

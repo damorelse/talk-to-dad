@@ -164,6 +164,52 @@ export const TodayOrientationView: React.FC = () => {
   const minStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
   const greeting = getGreeting(hours);
 
+  // Day Phase Helper: Morning (5:00-11:59), Afternoon (12:00-16:59), Evening (17:00-20:59), Night (21:00-4:59)
+  const getDayPhase = (h: number) => {
+    if (h >= 5 && h < 12) {
+      return {
+        phase: 'morning',
+        icon: '🌅',
+        en: 'Morning',
+        zh: '早上',
+        bgTint: 'bg-amber-500/20',
+        borderTint: 'border-amber-400/50',
+        textTint: 'text-amber-300',
+      };
+    } else if (h >= 12 && h < 17) {
+      return {
+        phase: 'afternoon',
+        icon: '☀️',
+        en: 'Afternoon',
+        zh: '下午',
+        bgTint: 'bg-amber-500/25',
+        borderTint: 'border-amber-300/60',
+        textTint: 'text-amber-200',
+      };
+    } else if (h >= 17 && h < 21) {
+      return {
+        phase: 'evening',
+        icon: '🌆',
+        en: 'Evening',
+        zh: '傍晚',
+        bgTint: 'bg-orange-500/20',
+        borderTint: 'border-orange-400/50',
+        textTint: 'text-orange-300',
+      };
+    } else {
+      return {
+        phase: 'night',
+        icon: '🌙',
+        en: 'Night',
+        zh: '晚上',
+        bgTint: 'bg-indigo-500/20',
+        borderTint: 'border-indigo-400/50',
+        textTint: 'text-indigo-300',
+      };
+    }
+  };
+  const dayPhase = getDayPhase(hours);
+
   // Active Glow Indicators for Visual-Audio Synchrony
   const isWeekdayActive = isSpeaking && (activeSpeechType === 'weekday' || activeSpeechType === 'date' || activeSpeechType === 'all');
   const isDateActive = isSpeaking && (activeSpeechType === 'date' || activeSpeechType === 'all');
@@ -172,8 +218,8 @@ export const TodayOrientationView: React.FC = () => {
 
   return (
     <div className="w-full h-full flex flex-col gap-3 overflow-y-auto p-1 select-none scrollbar-none">
-      {/* 1. HERO GREETING & MASTER SPEAK BUTTON (Quorra Mascot + Greeting) */}
-      <div className="w-full bg-transparent px-1.5 py-0.5 flex items-center justify-start gap-3.5 sm:gap-4 min-w-0 flex-wrap sm:flex-nowrap">
+      {/* 1. HERO GREETING, DAY-PHASE ANCHOR & MASTER SPEAK BUTTON */}
+      <div className="w-full bg-transparent px-1.5 py-0.5 flex items-center justify-between gap-3.5 sm:gap-4 min-w-0 flex-wrap sm:flex-nowrap">
         {/* Left: Quorra Mascot Avatar & Greeting */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 min-w-0">
           <QuorraGreetingAvatar
@@ -190,8 +236,30 @@ export const TodayOrientationView: React.FC = () => {
           </div>
         </div>
 
-        {/* Master Speak & Stop Controls (Directly next to Greeting, similar heights, English-only label) */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Right: Visual Day-Phase Anchor Badge & Master Controls */}
+        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 flex-wrap sm:flex-nowrap">
+          {/* Visual Day-Phase Anchor Badge (>=28px icon, bold bilingual text, tinted badge) */}
+          <div
+            className={`
+              flex items-center gap-2 sm:gap-2.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border shadow-md select-none transition-all
+              ${dayPhase.bgTint} ${dayPhase.borderTint}
+            `}
+            aria-label={`Time of day: ${dayPhase.en}, ${dayPhase.zh}`}
+          >
+            <span className="text-[28px] sm:text-3xl shrink-0 leading-none drop-shadow" role="img" aria-hidden="true">
+              {dayPhase.icon}
+            </span>
+            <div className="flex flex-col text-left leading-none gap-0.5">
+              <span className="text-xs sm:text-sm font-black text-white tracking-wide">
+                {dayPhase.en}
+              </span>
+              <span className={`text-[11px] sm:text-xs font-black ${dayPhase.textTint}`}>
+                {dayPhase.zh}
+              </span>
+            </div>
+          </div>
+
+          {/* Master Speak & Stop Controls */}
           <DebouncedTouchable
             onPress={handleSpeakAll}
             minTouchSize="md"
@@ -225,7 +293,7 @@ export const TodayOrientationView: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. 2-COLUMN LAYOUT: Left (Time, Weekday, Date) | Right (Location with World Map) */}
+      {/* 2. 2-COLUMN LAYOUT: Left (Time, Weekday, Date) | Right (Location Orientation Card) */}
       <div className="w-full flex-1 grid grid-cols-1 lg:grid-cols-2 gap-2.5 sm:gap-3 min-h-0">
         {/* LEFT COLUMN: Time (top) -> Weekday (middle) -> Date (bottom) */}
         <div className="flex flex-col gap-2.5 sm:gap-3 h-full">
@@ -241,7 +309,7 @@ export const TodayOrientationView: React.FC = () => {
                   : 'border-slate-800 hover:border-emerald-500/60'
               }
             `}
-            aria-label={`Current time: ${displayHours12}:${minStr} ${ampm}. Tap to hear.`}
+            aria-label={`Current time: ${displayHours12}:${minStr} ${ampm}, ${dayPhase.en}. Tap to hear.`}
           >
             {/* Card Header */}
             <div className="flex items-center justify-between w-full">
@@ -251,13 +319,18 @@ export const TodayOrientationView: React.FC = () => {
                   Time · 現在時間
                 </span>
               </div>
-              <div className="text-emerald-400 group-hover:text-white transition-colors p-0.5">
-                <Volume2 className="w-4 h-4" />
+              <div className="flex items-center gap-2">
+                <span className={`text-[11px] sm:text-xs font-black px-2 py-0.5 rounded-full border ${dayPhase.bgTint} ${dayPhase.borderTint} ${dayPhase.textTint}`}>
+                  {dayPhase.icon} {dayPhase.en} · {dayPhase.zh}
+                </span>
+                <div className="text-emerald-400 group-hover:text-white transition-colors p-0.5">
+                  <Volume2 className="w-4 h-4" />
+                </div>
               </div>
             </div>
 
-            {/* Time Display - Centered in container with compact vertical spacing, shifted slightly right */}
-            <div className="flex flex-col items-center justify-center my-auto py-0.5 w-full text-center translate-x-1.5 sm:translate-x-2">
+            {/* Time Display - Centered in container with compact vertical spacing */}
+            <div className="flex flex-col items-center justify-center my-auto py-0.5 w-full text-center">
               <div className="flex items-baseline gap-2.5 justify-center">
                 <span className="text-2xl sm:text-3xl lg:text-4xl font-black font-mono tracking-tight text-white group-hover:text-emerald-300 transition-colors">
                   {displayHours12}:{minStr}

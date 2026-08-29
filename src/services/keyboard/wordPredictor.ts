@@ -199,6 +199,48 @@ export function extractVocabularyFromCards(cards: AACCard[]): AACVocabularyItem[
         }
       }
     }
+
+    // D. Words from definition
+    if (card.definition) {
+      const tokens = card.definition.split(/\s+/);
+      for (const t of tokens) {
+        const cleanToken = t.replace(/[^\w'-]/g, '').trim();
+        if (cleanToken.length > 2) {
+          const lower = cleanToken.toLowerCase();
+          const tokenWeight = 68 + favoriteBonus;
+          const existing = map.get(lower);
+          if (!existing || existing.weight < tokenWeight) {
+            const formatted = cleanToken.charAt(0).toUpperCase() + cleanToken.slice(1).toLowerCase();
+            map.set(lower, {
+              word: formatted,
+              weight: tokenWeight,
+              category: card.categoryId,
+            });
+          }
+        }
+      }
+    }
+
+    // E. Words from exampleSentence
+    if (card.exampleSentence) {
+      const tokens = card.exampleSentence.split(/\s+/);
+      for (const t of tokens) {
+        const cleanToken = t.replace(/[^\w'-]/g, '').trim();
+        if (cleanToken.length > 2) {
+          const lower = cleanToken.toLowerCase();
+          const tokenWeight = 68 + favoriteBonus;
+          const existing = map.get(lower);
+          if (!existing || existing.weight < tokenWeight) {
+            const formatted = cleanToken.charAt(0).toUpperCase() + cleanToken.slice(1).toLowerCase();
+            map.set(lower, {
+              word: formatted,
+              weight: tokenWeight,
+              category: card.categoryId,
+            });
+          }
+        }
+      }
+    }
   }
 
   return Array.from(map.values());

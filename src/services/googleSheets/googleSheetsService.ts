@@ -388,10 +388,17 @@ export class GoogleSheetsService {
       return normHeaders.findIndex(h => keywords.some(k => h.includes(k)));
     };
 
-    const labelIdx = findIndex(['label', 'word', 'name', 'card', 'title', 'text', '標籤', '名稱', '單字', '詞彙']);
+    // Specific compound headers first to avoid substring collisions
+    const defZhIdx = findIndex(['definitionzh', 'zhdefinition', 'chinesedefinition', 'zhdef', 'chinesedef', '中文定義', '中文釋義']);
+    const defIdx = findIndex(['definition', 'def', 'meaning', 'description', '定義', '釋義']);
+    const exampleZhIdx = findIndex(['examplesentencezh', 'examplesentencechinese', 'chineseexamplesentence', 'chineseexample', 'zhexample', 'examplezh', '中文例句', '中文用法']);
+    const exampleIdx = findIndex(['examplesentence', 'example', 'sample', '例句', '日常例句', '日常用法']);
+    const clueZhIdx = findIndex(['cluezh', 'chineseclue', 'zhclue', 'chinesehint', 'zhhint', 'hintzh', '中文線索', '中文提示']);
+    const clueIdx = findIndex(['clue', 'hint', 'prompt', '線索', '提示']);
+    const spokenZhIdx = findIndex(['spokenzh', 'spokentextzh', 'chinesespoken', 'zhspoken', 'chinesespeech', 'zhspeech', '中文朗讀', '中文語音']);
     const spokenIdx = findIndex(['spokentext', 'spoken', 'speech', 'phrase', 'sentence', '朗讀', '語音']);
-    const labelZhIdx = findIndex(['labelzh', 'chinese', 'zhlabel', 'chineselabel', '中文標籤', '中文名稱', '中文']);
-    const spokenZhIdx = findIndex(['spokenzh', 'spokentextzh', 'chinesespoken', 'zhspoken', '中文朗讀', '中文語音']);
+    const labelZhIdx = findIndex(['labelzh', 'zhlabel', 'chineselabel', 'chinesename', 'zhname', '中文標籤', '中文名稱', '中文單字', '中文']);
+    const labelIdx = findIndex(['label', 'word', 'name', 'card', 'title', 'text', '標籤', '名稱', '單字', '詞彙']);
     const roleIdx = findIndex(['role', 'fitzgerald', 'partofspeech', 'pos', 'type', '詞性', '角色']);
     const iconIdx = findIndex(['emoji', 'icon', 'symbol', '圖示', '表情']);
     const syllablesIdx = findIndex(['syllable', 'phonetic', 'breakdown', '音節', '發音']);
@@ -414,6 +421,14 @@ export class GoogleSheetsService {
       // Traditional Chinese label & spoken
       let labelZh = labelZhIdx !== -1 ? row[labelZhIdx] : undefined;
       let spokenTextZh = spokenZhIdx !== -1 ? row[spokenZhIdx] : undefined;
+
+      // Definitions & Examples & Clues
+      let definition = defIdx !== -1 ? row[defIdx] : undefined;
+      let definitionZh = defZhIdx !== -1 ? row[defZhIdx] : undefined;
+      let exampleSentence = exampleIdx !== -1 ? row[exampleIdx] : undefined;
+      let exampleSentenceZh = exampleZhIdx !== -1 ? row[exampleZhIdx] : undefined;
+      let clue = clueIdx !== -1 ? row[clueIdx] : undefined;
+      let clueZh = clueZhIdx !== -1 ? row[clueZhIdx] : undefined;
 
       // Auto-detect Chinese if primary label is Chinese
       if (!labelZh && isChineseText(label)) {
@@ -469,6 +484,12 @@ export class GoogleSheetsService {
         labelZh,
         spokenText,
         spokenTextZh,
+        definition: definition || undefined,
+        definitionZh: definitionZh || undefined,
+        exampleSentence: exampleSentence || undefined,
+        exampleSentenceZh: exampleSentenceZh || undefined,
+        clue: clue || undefined,
+        clueZh: clueZh || undefined,
         phoneticSyllables: syllables,
         fitzgeraldCategory: role,
         icon,

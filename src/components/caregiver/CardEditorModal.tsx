@@ -22,6 +22,10 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
   const [labelZh, setLabelZh] = useState(initialCard?.labelZh || '');
   const [spokenText, setSpokenText] = useState(initialCard?.spokenText || '');
   const [spokenTextZh, setSpokenTextZh] = useState(initialCard?.spokenTextZh || '');
+  const [definition, setDefinition] = useState(initialCard?.definition || '');
+  const [definitionZh, setDefinitionZh] = useState(initialCard?.definitionZh || '');
+  const [exampleSentence, setExampleSentence] = useState(initialCard?.exampleSentence || '');
+  const [exampleSentenceZh, setExampleSentenceZh] = useState(initialCard?.exampleSentenceZh || '');
   const [clue, setClue] = useState(initialCard?.clue || '');
   const [clueZh, setClueZh] = useState(initialCard?.clueZh || '');
   const [categoryId, setCategoryId] = useState(initialCard?.categoryId || categories[0]?.id || 'cat-needs');
@@ -51,6 +55,10 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
       labelZh: labelZh.trim() || undefined,
       spokenText: spokenText.trim() || label.trim(),
       spokenTextZh: spokenTextZh.trim() || undefined,
+      definition: definition.trim() || undefined,
+      definitionZh: definitionZh.trim() || undefined,
+      exampleSentence: exampleSentence.trim() || undefined,
+      exampleSentenceZh: exampleSentenceZh.trim() || undefined,
       phoneticSyllables: phoneticSyllables.trim() || formatWithMiddleDot(label.trim()),
       clue: clue.trim() || undefined,
       clueZh: clueZh.trim() || undefined,
@@ -160,25 +168,73 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
               </div>
             </div>
 
-            {/* Clue / Prompt (English & Chinese) for Word Finding Therapy */}
+            {/* Simple Concept Definition (English & Traditional Chinese) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-slate-300">English Clue / Hint</label>
+                <label className="text-xs font-bold text-slate-300">Simple Definition (English)</label>
                 <input
                   type="text"
-                  value={clue}
-                  onChange={(e) => setClue(e.target.value)}
-                  placeholder="e.g. What do you drink when you are thirsty?"
+                  value={definition}
+                  onChange={(e) => setDefinition(e.target.value)}
+                  placeholder="e.g. A clear liquid essential for drinking"
                   className="px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-slate-300">Chinese Clue / Hint (繁體中文提示)</label>
+                <label className="text-xs font-bold text-slate-300">Simple Definition (繁體中文釋義)</label>
+                <input
+                  type="text"
+                  value={definitionZh}
+                  onChange={(e) => setDefinitionZh(e.target.value)}
+                  placeholder="e.g. 維持生命與解渴所必需的清澈液體"
+                  className="px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Daily Life Example Sentence (English & Traditional Chinese) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-300">Daily Life Example Sentence</label>
+                <input
+                  type="text"
+                  value={exampleSentence}
+                  onChange={(e) => setExampleSentence(e.target.value)}
+                  placeholder="e.g. He poured a cold glass of water."
+                  className="px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-300">Daily Life Example (繁體中文例句)</label>
+                <input
+                  type="text"
+                  value={exampleSentenceZh}
+                  onChange={(e) => setExampleSentenceZh(e.target.value)}
+                  placeholder="e.g. 他在散步後倒了一杯溫開水解渴。"
+                  className="px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Clue / Prompt (English & Chinese) for Word Finding Therapy */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-300">Mystery Clue (English - No Spoilers)</label>
+                <input
+                  type="text"
+                  value={clue}
+                  onChange={(e) => setClue(e.target.value)}
+                  placeholder="e.g. A clear liquid you drink from a glass when thirsty"
+                  className="px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-slate-300">Mystery Clue (繁體中文線索 - 不含答案)</label>
                 <input
                   type="text"
                   value={clueZh}
                   onChange={(e) => setClueZh(e.target.value)}
-                  placeholder="e.g. 口渴時想喝的透明液體"
+                  placeholder="e.g. 口渴時從杯子裡飲用、透明清澈的飲品"
                   className="px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white font-medium text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>

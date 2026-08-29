@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { AACCategory, AACCard } from "../../types";
 import { FlashcardDeck } from "./FlashcardDeck";
 import { CategorySelector } from "../grid/CategorySelector";
@@ -73,7 +73,7 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
   const currentItem = allWeeklyCards[cardIndex] || allWeeklyCards[0];
   const currentCard = currentItem?.card;
   const currentCategoryId = currentItem?.category?.id;
-  const prevCategoryIdRef = React.useRef<string | null>(null);
+  const prevCategoryIdRef = useRef<string | null>(null);
 
   // Trigger 5.8s top crossing animation on category changes
   const triggerCrossingAnimation = useCallback((name: string, nameZh?: string) => {
@@ -99,7 +99,7 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
   }, []);
 
   // Synchronize category transitions whenever the active card enters a new category
-  React.useEffect(() => {
+  useEffect(() => {
     if (!currentCategoryId) return;
 
     if (prevCategoryIdRef.current !== null && prevCategoryIdRef.current !== currentCategoryId) {
@@ -149,53 +149,61 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
     }
   };
 
-  const handleCorrect = () => {
+  const handleCorrect = useCallback(() => {
     // Play 1046Hz success fanfare
     playSuccess();
-    const newCorrect = correctCount + 1;
-    setCorrectCount(newCorrect);
+    setCorrectCount((prev) => {
+      const newCorrect = prev + 1;
+      // Check if score is multiple of 3
+      if (newCorrect > 0 && newCorrect % 3 === 0) {
+        triggerMilestoneAnimation();
+      }
+      return newCorrect;
+    });
     setCelebrationActive(true);
 
-    if (!isFlipped) {
-      setIsFlipped(true);
-    }
-
-    // Check if score is multiple of 3
-    if (newCorrect > 0 && newCorrect % 3 === 0) {
-      triggerMilestoneAnimation();
-    }
+    setIsFlipped(true);
 
     setTimeout(() => {
       setCelebrationActive(false);
 
       // Auto-advance to next card in unified continuous stream
-      if (cardIndex < allWeeklyCards.length - 1) {
-        setCardIndex((idx) => idx + 1);
-        setIsFlipped(false);
-      } else {
-        // Finished all cards in master deck!
-        setIsSessionComplete(true);
-      }
+      setCardIndex((idx) => {
+        if (idx < allWeeklyCards.length - 1) {
+          setIsFlipped(false);
+          return idx + 1;
+        } else {
+          // Finished all cards in master deck!
+          setIsSessionComplete(true);
+          return idx;
+        }
+      });
     }, 1200);
-  };
+  }, [playSuccess, triggerMilestoneAnimation, allWeeklyCards.length]);
 
-  const handleNext = () => {
-    if (cardIndex < allWeeklyCards.length - 1) {
-      setCardIndex((idx) => idx + 1);
-      setIsFlipped(false);
-    } else {
-      setIsSessionComplete(true);
-    }
-  };
+  const handleNext = useCallback(() => {
+    setCardIndex((idx) => {
+      if (idx < allWeeklyCards.length - 1) {
+        setIsFlipped(false);
+        return idx + 1;
+      } else {
+        setIsSessionComplete(true);
+        return idx;
+      }
+    });
+  }, [allWeeklyCards.length]);
 
-  const handlePrev = () => {
-    if (cardIndex > 0) {
-      setCardIndex((idx) => idx - 1);
-      setIsFlipped(false);
-    }
-  };
+  const handlePrev = useCallback(() => {
+    setCardIndex((idx) => {
+      if (idx > 0) {
+        setIsFlipped(false);
+        return idx - 1;
+      }
+      return idx;
+    });
+  }, []);
 
-  const handleRestart = () => {
+  const handleRestart = useCallback(() => {
     setCardIndex(0);
     setIsFlipped(false);
     setCorrectCount(0);
@@ -206,7 +214,49 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
       setSelectedCategoryId(allWeeklyCards[0].category.id);
       prevCategoryIdRef.current = allWeeklyCards[0].category.id;
     }
-  };
+  }, [allWeeklyCards]);
+
+  // Desktop global keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Safely ignore events when input, textarea, or contenteditable elements are focused
+      const activeEl = document.activeElement;
+      const isInputFocused =
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          (activeEl as HTMLElement).isContentEditable);
+
+      if (isInputFocused) return;
+
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault();
+        if (!isSessionComplete && currentCard) {
+          setIsFlipped((f) => !f);
+        }
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        if (!isSessionComplete && currentCard) {
+          handleCorrect();
+        }
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (!isSessionComplete && currentCard) {
+          handlePrev();
+        }
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        if (!isSessionComplete && currentCard) {
+          handleNext();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isSessionComplete, currentCard, handleCorrect, handleNext, handlePrev]);
 
   return (
     <div className="w-full h-full flex flex-col gap-2.5 overflow-hidden select-none relative">
@@ -308,6 +358,7 @@ export const TherapySessionView: React.FC<TherapySessionViewProps> = ({
                 card={currentCard}
                 isFlipped={isFlipped}
                 onFlip={() => setIsFlipped((f) => !f)}
+                category={currentItem?.category}
               />
             </div>
           ) : (

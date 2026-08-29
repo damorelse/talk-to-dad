@@ -44,10 +44,16 @@ const testFiles = [
   path.join(rootDir, 'dist-test/tests/suites/tier11_qrcode_and_flower_garden.test.js'),
   path.join(rootDir, 'dist-test/tests/suites/tier12_terms_and_privacy.test.js'),
   path.join(rootDir, 'dist-test/tests/suites/tier13_android_voice_compatibility.test.js'),
+  path.join(rootDir, 'dist-test/tests/suites/tier14_card_4pillar_invariants.test.js'),
+  path.join(rootDir, 'dist-test/tests/suites/tier15_accessible_redesign.test.js'),
   path.join(rootDir, 'dist-test/tests/empirical_challenge_runner.js'),
   path.join(rootDir, 'dist-test/tests/empirical_deep_fuzzer.js'),
   path.join(rootDir, 'dist-test/tests/weekly_selector_stress_harness.js'),
+  path.join(rootDir, 'tests/challenger_accessible_stress_test.js'),
+  path.join(rootDir, 'dist-test/tests/adv_accessible_redesign_stress.js'),
+  path.join(rootDir, 'dist-test/tests/empirical_adversarial_challenger_audit.js'),
 ];
+
 
 console.log(`\nStep 2: Executing ${testFiles.length} test suites with Node test runner...\n`);
 

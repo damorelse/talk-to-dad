@@ -13,6 +13,8 @@ import { TherapySessionView } from './components/therapy/TherapySessionView';
 import { BigSpeechKeyboard } from './components/keyboard/BigSpeechKeyboard';
 import { CaregiverDashboard } from './components/caregiver/CaregiverDashboard';
 import { CaregiverHoldLockModal } from './components/caregiver/CaregiverHoldLockModal';
+import { speechEngine } from './services/audio/WebSpeechEngine';
+import { piperTTSService } from './services/syllables/piperTTSService';
 import { Check } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -50,6 +52,8 @@ export const App: React.FC = () => {
   }, [isReady, refreshDatabase]);
 
   const handleTabChange = (tab: ActiveTab) => {
+    speechEngine.cancel();
+    piperTTSService.stop();
     if (tab === 'caregiver') {
       if (isCaregiverAuthenticated) {
         setActiveTab('caregiver');

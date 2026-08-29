@@ -5,6 +5,7 @@ import { DebouncedTouchable } from '../common/DebouncedTouchable';
 interface GridCardProps {
   card: AACCard;
   onSelect: (card: AACCard) => void;
+  onInspect?: (card: AACCard) => void;
   debounceMs?: number;
   isSelected?: boolean;
   fontSize?: 'standard' | 'large' | 'extra-large';
@@ -13,6 +14,7 @@ interface GridCardProps {
 export const GridCard: React.FC<GridCardProps> = ({
   card,
   onSelect,
+  onInspect,
   debounceMs = 300,
   isSelected = false,
   fontSize = 'large',
@@ -32,46 +34,58 @@ export const GridCard: React.FC<GridCardProps> = ({
   }[fontSize];
 
   return (
-    <DebouncedTouchable
-      onPress={() => onSelect(card)}
-      debounceMs={debounceMs}
-      minTouchSize="lg"
-      className={`
-        w-full h-full min-h-[145px] flex flex-col items-center justify-between pt-1 pb-2 sm:pt-1.5 sm:pb-2.5 px-2 sm:px-2.5 rounded-2xl
-        border-4 ${fitzgerald.border} ${fitzgerald.bg}
-        shadow-lg transition-all duration-150 relative overflow-hidden group
-        ${isSelected ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-slate-900 scale-95' : ''}
-      `}
-      aria-label={`AAC Card: ${card.label}. Spoken: ${card.spokenText}`}
+    <div
+      className="relative w-full h-full"
+      onContextMenu={(e) => {
+        if (onInspect) {
+          e.preventDefault();
+          onInspect(card);
+        }
+      }}
     >
-      {/* Custom Audio Recording Badge if present */}
-      {card.audioBlobId && (
-        <span
-          className="absolute top-2 right-2 text-xs bg-purple-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow"
-          title="Custom family voice recording"
-        >
-          🎙️ Voice
-        </span>
-      )}
-
-      {/* Main Emoji / Icon */}
-      <div className="flex-1 flex items-center justify-center mt-0 mb-1">
-        <span className="text-4xl sm:text-5xl md:text-6xl drop-shadow-md select-none">
-          {card.icon || '💬'}
-        </span>
-      </div>
-
-      {/* Card Label (English on top, Chinese underneath) */}
-      <div className="w-full text-center flex flex-col items-center justify-center px-1 shrink-0">
-        <span className={`${enFontClasses} ${fitzgerald.text} leading-tight line-clamp-1`}>
-          {card.label}
-        </span>
-        {card.labelZh && (
-          <span className={`${zhFontClasses} text-slate-900 dark:text-slate-100 font-black leading-tight tracking-wide drop-shadow-sm line-clamp-1 mt-0.5`}>
-            {card.labelZh}
-          </span>
+      <DebouncedTouchable
+        onPress={() => onSelect(card)}
+        debounceMs={debounceMs}
+        minTouchSize="lg"
+        className={`
+          w-full h-full min-h-[145px] flex flex-col items-center justify-between pt-2 pb-2.5 sm:pt-2.5 sm:pb-3 px-2 sm:px-2.5 rounded-2xl
+          border-4 ${fitzgerald.border} ${fitzgerald.bg}
+          shadow-lg transition-all duration-150 relative overflow-hidden group
+          ${isSelected ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-slate-900 scale-95' : ''}
+        `}
+        aria-label={`AAC Card: ${card.label}. Spoken: ${card.spokenText}`}
+      >
+        {/* Custom Audio Recording Badge if present (pointer-events-none to prevent intercepting taps) */}
+        {card.audioBlobId && (
+          <div className="absolute top-2 right-2 pointer-events-none z-10">
+            <span
+              className="text-xs bg-purple-600 text-white font-bold px-1.5 py-0.5 rounded-full shadow select-none"
+              title="Custom family voice recording"
+            >
+              🎙️ Voice
+            </span>
+          </div>
         )}
-      </div>
-    </DebouncedTouchable>
+
+        {/* Main Emoji / Icon - Enlarged canonical emoji with drop shadow */}
+        <div className="flex-1 flex items-center justify-center my-auto">
+          <span className="text-5xl sm:text-6xl md:text-7xl drop-shadow-md select-none">
+            {card.icon || '💬'}
+          </span>
+        </div>
+
+        {/* Card Label (English on top, Chinese underneath) - High contrast bold bilingual text */}
+        <div className="w-full text-center flex flex-col items-center justify-center px-1 shrink-0 mt-1">
+          <span className={`${enFontClasses} ${fitzgerald.text} leading-tight line-clamp-1`}>
+            {card.label}
+          </span>
+          {card.labelZh && (
+            <span className={`${zhFontClasses} text-slate-900 dark:text-slate-100 font-black leading-tight tracking-wide drop-shadow-sm line-clamp-1 mt-0.5`}>
+              {card.labelZh}
+            </span>
+          )}
+        </div>
+      </DebouncedTouchable>
+    </div>
   );
 };

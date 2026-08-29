@@ -1,25 +1,68 @@
-import React from 'react';
-import { AACCard } from '../../types';
-import { RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AACCard, AACCategory } from '../../types';
+import { RefreshCw, Volume2, Sparkles, Lightbulb } from 'lucide-react';
+import { useAudio } from '../../hooks/useAudio';
+import { DEFAULT_CATEGORIES } from '../../services/db/defaultData';
 
 interface FlashcardDeckProps {
   card: AACCard;
   isFlipped: boolean;
   onFlip: () => void;
+  category?: AACCategory;
 }
 
 export const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
   card,
   isFlipped,
   onFlip,
+  category: _category,
 }) => {
+  const [showFirstLetter, setShowFirstLetter] = useState<boolean>(false);
+  const [activeHint, setActiveHint] = useState<'sound' | 'letter' | null>(null);
+  const { speakText, speakBilingual } = useAudio();
+
+  // Reset hint state whenever card changes or flips
+  useEffect(() => {
+    setShowFirstLetter(false);
+    setActiveHint(null);
+  }, [card.id, isFlipped]);
+
   const clueText = card.clue || card.spokenText || card.label;
   const clueTextZh = card.clueZh || card.spokenTextZh || card.labelZh;
+  const firstLetter = card.label.trim().charAt(0).toUpperCase();
+
+  // First Sound (speaks starting phoneme/syllable)
+  const handleFirstSound = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveHint('sound');
+    const syllables = (card.phoneticSyllables || card.label)
+      .split(/[\s·•-]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const firstSound = syllables[0] || card.label.charAt(0);
+    speakText(firstSound);
+  };
+
+  // First Letter (shows and speaks "The first letter is X")
+  const handleFirstLetter = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowFirstLetter(true);
+    setActiveHint('letter');
+    speakBilingual(
+      `The first letter is ${firstLetter}`,
+      `第一個字母是 ${firstLetter}`
+    );
+  };
+
+  const handleSpeakAnswer = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    speakBilingual(card.label, card.labelZh);
+  };
 
   return (
     <div
       onClick={onFlip}
-      className="w-full max-w-lg h-52 sm:h-56 md:h-60 [perspective:1000px] cursor-pointer select-none group relative"
+      className="w-full max-w-lg min-h-[260px] sm:min-h-[290px] md:min-h-[320px] [perspective:1000px] cursor-pointer select-none group relative"
       role="button"
       tabIndex={0}
       aria-label={
@@ -39,8 +82,8 @@ export const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
           ${isFlipped ? '[transform:rotateY(180deg)]' : ''}
         `}
       >
-        {/* Front Face (Clue Side) */}
-        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-gradient-to-br from-slate-800 to-slate-900 border-4 border-purple-500/80 rounded-2xl sm:rounded-3xl px-4 py-2 sm:px-5 sm:py-2.5 flex flex-col justify-start gap-1 sm:gap-1.5 shadow-xl overflow-hidden">
+        {/* Front Face (Mystery Clue & Hints) */}
+        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] bg-gradient-to-br from-slate-800 to-slate-900 border-4 border-purple-500/80 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col justify-between gap-2 shadow-xl overflow-y-auto scrollbar-none">
           {/* Header */}
           <div className="w-full flex items-center justify-between shrink-0">
             <span className="text-xs font-black uppercase tracking-widest text-purple-300 bg-purple-950/80 px-3 py-0.5 rounded-full border border-purple-800 shadow-xs">
@@ -52,27 +95,81 @@ export const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
             </span>
           </div>
 
-          {/* Clue Content: Icon + English + Chinese */}
-          <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center px-1 overflow-y-auto scrollbar-none">
-            <div className="flex items-center justify-center select-none shrink-0">
-              <span className="text-3xl sm:text-4xl md:text-5xl drop-shadow-md whitespace-nowrap inline-flex items-center justify-center gap-2 leading-none">
-                {card.icon || '🎯'}
+          {/* Mystery Target Center */}
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-1.5 text-center px-1">
+            <div className="flex items-center justify-center select-none shrink-0 mb-0.5">
+              <span className="text-3xl sm:text-4xl drop-shadow-md leading-none">
+                🎯
               </span>
             </div>
 
-            <p className="text-base sm:text-lg md:text-xl font-bold text-center text-white leading-snug">
+            {/* Mystery Clue Text */}
+            <p className="text-sm sm:text-base md:text-lg font-bold text-center text-white leading-snug">
               {clueText}
             </p>
             {clueTextZh && (
-              <p className="text-sm sm:text-base md:text-lg font-semibold text-center text-purple-200 leading-snug">
+              <p className="text-xs sm:text-sm md:text-base font-semibold text-center text-purple-200 leading-snug">
                 {clueTextZh}
               </p>
             )}
+
+            {/* Revealed First Letter Hint Box */}
+            {showFirstLetter && (
+              <div className="w-full bg-purple-950/90 border border-purple-400/60 rounded-xl py-2 px-3 text-center mt-1 animate-in fade-in zoom-in-95">
+                <p className="text-sm sm:text-base font-black text-amber-300">
+                  The first letter is {firstLetter}
+                </p>
+                {card.labelZh && (
+                  <p className="text-xs sm:text-sm font-semibold text-purple-200 mt-0.5">
+                    第一個字母是 {firstLetter}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Clean 2-Button Hint Ladder: First Sound | First Letter */}
+          <div className="w-full grid grid-cols-2 gap-2 pt-1 border-t border-slate-700/60 shrink-0">
+            {/* First Sound */}
+            <button
+              type="button"
+              onClick={handleFirstSound}
+              className={`
+                flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer
+                ${
+                  activeHint === 'sound'
+                    ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-sm font-black'
+                    : 'bg-slate-800 hover:bg-slate-700 text-amber-200 border-amber-600/50'
+                }
+              `}
+              aria-label="First Sound hint"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300 shrink-0" />
+              <span className="whitespace-nowrap text-xs">First Sound</span>
+            </button>
+
+            {/* First Letter */}
+            <button
+              type="button"
+              onClick={handleFirstLetter}
+              className={`
+                flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer
+                ${
+                  activeHint === 'letter' || showFirstLetter
+                    ? 'bg-emerald-600 text-white border-emerald-400 shadow-sm font-black'
+                    : 'bg-slate-800 hover:bg-slate-700 text-emerald-200 border-emerald-600/50'
+                }
+              `}
+              aria-label="First Letter hint"
+            >
+              <Lightbulb className="w-4 h-4 text-emerald-300 shrink-0" />
+              <span className="whitespace-nowrap text-xs">First Letter</span>
+            </button>
           </div>
         </div>
 
-        {/* Back Face (Answer Side - No Syllable Breakdown) */}
-        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-purple-950 to-slate-900 border-4 border-yellow-400 rounded-2xl sm:rounded-3xl px-4 py-2 sm:px-5 sm:py-2.5 flex flex-col justify-start gap-1 sm:gap-1.5 shadow-2xl overflow-hidden">
+        {/* Back Face (Streamlined Answer Side - Emoji, Labels, Phonetic Syllables, Speak Button) */}
+        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] bg-gradient-to-br from-purple-950 via-slate-900 to-slate-900 border-4 border-yellow-400 rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-col justify-between gap-2 shadow-2xl overflow-y-auto scrollbar-none">
           {/* Header */}
           <div className="w-full flex items-center justify-between shrink-0">
             <span className="text-xs font-black uppercase tracking-widest text-yellow-950 bg-yellow-400 px-3 py-0.5 rounded-full font-bold shadow-xs">
@@ -84,22 +181,46 @@ export const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
             </span>
           </div>
 
-          {/* Answer Content: Icon + English Label + Chinese Label */}
-          <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-1.5 sm:gap-2 text-center px-1 overflow-y-auto scrollbar-none">
+          {/* Answer Body: Canonical Emoji, Labels, Phonetic Syllables */}
+          <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-2 text-center px-1">
+            {/* Single Canonical Emoji Anchor */}
             <div className="flex items-center justify-center select-none shrink-0">
-              <span className="text-3xl sm:text-4xl md:text-5xl drop-shadow-md whitespace-nowrap inline-flex items-center justify-center gap-2 leading-none">
-                {card.icon || '🎯'}
+              <span className="text-5xl sm:text-6xl md:text-7xl drop-shadow-md leading-none">
+                {card.icon || '💬'}
               </span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
-              {card.label}
-            </h2>
-            {card.labelZh && (
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-amber-300 tracking-wide drop-shadow leading-tight">
-                {card.labelZh}
-              </h3>
+            {/* Labels */}
+            <div className="flex flex-col items-center justify-center gap-0.5">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+                {card.label}
+              </h2>
+              {card.labelZh && (
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-amber-300 tracking-wide drop-shadow leading-tight">
+                  {card.labelZh}
+                </h3>
+              )}
+            </div>
+
+            {/* Phonetic Syllables */}
+            {card.phoneticSyllables && (
+              <div className="inline-flex items-center px-3 py-1 bg-slate-800/80 border border-slate-700/80 text-purple-200 text-sm sm:text-base font-bold rounded-xl tracking-wider">
+                <span>{card.phoneticSyllables}</span>
+              </div>
             )}
+          </div>
+
+          {/* 1-Tap "Speak Word" Button */}
+          <div className="w-full pt-1 border-t border-slate-700/60 shrink-0">
+            <button
+              type="button"
+              onClick={handleSpeakAnswer}
+              className="w-full py-2.5 sm:py-3 bg-yellow-400 hover:bg-yellow-300 active:bg-yellow-500 text-slate-950 font-black rounded-xl sm:rounded-2xl text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-yellow-500/20 border-2 border-yellow-300 transition-all cursor-pointer"
+              aria-label="Speak target word"
+            >
+              <Volume2 className="w-5 h-5 stroke-[2.5]" />
+              <span>Speak Word · 朗讀單字</span>
+            </button>
           </div>
         </div>
       </div>
