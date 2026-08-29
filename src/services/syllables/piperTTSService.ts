@@ -252,62 +252,6 @@ export class PiperTTSService {
   }
 
   /**
-   * Synthesizes audio for an isolated individual IPA phoneme token.
-   */
-  async synthesizeIndividualPhonemeAudio(
-    phoneme: string,
-    speed = 0.5,
-    pitch = 1.0,
-    voiceId = 'en_US-lessac-medium'
-  ): Promise<string> {
-    const cleanPhoneme = phoneme.trim();
-    const cacheKey = `phoneme:${cleanPhoneme}:${speed.toFixed(2)}:${pitch.toFixed(2)}:${voiceId}`;
-
-    if (this.inMemoryCache.has(cacheKey)) {
-      return this.inMemoryCache.get(cacheKey)!;
-    }
-
-    const dbBlobId = `piper-phoneme-${cleanPhoneme}-${Math.round(speed * 100)}-${voiceId}`;
-    try {
-      const stored = await db.mediaBlobs.get(dbBlobId);
-      if (stored && stored.dataBase64) {
-        this.inMemoryCache.set(cacheKey, stored.dataBase64);
-        return stored.dataBase64;
-      }
-    } catch {
-      // IndexedDB fallback
-    }
-
-    const generated = generateDeterministicPhonemeAudio([cleanPhoneme], 'primary', speed, pitch, voiceId);
-    this.inMemoryCache.set(cacheKey, generated.base64);
-
-    try {
-      await db.mediaBlobs.put({
-        id: dbBlobId,
-        type: 'audio',
-        mimeType: 'audio/wav',
-        dataBase64: generated.base64,
-        createdAt: Date.now(),
-      });
-    } catch {
-      // Ignore DB write errors
-    }
-
-    return generated.base64;
-  }
-
-  /**
-   * Plays an isolated individual phoneme's audio.
-   */
-  async playPhonemeAudio(phoneme: string, speed = 0.5, pitch = 1.0, voiceId = 'en_US-lessac-medium'): Promise<void> {
-    this.stop();
-    this.activeSequenceAbort = false;
-    iosAudioUnlock.ensureUnlockedAndResumed();
-    const audioBase64 = await this.synthesizeIndividualPhonemeAudio(phoneme, speed, pitch, voiceId);
-    await recordedAudioEngine.playBase64(audioBase64, 'audio/wav');
-  }
-
-  /**
    * Plays the complete syllable-by-syllable articulation sequence with visual event callbacks.
    */
   async playArticulationSequence(

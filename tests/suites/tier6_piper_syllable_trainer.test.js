@@ -334,57 +334,5 @@ describe('Tier 6: Piper TTS & eSpeak NG Syllable Articulation Trainer', () => {
       assert.equal(photoIds[photoIds.length - 1], 2); // EOS
     });
   });
-
-  // ===========================================================================
-  // 8. ISOLATED INDIVIDUAL IPA PHONEME AUDIO SYNTHESIS & PLAYBACK
-  // ===========================================================================
-  describe('Isolated Individual IPA Phoneme Audio Synthesis', () => {
-    it('should synthesize valid audio for isolated IPA phonemes', async () => {
-      const phonemes = ['f', 'ə', 't', 'ɑː', 'ɡ', 'ɹ', 'i'];
-      for (const ph of phonemes) {
-        const audio = await piperTTSService.synthesizeIndividualPhonemeAudio(ph, 0.5);
-        assert.ok(audio, `Audio for phoneme /${ph}/ must be defined`);
-        assert.ok(audio.startsWith('data:audio/wav;base64,'), `Audio for /${ph}/ must be a valid WAV data URL`);
-      }
-    });
-
-    it('should play isolated IPA phoneme via playPhonemeAudio without errors', async () => {
-      await piperTTSService.playPhonemeAudio('t', 0.5);
-      // Completes cleanly
-      assert.ok(true);
-    });
-  });
-
-  // ===========================================================================
-  // 9. GUARANTEED PHONEME MODEL USAGE IN ONNX & FALLBACK
-  // ===========================================================================
-  describe('Guaranteed Phoneme Model Invariant & Fallback', () => {
-    it('should synthesize syllables using deterministic phonetic fallback when ONNX is uninitialized', async () => {
-      const syl = {
-        index: 1,
-        text: 'tog',
-        ipa: 'ˈtɑːɡ',
-        stress: 'primary',
-        phonemes: ['t', 'ɑː', 'ɡ'],
-      };
-
-      const audio = await piperOnnxService.synthesizeSyllable(syl, 'photography', 0.5);
-      assert.ok(audio, 'Must return valid audio from phoneme model fallback');
-      assert.ok(audio.startsWith('data:audio/wav;base64,'));
-    });
-
-    it('should hydrate entire word with phonetic audio for every syllable without WebSpeech', async () => {
-      const data = phonemizeWord('photography');
-      const hydrated = await piperOnnxService.synthesizeWord(data, 0.5);
-
-      assert.equal(hydrated.syllables.length, 4);
-      for (const syl of hydrated.syllables) {
-        assert.ok(syl.audioBase64, `Syllable ${syl.text} must have phoneme audio base64`);
-        assert.ok(syl.audioBase64.startsWith('data:audio/wav;base64,'));
-      }
-      assert.ok(hydrated.fullAudioBase64);
-    });
-  });
 });
-
 

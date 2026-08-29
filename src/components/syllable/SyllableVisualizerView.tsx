@@ -69,7 +69,6 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
     activeSyllableIdx,
     isPlaying: isEnPlaying,
     playSingleSyllable,
-    playIndividualPhoneme,
     soundItOut: soundItOutEn,
     speakWholeWord: speakWholeWordEn,
     stop: stopEn,
@@ -589,12 +588,7 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
                 playSingleSyllable(idx);
               }
             }}
-            onPhonemeClick={(phoneme) => {
-              if (!isCurrentChinese) {
-                playIndividualPhoneme(phoneme);
-              }
-            }}
-            showIpa={true}
+            showIpa={isCurrentChinese}
             showStress={!isCurrentChinese}
           />
         </div>

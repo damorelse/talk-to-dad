@@ -8,7 +8,6 @@ export interface SyllableCardProps {
   activeSyllableIndex?: number | null;
   syllableData?: SyllablePhonemeData[];
   onSyllableClick?: (syllableText: string, index: number, data?: SyllablePhonemeData) => void;
-  onPhonemeClick?: (phoneme: string, syllableIndex: number) => void;
   showIpa?: boolean;
   showStress?: boolean;
 }
@@ -18,7 +17,6 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
   activeSyllableIndex = null,
   syllableData,
   onSyllableClick,
-  onPhonemeClick,
   showIpa = true,
   showStress = true,
 }) => {
@@ -96,47 +94,16 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
                 {syl.text}
               </span>
 
-              {/* Sub-label for BoPoMoFo (注音) or IPA with interactive Phoneme chips */}
+              {/* Sub-label for BoPoMoFo (注音) or IPA when available */}
               {showIpa && syl.ipa && (
-                <div className="flex flex-col items-center gap-1 mt-0.5">
-                  <span
-                    className={`
-                      text-xs sm:text-sm md:text-base font-bold tracking-widest leading-tight
-                      ${isActive ? 'text-slate-950 font-black' : 'text-amber-300'}
-                    `}
-                  >
-                    {syl.ipa}
-                  </span>
-                  {onPhonemeClick && syl.phonemes && syl.phonemes.length > 0 && (
-                    <div
-                      className="flex items-center gap-1 flex-wrap justify-center mt-0.5"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {syl.phonemes.map((ph, phIdx) => (
-                        <button
-                          key={`${ph}-${phIdx}`}
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onPhonemeClick(ph, idx);
-                          }}
-                          title={`Pronounce phoneme /${ph}/`}
-                          aria-label={`Pronounce phoneme ${ph}`}
-                          className={`
-                            px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-mono font-bold transition-all cursor-pointer border
-                            ${
-                              isActive
-                                ? 'bg-slate-950/20 hover:bg-slate-950/40 text-slate-950 border-slate-950/30'
-                                : 'bg-slate-900/90 hover:bg-amber-400 hover:text-slate-950 text-amber-200 border-amber-500/30 hover:border-amber-400 shadow-xs'
-                            }
-                          `}
-                        >
-                          /{ph}/
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <span
+                  className={`
+                    text-xs sm:text-sm md:text-base font-bold tracking-widest leading-tight
+                    ${isActive ? 'text-slate-950 font-black' : 'text-amber-300'}
+                  `}
+                >
+                  {syl.ipa}
+                </span>
               )}
             </button>
           </React.Fragment>
