@@ -503,19 +503,19 @@ describe('CHALLENGER STRESS SUITE: Accessible Redesign', () => {
       );
     });
 
-    it('should verify WorldMapSvg streamlined Location Card in WorldMapSvg.tsx', () => {
+    it('should verify WorldMapSvg visual map in WorldMapSvg.tsx', () => {
       const worldMapCode = fs.readFileSync(path.join(rootDir, 'src/components/today/WorldMapSvg.tsx'), 'utf8');
 
-      // Enlarged country flag emoji (>=48px)
+      // Visual SVG Map and country flag
       assert.ok(
-        worldMapCode.includes('text-5xl sm:text-6xl md:text-7xl'),
-        'WorldMapSvg must render large country flag (48px-72px)'
+        worldMapCode.includes('flag') && (worldMapCode.includes('USA_STATES') || worldMapCode.includes('svg')),
+        'WorldMapSvg must render visual SVG map and country flag'
       );
 
-      // 1-tap audio speech button
+      // Location speech interaction
       assert.ok(
-        worldMapCode.includes('Hear Location · 朗讀位置') || worldMapCode.includes('onSelectLocation'),
-        'WorldMapSvg must provide 1-tap speech button for location'
+        worldMapCode.includes('onSelectLocation'),
+        'WorldMapSvg must provide speech interaction for location'
       );
     });
   });

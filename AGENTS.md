@@ -36,3 +36,14 @@ When modifying or calling speech synthesis (`WebSpeechEngine.ts`), Web Audio ton
 5. **Unified `AudioContext` Singleton**:
    - Share a single singleton `AudioContext` across all tone engines and unlock utilities.
    - Verify `ctx.state === 'running'` before scheduling Web Audio oscillators.
+
+## Local Build & Git Push Invariants
+
+1. **Automatic Local Distribution Rebuild**:
+   - Always rebuild the local production bundle (`npm run build`) after making changes to source files (`src/`, `styles.css`, `public/`, etc.) so that the local server version (`dist/`) is immediately synchronized and ready for testing.
+   - Run the test suite (`npm test`) to verify all suites pass without regression after rebuilding.
+
+2. **Git Push Consent Invariant**:
+   - **Never push presumptively**: Do NOT execute `git push` to the remote Git repository unless the user explicitly asks or confirms.
+   - **Proactive Suggestions**: Suggest pushing changes after significant features, bug fixes, or milestones are completed and verified, but ALWAYS wait for explicit user confirmation before pushing.
+
