@@ -12,6 +12,23 @@ import { piperOnnxService, ModelLoadStatus } from '../services/syllables/piperOn
 import { iosAudioUnlock } from '../services/audio/iOSAudioUnlock.ts';
 import { speechEngine } from '../services/audio/WebSpeechEngine.ts';
 
+/**
+ * Speaks a fragment with the system voice and resolves when playback ends.
+ *
+ * This is the fallback whenever the offline neural model is unavailable. The local
+ * waveform generator is a tone, not speech, so it must never be used for playback.
+ */
+function speakFragment(text: string, rate: number): Promise<void> {
+  return new Promise<void>((resolve) => {
+    speechEngine.speak(text, {
+      locale: 'en-US',
+      rate,
+      onEnd: () => resolve(),
+      onError: () => resolve(),
+    });
+  });
+}
+
 export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.5) {
   const [word, setWordState] = useState<string>(initialWord);
   const [speed, setSpeedState] = useState<number>(initialSpeed);
@@ -84,17 +101,18 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
     let isCurrent = true;
     const warmCache = async () => {
       if (!pronunciationData || pronunciationData.syllables.length === 0) return;
+      // Without the neural model there is nothing to pre-render. Playback falls back
+      // to the system voice at press time instead.
+      if (!piperOnnxService.isReady()) return;
 
       setIsSynthesizing(true);
       try {
-        const hydrated = piperOnnxService.isReady()
-          ? await piperOnnxService.synthesizeWord(pronunciationData, speed)
-          : await piperTTSService.synthesizeWordAudio(pronunciationData, speed);
+        const hydrated = await piperOnnxService.synthesizeWord(pronunciationData, speed);
         if (isCurrent && isMountedRef.current) {
           setPronunciationData(hydrated);
         }
       } catch (err) {
-        console.error('Syllable synthesis error:', err);
+        console.error('Neural syllable synthesis error:', err);
       } finally {
         if (isCurrent && isMountedRef.current) {
           setIsSynthesizing(false);
@@ -117,14 +135,22 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
       setIsPlaying(true);
       iosAudioUnlock.ensureUnlockedAndResumed();
 
-      try {
-        let audioBase64 = syl.audioBase64;
-        if (!audioBase64) {
-          audioBase64 = piperOnnxService.isReady()
-            ? await piperOnnxService.synthesizeSyllable(syl, word, speed)
-            : await piperTTSService.synthesizeSyllableAudio(syl, word, speed);
+      let audioBase64 = syl.audioBase64 || null;
+      if (!audioBase64 && piperOnnxService.isReady()) {
+        try {
+          audioBase64 = await piperOnnxService.synthesizeSyllable(syl, word, speed);
+        } catch (err) {
+          console.error('Neural syllable synthesis failed:', err);
+          audioBase64 = null;
         }
-        await piperTTSService.playSyllableAudio(audioBase64);
+      }
+
+      try {
+        if (audioBase64) {
+          await piperTTSService.playSyllableAudio(audioBase64);
+        } else {
+          await speakFragment(syl.text, speed);
+        }
       } catch (err) {
         console.error('Failed to play syllable audio:', err);
       } finally {
@@ -141,16 +167,29 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
 
   // Play an isolated individual IPA phoneme chip
   const playIndividualPhoneme = useCallback(
-    async (phoneme: string) => {
+    async (phoneme: string, syllableIndex?: number) => {
       if (!phoneme) return;
       iosAudioUnlock.ensureUnlockedAndResumed();
+
+      if (piperOnnxService.isReady()) {
+        try {
+          const result = await piperOnnxService.synthesizePhonemes([phoneme], { speed });
+          await piperTTSService.playSyllableAudio(result.base64);
+          return;
+        } catch (err) {
+          console.error('Neural phoneme synthesis failed:', err);
+        }
+      }
+
+      // A bare phoneme has no system-voice equivalent. Speak the syllable that holds it.
+      const holder = syllableIndex != null ? pronunciationData.syllables[syllableIndex] : undefined;
       try {
-        await piperTTSService.playPhonemeAudio(phoneme, speed);
+        await speakFragment(holder?.text || word, speed);
       } catch (err) {
         console.error('Failed to play phoneme audio:', err);
       }
     },
-    [speed]
+    [pronunciationData, speed, word]
   );
 
   // Synchronized sequential articulation training ("Sound It Out")
@@ -165,38 +204,43 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
     const pauseMs = Math.round(350 / speed);
 
     try {
-      const activeData = piperOnnxService.isReady()
-        ? await piperOnnxService.synthesizeWord(pronunciationData, speed)
-        : await piperTTSService.synthesizeWordAudio(pronunciationData, speed);
+      let activeData = pronunciationData;
+      if (piperOnnxService.isReady()) {
+        try {
+          activeData = await piperOnnxService.synthesizeWord(pronunciationData, speed);
+        } catch (err) {
+          console.error('Neural word synthesis failed:', err);
+        }
+      }
 
       // STEP 1: First says the whole phrase using normal voice
       if (isMountedRef.current) {
         setActiveSyllableIdx(null);
-        await new Promise<void>((resolve) => {
-          speechEngine.speak(word, {
-            locale: 'en-US',
-            rate: Math.min(1.0, speed * 1.2),
-            onEnd: () => resolve(),
-            onError: () => resolve(),
-          });
-        });
+        await speakFragment(word, Math.min(1.0, speed * 1.2));
         await new Promise((r) => setTimeout(r, 450));
       }
 
-      // STEP 2: Then sounds it out syllable-by-syllable using dedicated phoneme audio
+      // STEP 2: Then sounds it out syllable-by-syllable with neural audio,
+      // or with the system voice if the neural model is unavailable.
       for (let i = 0; i < activeData.syllables.length; i++) {
         if (!isMountedRef.current) break;
         const syl = activeData.syllables[i];
         setActiveSyllableIdx(i);
 
-        let audio = syl.audioBase64;
-        if (!audio) {
-          audio = piperOnnxService.isReady()
-            ? await piperOnnxService.synthesizeSyllable(syl, word, speed)
-            : await piperTTSService.synthesizeSyllableAudio(syl, word, speed);
+        let audio = syl.audioBase64 || null;
+        if (!audio && piperOnnxService.isReady()) {
+          try {
+            audio = await piperOnnxService.synthesizeSyllable(syl, word, speed);
+          } catch (err) {
+            console.error('Neural syllable synthesis failed:', err);
+            audio = null;
+          }
         }
+
         if (audio) {
           await piperTTSService.playSyllableAudio(audio);
+        } else {
+          await speakFragment(syl.text, speed);
         }
         await new Promise((r) => setTimeout(r, pauseMs));
       }
@@ -205,14 +249,7 @@ export function usePiperSyllables(initialWord = 'Photography', initialSpeed = 0.
       if (isMountedRef.current) {
         setActiveSyllableIdx(null);
         await new Promise((r) => setTimeout(r, 350));
-        await new Promise<void>((resolve) => {
-          speechEngine.speak(word, {
-            locale: 'en-US',
-            rate: Math.min(1.0, speed * 1.2),
-            onEnd: () => resolve(),
-            onError: () => resolve(),
-          });
-        });
+        await speakFragment(word, Math.min(1.0, speed * 1.2));
       }
     } catch (err) {
       console.error('Sequential articulation playback error:', err);

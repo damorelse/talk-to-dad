@@ -6,12 +6,7 @@
  */
 
 import { db } from '../db/AppDatabase.ts';
-import {
-  createWavHeader,
-  bytesToBase64DataUrl,
-  generateDeterministicPhonemeAudio,
-  piperTTSService,
-} from './piperTTSService.ts';
+import { createWavHeader, bytesToBase64DataUrl } from './piperTTSService.ts';
 import { SyllablePhonemeData, WordPronunciationData } from '../../types/index.ts';
 
 // Safely resolve ONNX Runtime Web in browser, worker, or testing environments
@@ -43,9 +38,28 @@ async function getOrt(): Promise<any> {
 const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) ? import.meta.env.BASE_URL : './';
 const normalizedBase = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 
+/**
+ * Resolves an app-relative asset path to an absolute URL against the document.
+ *
+ * ONNX Runtime feeds env.wasm.wasmPaths straight into a dynamic import(). A relative
+ * specifier there resolves against the ONNX chunk's own URL, not the document. In a
+ * production build the chunk sits in assets/, so a bare "./wasm/" becomes
+ * "assets/wasm/" and 404s. A dev server happens to serve the module from the site
+ * root, which is why the relative form only ever worked in dev.
+ */
+export function resolveAssetUrl(relativePath: string): string {
+  const appRelative = `${normalizedBase}${relativePath}`;
+  if (typeof document !== 'undefined' && document.baseURI) {
+    return new URL(appRelative, document.baseURI).href;
+  }
+  return appRelative;
+}
+
+const WASM_DIR_URL = resolveAssetUrl('wasm/');
+
 // Configure ONNX WebAssembly environment paths for local offline execution
 if (typeof window !== 'undefined' && ortInstance && ortInstance.env && ortInstance.env.wasm) {
-  ortInstance.env.wasm.wasmPaths = `${normalizedBase}wasm/`;
+  ortInstance.env.wasm.wasmPaths = WASM_DIR_URL;
   ortInstance.env.wasm.numThreads = 1;
   ortInstance.env.wasm.simd = true;
 }
@@ -76,8 +90,8 @@ class PiperOnnxService {
   private loadError: string | null = null;
   private loadProgress = 0;
   private voiceId = 'en_US-amy-medium';
-  private modelUrl = `${normalizedBase}models/piper/en_US-amy-medium.onnx`;
-  private configUrl = `${normalizedBase}models/piper/en_US-amy-medium.onnx.json`;
+  private modelUrl = resolveAssetUrl('models/piper/en_US-amy-medium.onnx');
+  private configUrl = resolveAssetUrl('models/piper/en_US-amy-medium.onnx.json');
   private inMemoryCache = new Map<string, string>();
 
   getVoiceId(): string {
@@ -173,7 +187,7 @@ class PiperOnnxService {
 
       // Configure ONNX environment for WebAssembly
       if (ortRuntime.env && ortRuntime.env.wasm) {
-        ortRuntime.env.wasm.wasmPaths = `${normalizedBase}wasm/`;
+        ortRuntime.env.wasm.wasmPaths = WASM_DIR_URL;
         ortRuntime.env.wasm.numThreads = 1;
         ortRuntime.env.wasm.simd = true;
       }
@@ -226,6 +240,9 @@ class PiperOnnxService {
 
   /**
    * Synthesizes authentic neural 22.05kHz PCM audio from IPA phonemes using Piper ONNX.
+   *
+   * Throws if the neural model is unavailable. Callers must fall back to a real speech
+   * engine: a synthetic waveform is not intelligible speech and must never stand in for it.
    */
   async synthesizePhonemes(
     phonemes: string[],
@@ -237,86 +254,82 @@ class PiperOnnxService {
   ): Promise<{ base64: string; durationMs: number; rawBytes: Uint8Array }> {
     const userSpeed = options.speed ?? 0.5;
 
-    try {
-      if (!this.isReady() || !this.session || !this.config) {
-        await this.loadModel();
-      }
-
-      const phonemeIds = this.phonemesToIds(phonemes);
-      const sampleRate = this.config!.audio.sample_rate || 22050;
-
-      // Speech rate control via length_scale (lower length_scale = faster, higher = slower)
-      const baseLengthScale = this.config!.inference.length_scale || 1.0;
-      const effectiveLengthScale = baseLengthScale * (1.0 / Math.max(0.2, userSpeed));
-
-      const noiseScale = options.noiseScale ?? (this.config!.inference.noise_scale || 0.667);
-      const noiseW = options.noiseW ?? (this.config!.inference.noise_w || 0.8);
-
-      const ortRuntime = await getOrt();
-      if (!ortRuntime) throw new Error('ONNX Runtime is not available');
-
-      // Create ONNX Tensors
-      const inputTensor = new ortRuntime.Tensor(
-        'int64',
-        BigInt64Array.from(phonemeIds.map((id) => BigInt(id))),
-        [1, phonemeIds.length]
-      );
-
-      const inputLengthsTensor = new ortRuntime.Tensor(
-        'int64',
-        BigInt64Array.from([BigInt(phonemeIds.length)]),
-        [1]
-      );
-
-      const scalesTensor = new ortRuntime.Tensor(
-        'float32',
-        Float32Array.from([noiseScale, effectiveLengthScale, noiseW]),
-        [3]
-      );
-
-      const feeds: Record<string, any> = {
-        input: inputTensor,
-        input_lengths: inputLengthsTensor,
-        scales: scalesTensor,
-      };
-
-      // Run Neural Inference
-      const results = await this.session!.run(feeds);
-      const outputTensor = results.output;
-      const audioFloat = outputTensor.data as Float32Array;
-
-      // Convert Float32 samples [-1.0, 1.0] to 16-bit PCM WAV
-      const numSamples = audioFloat.length;
-      const pcmBytes = new Uint8Array(numSamples * 2);
-      const dataView = new DataView(pcmBytes.buffer);
-
-      for (let i = 0; i < numSamples; i++) {
-        const sample = Math.max(-1.0, Math.min(1.0, audioFloat[i]));
-        const int16 = sample < 0 ? Math.round(sample * 0x8000) : Math.round(sample * 0x7fff);
-        dataView.setInt16(i * 2, int16, true);
-      }
-
-      const header = createWavHeader(pcmBytes.byteLength, sampleRate, 1, 16);
-      const fullWav = new Uint8Array(header.byteLength + pcmBytes.byteLength);
-      fullWav.set(header, 0);
-      fullWav.set(pcmBytes, header.byteLength);
-
-      const durationMs = Math.round((numSamples / sampleRate) * 1000.0);
-      const base64Url = bytesToBase64DataUrl(fullWav, 'audio/wav');
-
-      return {
-        base64: base64Url,
-        durationMs,
-        rawBytes: fullWav,
-      };
-    } catch (err) {
-      // Automatic robust fallback to deterministic phoneme waveform synthesis
-      return generateDeterministicPhonemeAudio(phonemes, 'primary', userSpeed);
+    if (!this.isReady() || !this.session || !this.config) {
+      await this.loadModel();
     }
+
+    const phonemeIds = this.phonemesToIds(phonemes);
+    const sampleRate = this.config!.audio.sample_rate || 22050;
+
+    // Speech rate control via length_scale (lower length_scale = faster, higher = slower)
+    const baseLengthScale = this.config!.inference.length_scale || 1.0;
+    const effectiveLengthScale = baseLengthScale * (1.0 / Math.max(0.2, userSpeed));
+
+    const noiseScale = options.noiseScale ?? (this.config!.inference.noise_scale || 0.667);
+    const noiseW = options.noiseW ?? (this.config!.inference.noise_w || 0.8);
+
+    const ortRuntime = await getOrt();
+    if (!ortRuntime) throw new Error('ONNX Runtime is not available');
+
+    // Create ONNX Tensors
+    const inputTensor = new ortRuntime.Tensor(
+      'int64',
+      BigInt64Array.from(phonemeIds.map((id) => BigInt(id))),
+      [1, phonemeIds.length]
+    );
+
+    const inputLengthsTensor = new ortRuntime.Tensor(
+      'int64',
+      BigInt64Array.from([BigInt(phonemeIds.length)]),
+      [1]
+    );
+
+    const scalesTensor = new ortRuntime.Tensor(
+      'float32',
+      Float32Array.from([noiseScale, effectiveLengthScale, noiseW]),
+      [3]
+    );
+
+    const feeds: Record<string, any> = {
+      input: inputTensor,
+      input_lengths: inputLengthsTensor,
+      scales: scalesTensor,
+    };
+
+    // Run Neural Inference
+    const results = await this.session!.run(feeds);
+    const outputTensor = results.output;
+    const audioFloat = outputTensor.data as Float32Array;
+
+    // Convert Float32 samples [-1.0, 1.0] to 16-bit PCM WAV
+    const numSamples = audioFloat.length;
+    const pcmBytes = new Uint8Array(numSamples * 2);
+    const dataView = new DataView(pcmBytes.buffer);
+
+    for (let i = 0; i < numSamples; i++) {
+      const sample = Math.max(-1.0, Math.min(1.0, audioFloat[i]));
+      const int16 = sample < 0 ? Math.round(sample * 0x8000) : Math.round(sample * 0x7fff);
+      dataView.setInt16(i * 2, int16, true);
+    }
+
+    const header = createWavHeader(pcmBytes.byteLength, sampleRate, 1, 16);
+    const fullWav = new Uint8Array(header.byteLength + pcmBytes.byteLength);
+    fullWav.set(header, 0);
+    fullWav.set(pcmBytes, header.byteLength);
+
+    const durationMs = Math.round((numSamples / sampleRate) * 1000.0);
+    const base64Url = bytesToBase64DataUrl(fullWav, 'audio/wav');
+
+    return {
+      base64: base64Url,
+      durationMs,
+      rawBytes: fullWav,
+    };
   }
 
   /**
    * Synthesizes and caches an individual syllable audio.
+   * Throws if the neural model is unavailable. See synthesizePhonemes.
    */
   async synthesizeSyllable(
     syllable: SyllablePhonemeData,
@@ -324,7 +337,7 @@ class PiperOnnxService {
     speed = 0.5
   ): Promise<string> {
     if (!this.isReady()) {
-      return piperTTSService.synthesizeSyllableAudio(syllable, word, speed);
+      throw new Error(`Piper neural model is not ready (status: ${this.loadStatus})`);
     }
 
     const cacheKey = `neural:${word.toLowerCase().trim()}:${syllable.index}:${speed.toFixed(2)}`;
@@ -332,68 +345,61 @@ class PiperOnnxService {
       return this.inMemoryCache.get(cacheKey)!;
     }
 
+    const phonemes = syllable.phonemes.length > 0 ? syllable.phonemes : [syllable.text];
+    const result = await this.synthesizePhonemes(phonemes, { speed });
+
+    this.inMemoryCache.set(cacheKey, result.base64);
+
+    // Save to IndexedDB
     try {
-      const phonemes = syllable.phonemes.length > 0 ? syllable.phonemes : [syllable.text];
-      const result = await this.synthesizePhonemes(phonemes, { speed });
-
-      this.inMemoryCache.set(cacheKey, result.base64);
-
-      // Save to IndexedDB
-      try {
-        const blobId = `neural-piper-${word.toLowerCase()}-${syllable.index}-${Math.round(speed * 100)}`;
-        await db.mediaBlobs.put({
-          id: blobId,
-          type: 'audio',
-          mimeType: 'audio/wav',
-          dataBase64: result.base64,
-          createdAt: Date.now(),
-        });
-      } catch {
-        // Ignore DB write errors
-      }
-
-      return result.base64;
+      const blobId = `neural-piper-${word.toLowerCase()}-${syllable.index}-${Math.round(speed * 100)}`;
+      await db.mediaBlobs.put({
+        id: blobId,
+        type: 'audio',
+        mimeType: 'audio/wav',
+        dataBase64: result.base64,
+        createdAt: Date.now(),
+      });
     } catch {
-      return piperTTSService.synthesizeSyllableAudio(syllable, word, speed);
+      // Ignore DB write errors
     }
+
+    return result.base64;
   }
 
   /**
    * Synthesizes all syllables and whole word audio for WordPronunciationData.
+   * Throws if the neural model is unavailable. See synthesizePhonemes.
    */
   async synthesizeWord(
     wordData: WordPronunciationData,
     speed = 0.5
   ): Promise<WordPronunciationData> {
     if (!this.isReady()) {
-      return piperTTSService.synthesizeWordAudio(wordData, speed);
+      throw new Error(`Piper neural model is not ready (status: ${this.loadStatus})`);
     }
 
-    try {
-      const word = wordData.word;
-      const updatedSyllables: SyllablePhonemeData[] = [];
+    const word = wordData.word;
+    const updatedSyllables: SyllablePhonemeData[] = [];
 
-      for (const syl of wordData.syllables) {
-        const audioBase64 = await this.synthesizeSyllable(syl, word, speed);
-        updatedSyllables.push({
-          ...syl,
-          audioBase64,
-          audioBlobId: `neural-piper-${word.toLowerCase()}-${syl.index}-${Math.round(speed * 100)}`,
-        });
-      }
-
-      // Synthesize full word
-      const allPhonemes = wordData.syllables.flatMap((s) => s.phonemes);
-      const fullAudio = await this.synthesizePhonemes(allPhonemes, { speed: Math.min(speed + 0.2, 1.0) });
-
-      return {
-        ...wordData,
-        syllables: updatedSyllables,
-        fullAudioBase64: fullAudio.base64,
-      };
-    } catch {
-      return piperTTSService.synthesizeWordAudio(wordData, speed);
+    for (const syl of wordData.syllables) {
+      const audioBase64 = await this.synthesizeSyllable(syl, word, speed);
+      updatedSyllables.push({
+        ...syl,
+        audioBase64,
+        audioBlobId: `neural-piper-${word.toLowerCase()}-${syl.index}-${Math.round(speed * 100)}`,
+      });
     }
+
+    // Synthesize full word
+    const allPhonemes = wordData.syllables.flatMap((s) => s.phonemes);
+    const fullAudio = await this.synthesizePhonemes(allPhonemes, { speed: Math.min(speed + 0.2, 1.0) });
+
+    return {
+      ...wordData,
+      syllables: updatedSyllables,
+      fullAudioBase64: fullAudio.base64,
+    };
   }
 }
 

@@ -342,7 +342,9 @@ describe('Tier 6: Piper TTS & eSpeak NG Syllable Articulation Trainer', () => {
       assert.equal(phonemeAudio, cachedAudio, 'Clean phoneme lookup should match cached result');
     });
 
-    it('should gracefully synthesize audio via piperOnnxService fallback when model is not ready', async () => {
+    it('should reject syllable synthesis when the neural model is not ready', async () => {
+      // The local waveform generator is a tone, not speech, so it must not stand in here.
+      // Callers fall back to the system voice instead. See Tier 16.
       const testSyl = {
         index: 0,
         text: 'wa',
@@ -350,8 +352,10 @@ describe('Tier 6: Piper TTS & eSpeak NG Syllable Articulation Trainer', () => {
         stress: 'primary',
         phonemes: ['w', 'ɔː'],
       };
-      const audio = await piperOnnxService.synthesizeSyllable(testSyl, 'water', 0.5);
-      assert.ok(audio.startsWith('data:audio/wav;base64,'));
+      await assert.rejects(
+        () => piperOnnxService.synthesizeSyllable(testSyl, 'water', 0.5),
+        /not ready/
+      );
     });
   });
 });

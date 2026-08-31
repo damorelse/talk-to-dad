@@ -8,7 +8,7 @@ export interface SyllableCardProps {
   activeSyllableIndex?: number | null;
   syllableData?: SyllablePhonemeData[];
   onSyllableClick?: (syllableText: string, index: number, data?: SyllablePhonemeData) => void;
-  onPhonemeClick?: (phoneme: string) => void;
+  onPhonemeClick?: (phoneme: string, syllableIndex: number) => void;
   showIpa?: boolean;
   showStress?: boolean;
 }
@@ -108,14 +108,14 @@ export const SyllableCard: React.FC<SyllableCardProps> = ({
                         onClick={(e) => {
                           if (onPhonemeClick) {
                             e.stopPropagation();
-                            onPhonemeClick(ph);
+                            onPhonemeClick(ph, idx);
                           }
                         }}
                         onKeyDown={(e) => {
                           if (onPhonemeClick && (e.key === 'Enter' || e.key === ' ')) {
                             e.stopPropagation();
                             e.preventDefault();
-                            onPhonemeClick(ph);
+                            onPhonemeClick(ph, idx);
                           }
                         }}
                         title={onPhonemeClick ? `Play phoneme /${ph}/` : undefined}

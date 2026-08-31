@@ -589,9 +589,9 @@ export const SyllableVisualizerView: React.FC<SyllableVisualizerViewProps> = ({
                 playSingleSyllable(idx);
               }
             }}
-            onPhonemeClick={(ph) => {
+            onPhonemeClick={(ph, sylIdx) => {
               if (!isCurrentChinese) {
-                playIndividualPhoneme(ph);
+                playIndividualPhoneme(ph, sylIdx);
               }
             }}
             showIpa={true}
