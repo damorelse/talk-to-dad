@@ -484,6 +484,123 @@ describe('Tier 7: Google Sheets Pull & Sound It Out Synchronization', () => {
         global.fetch = originalFetch;
       }
     });
+
+    it('should gracefully fallback to Sheet1 when requested sheetName (Cards) does not exist in metadata', async () => {
+      const originalFetch = global.fetch;
+
+      global.fetch = async (url) => {
+        const urlStr = String(url);
+        if (urlStr.includes('fields=sheets.properties')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              sheets: [
+                { properties: { sheetId: 0, title: 'Sheet1' } },
+              ],
+            }),
+          };
+        }
+        if (urlStr.includes('/values/Sheet1')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              range: 'Sheet1!A1:B2',
+              values: [
+                ['Label', 'Spoken Text'],
+                ['Juice', 'I would like some juice'],
+              ],
+            }),
+          };
+        }
+        return { ok: false, status: 404 };
+      };
+
+      try {
+        const { headers, rows } = await googleSheetsService.fetchSpreadsheetValuesViaApi(
+          '1MsCXaC6F-uJiiYsqnS4-abW2nFTYFyTMd09hHRfwOwE',
+          'mock-token',
+          { sheetName: 'Cards' }
+        );
+
+        assert.equal(headers[0], 'Label');
+        assert.equal(rows.length, 1);
+        assert.equal(rows[0][0], 'Juice');
+      } finally {
+        global.fetch = originalFetch;
+      }
+    });
+
+    it('should recover via Layer 2 fallback when API values request returns 400 Unable to parse range', async () => {
+      const originalFetch = global.fetch;
+
+      global.fetch = async (url) => {
+        const urlStr = String(url);
+        if (urlStr.includes('fields=sheets.properties')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              sheets: [
+                { properties: { sheetId: 0, title: 'Sheet1' } },
+              ],
+            }),
+          };
+        }
+        if (urlStr.includes('/values/NonExistentTab')) {
+          return {
+            ok: false,
+            status: 400,
+            text: async () => JSON.stringify({
+              error: {
+                code: 400,
+                message: 'Unable to parse range: NonExistentTab',
+                status: 'INVALID_ARGUMENT',
+              },
+            }),
+          };
+        }
+        if (urlStr.includes('/values/Sheet1')) {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              range: 'Sheet1!A1:B2',
+              values: [
+                ['Label', 'Spoken Text'],
+                ['Water', 'I would like some water'],
+              ],
+            }),
+          };
+        }
+        return { ok: false, status: 404 };
+      };
+
+      try {
+        const { headers, rows } = await googleSheetsService.fetchSpreadsheetValuesViaApi(
+          '1MsCXaC6F-uJiiYsqnS4-abW2nFTYFyTMd09hHRfwOwE',
+          'mock-token',
+          { sheetName: 'NonExistentTab' }
+        );
+
+        assert.equal(headers[0], 'Label');
+        assert.equal(rows.length, 1);
+        assert.equal(rows[0][0], 'Water');
+      } finally {
+        global.fetch = originalFetch;
+      }
+    });
+
+    it('should safely format sheet range names with quotes for special characters', () => {
+      assert.equal(googleSheetsService.formatSheetRangeName('Sheet1'), 'Sheet1');
+      assert.equal(googleSheetsService.formatSheetRangeName('Cards'), 'Cards');
+      assert.equal(googleSheetsService.formatSheetRangeName('Daily Needs'), "'Daily Needs'");
+      assert.equal(googleSheetsService.formatSheetRangeName('AAC-Cards'), "'AAC-Cards'");
+      assert.equal(googleSheetsService.formatSheetRangeName("Dad's Sheet"), "'Dad''s Sheet'");
+      assert.equal(googleSheetsService.formatSheetRangeName("'Already Quoted'"), "'Already Quoted'");
+      assert.equal(googleSheetsService.formatSheetRangeName(''), 'Sheet1');
+    });
   });
 
   describe('10. Unified fetchAndParseSheet Dispatcher & Private Sheet Handling', () => {

@@ -770,7 +770,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
                       type="text"
                       value={settings.googleSheetSyncCardsTab || ''}
                       onChange={(e) => updateSettings({ googleSheetSyncCardsTab: e.target.value })}
-                      placeholder="Cards (default)"
+                      placeholder="e.g. Sheet1, Cards (defaults to first sheet)"
                       className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                     />
                   </div>

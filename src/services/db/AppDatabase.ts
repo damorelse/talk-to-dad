@@ -187,6 +187,12 @@ export class AppDatabase extends Dexie {
         currentSettings.googleSheetAutoSyncOnLoad = DEFAULT_SETTINGS.googleSheetAutoSyncOnLoad;
         currentSettings.googleSheetSyncCardsTab = DEFAULT_SETTINGS.googleSheetSyncCardsTab;
         settingsUpdated = true;
+      } else if (
+        currentSettings.googleSheetSyncCardsTab === 'Cards' &&
+        currentSettings.googleSheetSyncUrl === DEFAULT_SETTINGS.googleSheetSyncUrl
+      ) {
+        currentSettings.googleSheetSyncCardsTab = '';
+        settingsUpdated = true;
       }
       if (typeof currentSettings.weeklyFocusCardsPerCategory !== 'number') {
         currentSettings.weeklyFocusCardsPerCategory = DEFAULT_SETTINGS.weeklyFocusCardsPerCategory ?? 2;

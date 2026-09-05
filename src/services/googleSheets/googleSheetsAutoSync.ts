@@ -72,6 +72,12 @@ export async function syncGoogleSheetOnStartup(options: {
       settings.googleSheetAutoSyncOnLoad = true;
       settings.googleSheetSyncCardsTab = DEFAULT_SETTINGS.googleSheetSyncCardsTab;
       await db.settings.put(settings);
+    } else if (
+      settings.googleSheetSyncCardsTab === 'Cards' &&
+      settings.googleSheetSyncUrl === DEFAULT_SETTINGS.googleSheetSyncUrl
+    ) {
+      settings.googleSheetSyncCardsTab = '';
+      await db.settings.put(settings);
     }
 
     // 2. Check if auto-sync is enabled or forced

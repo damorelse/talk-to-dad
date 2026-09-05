@@ -192,6 +192,23 @@ export class GoogleSheetsService {
   }
 
   /**
+   * Formats a sheet/tab name for Google Sheets API v4 range queries.
+   * If the name contains spaces, special characters, or is not purely alphanumeric,
+   * it encloses it in single quotes and escapes embedded single quotes.
+   */
+  formatSheetRangeName(sheetTitle: string): string {
+    const trimmed = sheetTitle?.trim() || '';
+    if (!trimmed) return 'Sheet1';
+    if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
+      return trimmed;
+    }
+    if (/[^a-zA-Z0-9_]/.test(trimmed)) {
+      return `'${trimmed.replace(/'/g, "''")}'`;
+    }
+    return trimmed;
+  }
+
+  /**
    * Fetches spreadsheet rows using the official Google Sheets API v4 with an OAuth Bearer token.
    */
   async fetchSpreadsheetValuesViaApi(
@@ -206,9 +223,10 @@ export class GoogleSheetsService {
     try {
       let targetRange = sheetName?.trim() || '';
 
-      // If sheetName is not provided, resolve sheet title from metadata (matching gid if provided)
-      if (!targetRange) {
-        const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=sheets.properties`;
+      // Fetch metadata to validate requested sheet or resolve active/first sheet
+      let sheetsList: any[] = [];
+      const metaUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=sheets.properties`;
+      try {
         const metaResponse = await fetch(metaUrl, {
           method: 'GET',
           signal: controller.signal,
@@ -218,7 +236,10 @@ export class GoogleSheetsService {
           },
         });
 
-        if (!metaResponse.ok) {
+        if (metaResponse.ok) {
+          const metaData = await metaResponse.json();
+          sheetsList = metaData.sheets || [];
+        } else if (!targetRange) {
           if (metaResponse.status === 401 || metaResponse.status === 403) {
             throw new Error(
               `Google authorization error (${metaResponse.status}). Please check your Google permissions or sign in again.`
@@ -230,27 +251,66 @@ export class GoogleSheetsService {
           const errBody = await metaResponse.text().catch(() => '');
           throw new Error(`Google Sheets API metadata request failed (${metaResponse.status}): ${errBody}`);
         }
-
-        const metaData = await metaResponse.json();
-        const sheetsList = metaData.sheets || [];
-
-        if (sheetsList.length === 0) {
-          throw new Error('No sheets/tabs found in the specified Google Spreadsheet.');
+      } catch (metaErr: unknown) {
+        if (!targetRange) {
+          throw metaErr;
         }
-
-        if (gid) {
-          const matched = sheetsList.find((s: any) => String(s.properties?.sheetId) === String(gid));
-          targetRange = matched?.properties?.title || sheetsList[0]?.properties?.title || 'Sheet1';
-        } else {
-          targetRange = sheetsList[0]?.properties?.title || 'Sheet1';
-        }
+        // If targetRange was provided and metadata request failed (e.g., in unit tests without metadata mock),
+        // proceed with targetRange directly.
+        console.warn('[GoogleSheetsService] Metadata check failed, continuing with specified range:', metaErr);
       }
 
+      if (sheetsList.length > 0) {
+        if (targetRange) {
+          // 1. Try exact match
+          const exactMatch = sheetsList.find(
+            (s: any) => s.properties?.title === targetRange
+          );
+          if (exactMatch) {
+            targetRange = exactMatch.properties.title;
+          } else {
+            // 2. Try case-insensitive trimmed match
+            const caseMatch = sheetsList.find(
+              (s: any) => s.properties?.title?.trim().toLowerCase() === targetRange.toLowerCase()
+            );
+            if (caseMatch) {
+              targetRange = caseMatch.properties.title;
+            } else {
+              // 3. Tab not found: gracefully fallback to sheet matching gid or first tab
+              let fallbackTitle = '';
+              if (gid) {
+                const matchedGid = sheetsList.find((s: any) => String(s.properties?.sheetId) === String(gid));
+                fallbackTitle = matchedGid?.properties?.title || '';
+              }
+              if (!fallbackTitle) {
+                fallbackTitle = sheetsList[0]?.properties?.title || 'Sheet1';
+              }
+              console.warn(
+                `[GoogleSheetsService] Sheet tab "${targetRange}" not found in spreadsheet (available: [${sheetsList.map((s: any) => s.properties?.title).join(', ')}]). Falling back to "${fallbackTitle}".`
+              );
+              targetRange = fallbackTitle;
+            }
+          }
+        } else {
+          // No tab provided: resolve by gid or pick the first sheet
+          if (gid) {
+            const matched = sheetsList.find((s: any) => String(s.properties?.sheetId) === String(gid));
+            targetRange = matched?.properties?.title || sheetsList[0]?.properties?.title || 'Sheet1';
+          } else {
+            targetRange = sheetsList[0]?.properties?.title || 'Sheet1';
+          }
+        }
+      } else if (!targetRange) {
+        targetRange = 'Sheet1';
+      }
+
+      const formattedRange = this.formatSheetRangeName(targetRange);
+
       // Fetch cell values from range
-      const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(targetRange)}`;
+      const valuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(formattedRange)}`;
       console.info(`[GoogleSheetsService] Fetching API v4 values from: ${valuesUrl}`);
 
-      const valuesResponse = await fetch(valuesUrl, {
+      let valuesResponse = await fetch(valuesUrl, {
         method: 'GET',
         signal: controller.signal,
         headers: {
@@ -258,6 +318,35 @@ export class GoogleSheetsService {
           'Accept': 'application/json',
         },
       });
+
+      // Layer 2 Fallback: If range request failed with 400 Bad Request ("Unable to parse range"),
+      // attempt recovery by falling back to the spreadsheet's first sheet
+      if (!valuesResponse.ok && valuesResponse.status === 400) {
+        const errText = await valuesResponse.text().catch(() => '');
+        const fallbackTab = sheetsList[0]?.properties?.title || 'Sheet1';
+        if (errText.includes('Unable to parse range') && targetRange !== fallbackTab) {
+          console.warn(
+            `[GoogleSheetsService] Range "${formattedRange}" rejected by API (400: ${errText}). Attempting fallback to "${fallbackTab}"...`
+          );
+          const fallbackRange = this.formatSheetRangeName(fallbackTab);
+          const fallbackValuesUrl = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(fallbackRange)}`;
+          const retryResponse = await fetch(fallbackValuesUrl, {
+            method: 'GET',
+            signal: controller.signal,
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Accept': 'application/json',
+            },
+          });
+          if (retryResponse.ok) {
+            valuesResponse = retryResponse;
+          } else {
+            throw new Error(`Google Sheets API values request failed (400): ${errText}`);
+          }
+        } else {
+          throw new Error(`Google Sheets API values request failed (400): ${errText}`);
+        }
+      }
 
       clearTimeout(timer);
 

@@ -21,7 +21,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   fontSize: 'large',
   googleSheetSyncUrl: 'https://docs.google.com/spreadsheets/d/1MsCXaC6F-uJiiYsqnS4-abW2nFTYFyTMd09hHRfwOwE/edit',
   googleSheetAutoSyncOnLoad: true,
-  googleSheetSyncCardsTab: 'Cards',
+  googleSheetSyncCardsTab: '',
   googleOAuthClientId: '',
   googleOAuthUserEmail: '',
 };
